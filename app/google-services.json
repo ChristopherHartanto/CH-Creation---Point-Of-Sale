@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "654786577855",
+    "firebase_url": "https://ch-creation---point-of-sale.firebaseio.com",
+    "project_id": "ch-creation---point-of-sale",
+    "storage_bucket": "ch-creation---point-of-sale.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:654786577855:android:4222dc6e656918c8744d0a",
+        "android_client_info": {
+          "package_name": "com.chcreation.pointofsale"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "654786577855-i7av40ahmue202e5nc7s5k62nv9i5rd5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chcreation.pointofsale",
+            "certificate_hash": "d89f20724b79eca58c71d664be481fbb58e4ccb0"
+          }
+        },
+        {
+          "client_id": "654786577855-vh7eip63avdnta776oksr4c97ei7cdht.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-53XAPcnvRWxPfdVHbs7NftilIk0r-WM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "654786577855-vh7eip63avdnta776oksr4c97ei7cdht.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

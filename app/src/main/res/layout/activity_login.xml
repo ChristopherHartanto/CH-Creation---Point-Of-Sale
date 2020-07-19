@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".login.LoginActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:text="P.O.S"
+        android:textSize="52sp"
+        android:textColor="@color/colorBlack"
+        android:layout_margin="30dp"
+        android:gravity="center"
+        android:layout_weight="5"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_weight="3">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnLoginSignIn"
+            android:background="@drawable/button_border"
+            android:layout_margin="10dp"
+            android:text="Login"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnLoginSignUp"
+            android:background="@drawable/button_border"
+            android:layout_margin="10dp"
+            android:text="Create Account"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="bottom |center"
+        android:id="@+id/tvLoginVersion"
+        android:layout_weight="2"
+        android:textColor="@color/colorBlack"
+        android:textSize="16sp"
+        android:padding="5dp"/>
+
+</LinearLayout>

@@ -1,0 +1,2 @@
+rootProject.name='Point of Sale'
+include ':app'
