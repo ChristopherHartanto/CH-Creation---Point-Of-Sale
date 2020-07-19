@@ -1,13 +1,91 @@
 package com.chcreation.pointofsale.merchant
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Gravity
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.MainActivity
 import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.model.Merchant
+import com.chcreation.pointofsale.presenter.MerchantPresenter
+import com.chcreation.pointofsale.view.MainView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import kotlinx.android.synthetic.main.activity_merchant.*
+import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.startActivity
 
-class MerchantActivity : AppCompatActivity() {
+class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelectedListener {
+
+    private lateinit var sharedPreference: SharedPreferences
+    lateinit var editor: SharedPreferences.Editor
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var mDatabase : DatabaseReference
+    private lateinit var presenter: MerchantPresenter
+    private var selectedMerchant = ""
+    private var merchantItems : MutableList<String> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_merchant)
+
+        mAuth = FirebaseAuth.getInstance()
+        mDatabase = FirebaseDatabase.getInstance().reference
+        presenter = MerchantPresenter(this,mAuth,mDatabase)
+        sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+        presenter.retrieveMerchants()
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        btnMerchant.onClick {
+            editor = sharedPreference.edit()
+            editor.putString("merchant",selectedMerchant)
+            editor.apply()
+
+            startActivity<MainActivity>()
+            finish()
+        }
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        if (response == EMessageResult.FETCH_MERCHANT_SUCCESS.toString()){
+            if (dataSnapshot.exists()){
+                merchantItems.clear()
+                for (data in dataSnapshot.children) {
+                    val item = data.key
+                    merchantItems.add(item.toString())
+                }
+
+                selectedMerchant = merchantItems[0]
+
+                val spAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,merchantItems)
+                spAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+                spMerchant.adapter = spAdapter
+                spMerchant.onItemSelectedListener = this
+                spMerchant.gravity = Gravity.CENTER
+            }
+        }
+    }
+
+    override fun response(message: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) {
+    }
+
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        selectedMerchant = merchantItems[position]
     }
 }

@@ -6,6 +6,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -13,13 +17,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".login.SignUpActivity"></activity>
+        <activity android:name=".product.NewCategory"></activity>
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".login.SignUpActivity" />
         <activity android:name=".login.SignInActivity" />
         <activity android:name=".merchant.MerchantActivity" />
         <activity android:name=".merchant.NewMerchantActivity" />
         <activity android:name=".login.LoginActivity" />
         <activity android:name=".customer.CustomerActivity" />
-        <activity android:name=".product.ProductActivity" />
+        <activity android:name=".product.NewProductActivity" />
         <activity android:name=".HomeActivity" />
         <activity
             android:name=".SplashActivity"
@@ -30,6 +39,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

@@ -1,5 +1,7 @@
 package com.chcreation.pointofsale
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -10,10 +12,15 @@ import org.jetbrains.anko.startActivity
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var mAuth: FirebaseAuth
+    private lateinit var sharedPreference: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
+
+        supportActionBar!!.hide()
+        mAuth = FirebaseAuth.getInstance()
+        sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
         val timer = object: CountDownTimer(1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -21,10 +28,10 @@ class SplashActivity : AppCompatActivity() {
 
             override fun onFinish() {
 
-                if (mAuth.currentUser == null)
+                if (mAuth.currentUser == null || sharedPreference.getString("merchant",null ) == null)
                     startActivity<LoginActivity>()
                 else
-                    startActivity<HomeActivity>()
+                    startActivity<MainActivity>()
 
                 finish()
 
@@ -34,6 +41,6 @@ class SplashActivity : AppCompatActivity() {
                 )
             }
         }
-
+        timer.start()
     }
 }

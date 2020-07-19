@@ -3,14 +3,12 @@ package com.chcreation.pointofsale.login
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import com.chcreation.pointofsale.HomeActivity
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.merchant.NewMerchantActivity
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.android.synthetic.main.activity_sign_in.*
 import kotlinx.android.synthetic.main.activity_sign_up.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
@@ -22,7 +20,7 @@ class SignUpActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sign_in)
+        setContentView(R.layout.activity_sign_up)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -39,10 +37,11 @@ class SignUpActivity : AppCompatActivity() {
 
     private fun registerUser () {
 
-        var email = etSignInEmail.text.toString()
-        var password = etSignInPassword.text.toString()
+        val email = etSignUpEmail.text.toString()
+        val name = etSignUpName.text.toString()
+        val password = etSignUpPassword.text.toString()
 
-        if (email.isNotEmpty() && password.isNotEmpty()) {
+        if (email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
 
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -54,8 +53,8 @@ class SignUpActivity : AppCompatActivity() {
                 }
             })
         }else {
-            etSignInEmail.setText("")
-            etSignInPassword.setText("")
+            etSignUpEmail.setText("")
+            etSignUpPassword.setText("")
             Toast.makeText(this,"Please fill up the Credentials", Toast.LENGTH_LONG).show()
         }
     }

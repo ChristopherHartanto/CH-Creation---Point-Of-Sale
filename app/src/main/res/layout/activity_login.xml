@@ -14,8 +14,8 @@
         android:text="P.O.S"
         android:textSize="52sp"
         android:textColor="@color/colorBlack"
-        android:layout_margin="30dp"
-        android:gravity="center"
+        android:layout_marginBottom="30dp"
+        android:gravity="bottom |center_horizontal"
         android:layout_weight="5"/>
 
     <LinearLayout

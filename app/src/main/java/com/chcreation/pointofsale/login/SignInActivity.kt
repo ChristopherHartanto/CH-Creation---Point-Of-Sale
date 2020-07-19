@@ -1,23 +1,32 @@
 package com.chcreation.pointofsale.login
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import com.chcreation.pointofsale.HomeActivity
+import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.MainActivity
 import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.merchant.MerchantActivity
+import com.chcreation.pointofsale.merchant.NewMerchantActivity
+import com.chcreation.pointofsale.presenter.MerchantPresenter
+import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_sign_in.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
 
-class SignInActivity : AppCompatActivity() {
+class SignInActivity : AppCompatActivity(), MainView {
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
+    private lateinit var sharedPreference: SharedPreferences
+    private lateinit var presenter: MerchantPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,28 +34,29 @@ class SignInActivity : AppCompatActivity() {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-
+        presenter = MerchantPresenter(this,mAuth,mDatabase)
+        sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
     }
 
     override fun onStart() {
         super.onStart()
 
         btnSignIn.onClick {
-            registerUser()
+            login()
         }
     }
 
-    private fun registerUser () {
+    private fun login () {
 
-        var email = etSignInEmail.text.toString()
-        var password = etSignInPassword.text.toString()
+        val email = etSignInEmail.text.toString()
+        val password = etSignInPassword.text.toString()
 
         if (email.isNotEmpty() && password.isNotEmpty()) {
 
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    startActivity<HomeActivity>()
-                    finish()
+                    presenter.retrieveMerchants()
+
                     Toast.makeText(this, "Successfully registered ", Toast.LENGTH_LONG).show()
                 }else {
                     Toast.makeText(this, "Error registering, try again later ", Toast.LENGTH_LONG).show()
@@ -57,5 +67,25 @@ class SignInActivity : AppCompatActivity() {
             etSignInPassword.setText("")
             Toast.makeText(this,"Please fill up the Credentials", Toast.LENGTH_LONG).show()
         }
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        if (response == EMessageResult.FETCH_MERCHANT_SUCCESS.toString())
+        {
+            if (dataSnapshot.exists())
+            {
+                if (sharedPreference.getString("merchant",null) == null)
+                    startActivity<MerchantActivity>()
+                else
+                    startActivity<MainActivity>()
+            }
+            else
+                startActivity<NewMerchantActivity>()
+
+            finish()
+        }
+    }
+
+    override fun response(message: String) {
     }
 }

@@ -2,10 +2,8 @@ package com.chcreation.pointofsale.login
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
-import com.chcreation.pointofsale.HomeActivity
+import android.view.animation.AlphaAnimation
 import com.chcreation.pointofsale.R
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -17,6 +15,7 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
+    private val clickAnimation = AlphaAnimation(1.2F,0.6F)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,17 +26,25 @@ class LoginActivity : AppCompatActivity() {
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
 
+        val version = packageManager.getPackageInfo(packageName,0).versionName
+        tvLoginVersion.text = "Version $version"
     }
 
     override fun onStart() {
         super.onStart()
 
         btnLoginSignIn.onClick {
+            btnLoginSignIn.startAnimation(clickAnimation)
             startActivity<SignInActivity>()
+
+            finish()
         }
 
         btnLoginSignUp.onClick {
+            btnLoginSignUp.startAnimation(clickAnimation)
             startActivity<SignUpActivity>()
+
+            finish()
         }
     }
 
