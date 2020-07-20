@@ -18,6 +18,7 @@
             android:layout_height="150dp"
             android:layout_gravity="center_horizontal"
             android:layout_margin="10dp"
+            android:src="@drawable/default_image"
             android:id="@+id/ivProductImage"/>
 
         <com.google.android.material.textfield.TextInputLayout

@@ -17,7 +17,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".product.NewCategory"></activity>
+        <activity android:name=".product.ProductDetailActivity"></activity>
+        <activity android:name=".product.ListProductActivity" />
+        <activity android:name=".product.NewCategory" />
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"

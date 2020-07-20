@@ -9,5 +9,6 @@ data class Product(
     var IMAGE: String? = "",
     var PROD_CODE: String? = "",
     var UOM_CODE: String? = "Unit",
-    var CAT: String? = "All"
+    var CAT: String? = "All",
+    var CODE: String? = ""
 )

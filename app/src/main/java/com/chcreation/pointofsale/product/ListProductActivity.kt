@@ -1,15 +1,14 @@
-package com.chcreation.pointofsale.home
+package com.chcreation.pointofsale.product
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.getMerchant
+import com.chcreation.pointofsale.home.HomeRecyclerViewAdapter
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.view.MainView
@@ -18,11 +17,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.android.synthetic.main.activity_list_product.*
 import kotlinx.android.synthetic.main.fragment_home.*
+import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.onRefresh
 
-class HomeFragment : Fragment() , MainView {
+class ListProductActivity : AppCompatActivity(), MainView {
 
     private lateinit var adapter: HomeRecyclerViewAdapter
     private var productItems : MutableList<Product> = mutableListOf()
@@ -30,86 +30,48 @@ class HomeFragment : Fragment() , MainView {
     private lateinit var presenter: Homepresenter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
-    private lateinit var sharedPreference: SharedPreferences
     private var categoryItems: MutableList<String> = mutableListOf()
-    private var merchant = ""
     private var currentCat = 0
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-
-        return inflater.inflate(R.layout.fragment_home, container, false)
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_list_product)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
         presenter = Homepresenter(this,mAuth,mDatabase)
 
-        merchant = sharedPreference.getString("merchant","").toString()
+        currentCat = intent.extras!!.getInt("category",0)
 
         adapter = HomeRecyclerViewAdapter(
-            ctx,
+            this,
             tempProductItems
         ) {
-
+            startActivity(intentFor<ProductDetailActivity>("prodCode" to it.PROD_CODE))
         }
-
-        tlHome.tabGravity = TabLayout.GRAVITY_FILL
-
-        rvHome.layoutManager = LinearLayoutManager(ctx)
-        rvHome.adapter = adapter
-
-
-        tlHome.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-            }
-
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                currentCat = tab!!.position
-
-                fetchProductByCat()
-            }
-
-        })
-        srHome.onRefresh {
-            fetchProductByCat()
-        }
-
+        rvListProduct.layoutManager = LinearLayoutManager(this)
+        rvListProduct.adapter = adapter
     }
+
     override fun onStart() {
         super.onStart()
-        presenter.retrieveProducts(merchant)
-        presenter.retrieveCategories(merchant)
+
+        presenter.retrieveCategories(getMerchant(this))
     }
 
-    fun fetchProductByCat(){
+    private fun fetchProductByCat(){
         tempProductItems.clear()
-        adapter.notifyDataSetChanged()
-
         for ((index, data) in productItems.withIndex()) {
             if (currentCat == 0 || data.CAT.toString() == categoryItems[currentCat])
                 tempProductItems.add(productItems[index])
 
         }
         adapter.notifyDataSetChanged()
-
-        srHome.isRefreshing = false
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
             if (dataSnapshot.exists()){
-                productItems.clear()
                 tempProductItems.clear()
                 adapter.notifyDataSetChanged()
 
@@ -119,28 +81,26 @@ class HomeFragment : Fragment() , MainView {
                 }
                 productItems.addAll(tempProductItems)
 
-                adapter.notifyDataSetChanged()
-                srHome.isRefreshing = false
+                if (currentCat == 0)
+                    adapter.notifyDataSetChanged()
+                else
+                    fetchProductByCat()
             }
-            else
-                srHome.isRefreshing = false
         }
         else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
             categoryItems.clear()
-            tlHome.addTab(tlHome.newTab().setText("All"),true)
             categoryItems.add("All")
             if (dataSnapshot.exists()){
                 for (data in dataSnapshot.children) {
-                    tlHome.addTab(tlHome.newTab().setText(data.key))
                     categoryItems.add(data.key.toString())
                 }
+
+                presenter.retrieveProducts(getMerchant(this))
             }
         }
-
     }
 
     override fun response(message: String) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
-
 }

@@ -104,6 +104,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         val price = etProductPrice.text.toString().toInt()
         val cost = etProductCost.text.toString().toInt()
         val stock = etProductStock.text.toString().toInt()
+        val code = etProductCode.text.toString()
         val uomCode = "Unit"
         var cat = ""
         cat = if (selectedCategory == categoryItems[0])
@@ -114,7 +115,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         if (merchant == "")
             toast("You Haven't Set Up Your Merchant")
         else
-            presenter.saveProduct(Product(name,price,desc,cost,stock,imageUrl,prodCode,uomCode,selectedCategory),merchant)
+            presenter.saveProduct(Product(name,price,desc,cost,stock,imageUrl,prodCode,uomCode,selectedCategory,code),merchant)
     }
 
     override fun onResume() {

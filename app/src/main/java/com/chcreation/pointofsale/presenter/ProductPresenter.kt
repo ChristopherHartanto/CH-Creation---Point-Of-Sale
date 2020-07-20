@@ -34,7 +34,6 @@ class ProductPresenter(private val view: MainView,
 
     fun saveProduct(product: Product, merchant: String){
 
-        if (product.PROD_CODE.equals(""))
             product.PROD_CODE = generateProdCode()
 
         val values  = hashMapOf(
@@ -45,7 +44,9 @@ class ProductPresenter(private val view: MainView,
             EProduct.PROD_CODE.toString() to product.PROD_CODE,
             EProduct.UOM_CODE.toString() to product.UOM_CODE,
             EProduct.STOCK.toString() to product.STOCK,
-            EProduct.IMAGE.toString() to product.IMAGE
+            EProduct.IMAGE.toString() to product.IMAGE,
+            EProduct.CAT.toString() to product.CAT,
+            EProduct.CODE.toString() to product.CODE
         )
 
         database.child(ETable.PRODUCT.toString())
@@ -97,6 +98,25 @@ class ProductPresenter(private val view: MainView,
             .child(merchant)
             .child(EMerchant.CAT.toString())
             .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun retrieveProducts(merchant: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_PROD_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.PRODUCT.toString())
+            .child(auth.currentUser!!.uid)
+            .child(merchant)
+            .orderByKey()
+            .addListenerForSingleValueEvent(postListener)
+
     }
 
     private fun generateProdCode() : String{

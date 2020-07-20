@@ -14,6 +14,26 @@
             android:title="@string/product" />
 
         <item
+            android:id="@+id/nav_customer"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Customer" />
+
+        <item
+            android:id="@+id/nav_transaction"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="@string/transaction" />
+
+        <item
+            android:id="@+id/nav_analytics"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Analytic" />
+
+        <item
+            android:id="@+id/nav_setting"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Settings" />
+
+        <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"
             android:title="@string/menu_gallery" />

@@ -17,7 +17,8 @@ enum class EProduct{
     PROD_CODE,
     UOM_CODE,
     IMAGE,
-    CAT
+    CAT,
+    CODE
 }
 
 enum class EMerchant{

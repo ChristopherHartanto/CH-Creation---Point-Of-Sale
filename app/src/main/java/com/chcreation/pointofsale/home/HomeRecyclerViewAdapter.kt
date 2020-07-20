@@ -1,4 +1,4 @@
-package com.chcreation.pointofsale
+package com.chcreation.pointofsale.home
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -7,15 +7,22 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.model.Product
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
-class HomeRecyclerViewAdapter(private val context: Context, private val items: List<Product>,private val listener: (position: Int) -> Unit)
+class HomeRecyclerViewAdapter(private val context: Context, private val items: List<Product>,private val listener: (product: Product) -> Unit)
     : RecyclerView.Adapter<HomeRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_product, parent, false))
+        ViewHolder(
+            LayoutInflater.from(context).inflate(
+                R.layout.row_product,
+                parent,
+                false
+            )
+        )
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bindItem(items[position],listener, position)
@@ -30,7 +37,7 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
         private val price = view.findViewById<TextView>(R.id.tvRowProductPrice)
         private val stock = view.findViewById<TextView>(R.id.tvRowProductStock)
 
-        fun bindItem(product: Product, listener: (position: Int) -> Unit, position: Int) {
+        fun bindItem(product: Product, listener: (listenerProduct: Product) -> Unit, position: Int) {
             if (product.IMAGE != "")
                 Picasso.get().load(product.IMAGE).fit().into(image)
 
@@ -39,7 +46,7 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
             stock.text = "${product.STOCK} qty"
 
             itemView.onClick {
-                listener(position)
+                listener(product)
             }
         }
 
