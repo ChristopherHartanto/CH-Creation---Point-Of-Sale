@@ -27,10 +27,22 @@ enum class EMerchant{
     CAT
 }
 
+enum class ECustomer{
+    CREATED_DATE,
+    UPDATED_DATE,
+    NAME,
+    EMAIL,
+    PHONE,
+    ADDRESS,
+    NOTE,
+    CODE
+}
+
 enum class EMessageResult{
     SUCCESS,
     FAILURE,
     FETCH_PROD_SUCCESS,
     FETCH_MERCHANT_SUCCESS,
-    FETCH_CATEGORY_SUCCESS
+    FETCH_CATEGORY_SUCCESS,
+    FETCH_CUSTOMER_SUCCESS
 }

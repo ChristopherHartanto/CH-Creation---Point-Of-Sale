@@ -1,11 +1,16 @@
 package com.chcreation.pointofsale.home
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.EMessageResult
@@ -19,21 +24,27 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.fragment_home.*
+import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.sdk27.coroutines.onTouch
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.onRefresh
+import org.jetbrains.anko.support.v4.toast
 
 class HomeFragment : Fragment() , MainView {
 
     private lateinit var adapter: HomeRecyclerViewAdapter
-    private var productItems : MutableList<Product> = mutableListOf()
-    private var tempProductItems : MutableList<Product> = mutableListOf()
+    private var productItems : ArrayList<Product> = arrayListOf()
+    private var tempProductItems : ArrayList<Product> = arrayListOf()
     private lateinit var presenter: Homepresenter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
     private lateinit var sharedPreference: SharedPreferences
-    private var categoryItems: MutableList<String> = mutableListOf()
+    private val clickAnimation = AlphaAnimation(1.2F,0.6F)
+    private var categoryItems: ArrayList<String> = arrayListOf()
     private var merchant = ""
     private var currentCat = 0
+    private var searchFilter = ""
+    private var cartItems: ArrayList<Product> = arrayListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,14 +69,14 @@ class HomeFragment : Fragment() , MainView {
             ctx,
             tempProductItems
         ) {
-
+            cartItems.add(it)
+            btnHomeAddItem.text = "${cartItems.size} Item"
         }
-
-        tlHome.tabGravity = TabLayout.GRAVITY_FILL
 
         rvHome.layoutManager = LinearLayoutManager(ctx)
         rvHome.adapter = adapter
 
+        tlHome.tabMode = TabLayout.MODE_SCROLLABLE
 
         tlHome.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
             override fun onTabReselected(tab: TabLayout.Tab?) {
@@ -81,26 +92,66 @@ class HomeFragment : Fragment() , MainView {
             }
 
         })
+
+        svHomeSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                searchFilter = newText
+                fetchProductByCat()
+                return false
+            }
+
+            override fun onQueryTextSubmit(query: String): Boolean {
+                return false
+            }
+
+        })
+
         srHome.onRefresh {
             fetchProductByCat()
         }
 
-    }
-    override fun onStart() {
-        super.onStart()
         presenter.retrieveProducts(merchant)
         presenter.retrieveCategories(merchant)
+
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        currentCat = 0
+    }
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        outState.putStringArrayList("categoryItems",categoryItems)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+
+        if (savedInstanceState != null) {
+            savedInstanceState.getStringArray("categoryItems")?.let { categoryItems.addAll(it) }
+        }
+    }
     fun fetchProductByCat(){
         tempProductItems.clear()
         adapter.notifyDataSetChanged()
 
-        for ((index, data) in productItems.withIndex()) {
-            if (currentCat == 0 || data.CAT.toString() == categoryItems[currentCat])
-                tempProductItems.add(productItems[index])
-
+        if (searchFilter != ""){
+            for ((index, data) in productItems.withIndex()) {
+                if (data.NAME.toString().contains(searchFilter) || data.CAT.toString().contains(searchFilter))
+                    tempProductItems.add(productItems[index])
+            }
+        }else{
+            for ((index, data) in productItems.withIndex()) {
+                if (currentCat == 0 || data.CAT.toString() == categoryItems[currentCat])
+                    tempProductItems.add(productItems[index])
+            }
         }
+
         adapter.notifyDataSetChanged()
 
         srHome.isRefreshing = false

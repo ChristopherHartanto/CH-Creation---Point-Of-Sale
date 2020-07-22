@@ -23,10 +23,10 @@
         tools:layout="@layout/fragment_product" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.chcreation.pointofsale.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_customer"
+        android:name="com.chcreation.pointofsale.customer.CustomerFragment"
+        android:label="Customer"
+        tools:layout="@layout/fragment_customer" />
 
     <fragment
         android:id="@+id/nav_slideshow"

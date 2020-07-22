@@ -34,31 +34,57 @@ class ProductPresenter(private val view: MainView,
 
     fun saveProduct(product: Product, merchant: String){
 
-            product.PROD_CODE = generateProdCode()
+       getProductPrimaryKey(product,merchant)
+    }
 
-        val values  = hashMapOf(
-            EProduct.NAME.toString() to product.NAME,
-            EProduct.COST.toString() to product.COST,
-            EProduct.DESC.toString() to product.DESC,
-            EProduct.PRICE.toString() to product.PRICE,
-            EProduct.PROD_CODE.toString() to product.PROD_CODE,
-            EProduct.UOM_CODE.toString() to product.UOM_CODE,
-            EProduct.STOCK.toString() to product.STOCK,
-            EProduct.IMAGE.toString() to product.IMAGE,
-            EProduct.CAT.toString() to product.CAT,
-            EProduct.CODE.toString() to product.CODE
-        )
+    fun getProductPrimaryKey(product: Product, merchant: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
 
+            override fun onDataChange(p0: DataSnapshot) {
+                var key = 0
+                if (p0.exists()){
+                    for (data in p0.children){
+                        key = data.key.toString().toInt() + 1
+                        break
+                    }
+                }
+
+                product.PROD_CODE = generateProdCode()
+
+                val values  = hashMapOf(
+                    EProduct.NAME.toString() to product.NAME,
+                    EProduct.COST.toString() to product.COST,
+                    EProduct.DESC.toString() to product.DESC,
+                    EProduct.PRICE.toString() to product.PRICE,
+                    EProduct.PROD_CODE.toString() to product.PROD_CODE,
+                    EProduct.UOM_CODE.toString() to product.UOM_CODE,
+                    EProduct.STOCK.toString() to product.STOCK,
+                    EProduct.IMAGE.toString() to product.IMAGE,
+                    EProduct.CAT.toString() to product.CAT,
+                    EProduct.CODE.toString() to product.CODE
+                )
+                database.child(ETable.PRODUCT.toString())
+                    .child(auth.currentUser!!.uid)
+                    .child(merchant)
+                    .child(key.toString())
+                    .setValue(values).addOnFailureListener {
+                        view.response(it.message.toString())
+                    }
+                    .addOnSuccessListener {
+                        view.response(EMessageResult.SUCCESS.toString())
+                    }
+            }
+
+        }
         database.child(ETable.PRODUCT.toString())
             .child(auth.currentUser!!.uid)
             .child(merchant)
-            .child(generateProdCode())
-            .setValue(values).addOnFailureListener {
-                view.response(it.message.toString())
-            }
-            .addOnSuccessListener {
-                view.response(EMessageResult.SUCCESS.toString())
-            }
+            .orderByKey()
+            .limitToLast(1)
+            .addListenerForSingleValueEvent(postListener)
     }
 
     fun saveNewCategory(merchant: String, newCategory: String){

@@ -39,7 +39,7 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
         database.child(ETable.PRODUCT.toString())
             .child(auth.currentUser!!.uid)
             .child(merchant)
-            .orderByKey()
+            .orderByChild("NAME")
             .addListenerForSingleValueEvent(postListener)
 
     }
