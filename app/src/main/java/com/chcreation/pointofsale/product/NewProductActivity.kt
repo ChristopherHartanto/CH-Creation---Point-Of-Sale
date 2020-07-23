@@ -96,14 +96,24 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         ivProductImage.onClick {
             selectImage()
         }
+
     }
 
     private fun saveProduct(imageUrl: String){
         val name = etProductName.text.toString()
         val desc = etProductDescription.text.toString()
-        val price = etProductPrice.text.toString().toInt()
-        val cost = etProductCost.text.toString().toInt()
-        val stock = etProductStock.text.toString().toInt()
+        var price = 0
+        if (etProductPrice.text.toString() != "")
+            price = etProductPrice.text.toString().toInt()
+
+        var cost = 0
+        if (etProductCost.text.toString() != "")
+            cost = etProductCost.text.toString().toInt()
+
+        var stock = 0
+        if (etProductStock.text.toString() != "")
+            stock = etProductStock.text.toString().toInt()
+
         val code = etProductCode.text.toString()
         val uomCode = "Unit"
         var cat = ""
@@ -294,6 +304,8 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                     if (item != "")
                         categoryItems.add(item.toString())
                 }
+                spProduct.setSelection(0)
+                selectedCategory = categoryItems[0]
             }
             spAdapter.notifyDataSetChanged()
         }

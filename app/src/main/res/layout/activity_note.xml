@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".checkout.NoteActivity">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:hint="Enter a note here"
+        android:maxLines="10"
+        android:gravity="start"
+        android:lines="1"
+        android:id="@+id/etNote"
+        android:layout_weight="15"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/button_border"
+        android:id="@+id/btnNoteSave"
+        android:text="Save"
+        android:layout_margin="10dp"/>
+
+</LinearLayout>

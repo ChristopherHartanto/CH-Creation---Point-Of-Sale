@@ -1,11 +1,8 @@
 package com.chcreation.pointofsale.home
 
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,8 +10,10 @@ import android.view.animation.AlphaAnimation
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.chcreation.pointofsale.checkout.CartActivity
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.view.MainView
@@ -25,10 +24,11 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.fragment_home.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.sdk27.coroutines.onTouch
+import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.onRefresh
-import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.support.v4.startActivity
+import org.jetbrains.anko.yesButton
 
 class HomeFragment : Fragment() , MainView {
 
@@ -44,7 +44,12 @@ class HomeFragment : Fragment() , MainView {
     private var merchant = ""
     private var currentCat = 0
     private var searchFilter = ""
-    private var cartItems: ArrayList<Product> = arrayListOf()
+
+    companion object{
+        var cartItems: ArrayList<Cart> = arrayListOf()
+        var totalQty = 0
+        var totalPrice = 0F
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,8 +74,10 @@ class HomeFragment : Fragment() , MainView {
             ctx,
             tempProductItems
         ) {
-            cartItems.add(it)
-            btnHomeAddItem.text = "${cartItems.size} Item"
+            addCart(it)
+            totalQty = countQty()
+            totalPrice = sumPrice()
+            btnHomeAddItem.text = "$totalQty Item = Rp ${totalPrice},00"
         }
 
         rvHome.layoutManager = LinearLayoutManager(ctx)
@@ -107,6 +114,17 @@ class HomeFragment : Fragment() , MainView {
 
         })
 
+        btnHomeAddItem.onClick {
+            if (cartItems.size == 0)
+                alert("Add some Items to Your Cart First.") {
+                    title = "Empty Cart"
+
+                    yesButton {  }
+                }.show()
+            else
+                startActivity<CartActivity>()
+        }
+
         srHome.onRefresh {
             fetchProductByCat()
         }
@@ -119,9 +137,9 @@ class HomeFragment : Fragment() , MainView {
     override fun onStart() {
         super.onStart()
 
+        btnHomeAddItem.text = "$totalQty Item = Rp ${totalPrice},00"
         currentCat = 0
     }
-
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -136,6 +154,44 @@ class HomeFragment : Fragment() , MainView {
             savedInstanceState.getStringArray("categoryItems")?.let { categoryItems.addAll(it) }
         }
     }
+
+    private fun countQty() : Int{
+        var total = 0
+        for (data in cartItems){
+            total += data.Qty!!
+        }
+        return total
+    }
+
+    private fun sumPrice() : Float{
+        var total = 0F
+
+        for (data in cartItems){
+            total += (data.PRICE!! * data.Qty!!)
+        }
+        return total
+    }
+
+    private fun addCart(product: Product){
+        if (cartItems.size == 0)
+            cartItems.add(Cart(product.NAME,product.PRICE,1))
+        else{
+            var check = false
+            for ((i , data) in cartItems.withIndex()){
+                if (data.NAME.equals(product.NAME)){
+                    val lastQty = data.Qty
+                    cartItems[i].Qty = lastQty!! + 1
+
+                    check = true
+                    break
+                }
+
+            }
+            if (!check)
+                cartItems.add(Cart(product.NAME,product.PRICE,1))
+        }
+    }
+
     fun fetchProductByCat(){
         tempProductItems.clear()
         adapter.notifyDataSetChanged()

@@ -19,7 +19,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".product.ProductDetailActivity"></activity>
+        <activity android:name=".checkout.CheckOutActivity"></activity>
+        <activity android:name=".checkout.DiscountActivity" />
+        <activity android:name=".checkout.NoteActivity" />
+        <activity android:name=".checkout.CartActivity" />
+        <activity android:name=".product.ProductDetailActivity" />
         <activity android:name=".product.ListProductActivity" />
         <activity android:name=".product.NewCategory" />
         <activity
