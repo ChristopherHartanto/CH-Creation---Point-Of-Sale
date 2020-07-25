@@ -13,8 +13,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.checkout.CartActivity
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.normalClickAnimation
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.material.tabs.TabLayout
@@ -22,13 +24,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.fragment_home.*
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.onRefresh
-import org.jetbrains.anko.support.v4.startActivity
-import org.jetbrains.anko.yesButton
+import org.jetbrains.anko.support.v4.*
 
 class HomeFragment : Fragment() , MainView {
 
@@ -48,7 +48,7 @@ class HomeFragment : Fragment() , MainView {
     companion object{
         var cartItems: ArrayList<Cart> = arrayListOf()
         var totalQty = 0
-        var totalPrice = 0F
+        var totalPrice = 0
     }
 
     override fun onCreateView(
@@ -77,7 +77,17 @@ class HomeFragment : Fragment() , MainView {
             addCart(it)
             totalQty = countQty()
             totalPrice = sumPrice()
-            btnHomeAddItem.text = "$totalQty Item = Rp ${totalPrice},00"
+
+            productItems[it] = Product(productItems[it].NAME,productItems[it].PRICE,productItems[it].DESC,productItems[it].COST,
+                productItems[it].STOCK!! - 1,productItems[it].IMAGE,productItems[it].PROD_CODE,productItems[it].UOM_CODE,productItems[it].CAT,
+                productItems[it].CODE)
+
+            adapter.notifyDataSetChanged()
+
+            btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
+            btnHomeAddItem.startAnimation(normalClickAnimation())
+            btnHomeAddItem.backgroundResource = R.drawable.button_border_fill
+            btnHomeAddItem.textColorResource = R.color.colorWhite
         }
 
         rvHome.layoutManager = LinearLayoutManager(ctx)
@@ -121,14 +131,17 @@ class HomeFragment : Fragment() , MainView {
 
                     yesButton {  }
                 }.show()
-            else
+            else{
+                btnHomeAddItem.startAnimation(normalClickAnimation())
                 startActivity<CartActivity>()
+            }
         }
 
         srHome.onRefresh {
             fetchProductByCat()
         }
 
+        pbHome.visibility = View.VISIBLE
         presenter.retrieveProducts(merchant)
         presenter.retrieveCategories(merchant)
 
@@ -137,7 +150,16 @@ class HomeFragment : Fragment() , MainView {
     override fun onStart() {
         super.onStart()
 
-        btnHomeAddItem.text = "$totalQty Item = Rp ${totalPrice},00"
+        btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
+
+        if (totalPrice != 0){
+            btnHomeAddItem.backgroundResource = R.drawable.button_border_fill
+            btnHomeAddItem.textColorResource = R.color.colorWhite
+        }
+        else{
+            btnHomeAddItem.backgroundResource = R.drawable.button_border
+            btnHomeAddItem.textColorResource = R.color.colorBlack
+        }
         currentCat = 0
     }
 
@@ -163,8 +185,8 @@ class HomeFragment : Fragment() , MainView {
         return total
     }
 
-    private fun sumPrice() : Float{
-        var total = 0F
+    private fun sumPrice() : Int{
+        var total = 0
 
         for (data in cartItems){
             total += (data.PRICE!! * data.Qty!!)
@@ -172,13 +194,13 @@ class HomeFragment : Fragment() , MainView {
         return total
     }
 
-    private fun addCart(product: Product){
+    private fun addCart(position: Int){
         if (cartItems.size == 0)
-            cartItems.add(Cart(product.NAME,product.PRICE,1))
+            cartItems.add(Cart(tempProductItems[position].NAME,tempProductItems[position].PRICE,1))
         else{
             var check = false
             for ((i , data) in cartItems.withIndex()){
-                if (data.NAME.equals(product.NAME)){
+                if (data.NAME.equals(tempProductItems[position].NAME)){
                     val lastQty = data.Qty
                     cartItems[i].Qty = lastQty!! + 1
 
@@ -188,7 +210,7 @@ class HomeFragment : Fragment() , MainView {
 
             }
             if (!check)
-                cartItems.add(Cart(product.NAME,product.PRICE,1))
+                cartItems.add(Cart(tempProductItems[position].NAME,tempProductItems[position].PRICE,1))
         }
     }
 
@@ -241,6 +263,9 @@ class HomeFragment : Fragment() , MainView {
                     tlHome.addTab(tlHome.newTab().setText(data.key))
                     categoryItems.add(data.key.toString())
                 }
+                svHomeSearch.visibility = View.VISIBLE
+                pbHome.visibility = View.GONE
+                srHome.visibility = View.VISIBLE
             }
         }
 

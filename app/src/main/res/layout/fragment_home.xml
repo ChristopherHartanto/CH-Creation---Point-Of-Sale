@@ -11,6 +11,8 @@
     <com.google.android.material.tabs.TabLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:tabTextColor="@color/colorBlack"
+        app:tabSelectedTextColor="@color/colorPrimary"
         android:id="@+id/tlHome"/>
 
     <LinearLayout
@@ -25,14 +27,22 @@
             android:layout_weight="8"
             app:queryHint="Search Here"
             app:iconifiedByDefault="false"
-            android:id="@+id/svHomeSearch"/>
+            android:id="@+id/svHomeSearch"
+            android:visibility="invisible"/>
 
     </LinearLayout>
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:id="@+id/pbHome"/>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="9"
+        android:visibility="gone"
         android:id="@+id/srHome">
 
         <androidx.recyclerview.widget.RecyclerView

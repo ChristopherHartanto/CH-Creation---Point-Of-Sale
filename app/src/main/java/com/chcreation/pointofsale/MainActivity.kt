@@ -3,6 +3,7 @@ package com.chcreation.pointofsale
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
+import android.widget.TextView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
@@ -26,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
+        //supportActionBar!!.elevation = 0.0F
     }
 
     override fun onStart() {
@@ -45,6 +46,11 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_home, R.id.nav_product, R.id.nav_customer, R.id.nav_slideshow
             ), drawerLayout
         )
+
+        var view = navView.getHeaderView(0)
+        val tvNavHeaderMerchantName = view.findViewById<TextView>(R.id.tvNavHeaderMerchantName)
+        tvNavHeaderMerchantName.text = "CH"
+
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
     }

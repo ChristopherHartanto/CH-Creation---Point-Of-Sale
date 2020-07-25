@@ -14,11 +14,11 @@ import org.jetbrains.anko.sdk27.coroutines.textChangedListener
 class DiscountActivity : AppCompatActivity() {
 
     companion object{
-        var newTotal = 0F
+        var newTotal = 0
     }
 
-    private var percentageDiscount = 0F
-    private var cashDiscount = 0F
+    private var percentageDiscount = 0
+    private var cashDiscount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,15 +27,21 @@ class DiscountActivity : AppCompatActivity() {
         tvDiscountNewTotalContent.text = totalPrice.toString()
 
         etDiscountCash.doOnTextChanged { text, start, before, count ->
-            if (etDiscountCash.hasFocus()){
+            if (etDiscountCash.hasFocus() && etDiscountCash.text.toString() != ""){
 
-                newTotal = totalPrice -  text.toString().toFloat()
-                percentageDiscount =  text.toString().toFloat() / totalPrice * 100
+                var value = text.toString().toInt()
+                if (value > totalPrice){
+                    value = totalPrice
+                    etDiscountCash.setText(totalPrice.toString())
+                }
+
+                newTotal = totalPrice -  value
+                percentageDiscount =  value / totalPrice * 100
 
                 etDiscountPercentage.setText(percentageDiscount.toString())
                 tvDiscountNewTotalContent.text = newTotal.toString()
 
-                etDiscountCash.clearFocus()
+                etDiscountCash.requestFocus()
             }
         }
 
@@ -53,17 +59,26 @@ class DiscountActivity : AppCompatActivity() {
         }
 
         etDiscountPercentage.doOnTextChanged { text, start, before, count ->
-            if (etDiscountPercentage.hasFocus()){
+            if (etDiscountPercentage.hasFocus() && etDiscountPercentage.text.toString() != ""){
 
-                newTotal = totalPrice * text.toString().toFloat() / 100
-                cashDiscount = totalPrice * text.toString().toFloat() / 100
+                var value = text.toString().toInt()
+                if (value > 100){
+                    value = 100
+                    etDiscountPercentage.setText("100")
+                }
+
+                newTotal = totalPrice - (totalPrice * value / 100)
+                cashDiscount = totalPrice * value / 100
 
                 etDiscountCash.setText(cashDiscount.toString())
-                tvDiscountNewTotalContent.text = (totalPrice - newTotal).toString()
+                tvDiscountNewTotalContent.text = (newTotal).toString()
 
-                etDiscountPercentage.clearFocus()
+                etDiscountPercentage.requestFocus()
             }
         }
 
+        btnDiscount.onClick {
+            finish()
+        }
     }
 }

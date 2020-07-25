@@ -29,10 +29,10 @@
         tools:layout="@layout/fragment_customer" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.chcreation.pointofsale.ui.slideshow.SlideshowFragment"
+        android:id="@+id/nav_transaction"
+        android:name="com.chcreation.pointofsale.transaction.TransactionFragment"
         android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" >
+        tools:layout="@layout/fragment_transaction" >
         <action
             android:id="@+id/action_nav_slideshow_to_nav_home"
             app:destination="@id/nav_home" />

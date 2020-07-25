@@ -1,9 +1,6 @@
 package com.chcreation.pointofsale.presenter
 
-import com.chcreation.pointofsale.EMerchant
-import com.chcreation.pointofsale.EMessageResult
-import com.chcreation.pointofsale.EProduct
-import com.chcreation.pointofsale.ETable
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.product.NewCategory
 import com.chcreation.pointofsale.view.MainView
@@ -52,7 +49,7 @@ class ProductPresenter(private val view: MainView,
                     }
                 }
 
-                product.PROD_CODE = generateProdCode()
+                product.PROD_CODE = "P${generateProdCode()}"
 
                 val values  = hashMapOf(
                     EProduct.NAME.toString() to product.NAME,
@@ -88,7 +85,7 @@ class ProductPresenter(private val view: MainView,
     }
 
     fun saveNewCategory(merchant: String, newCategory: String){
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val timeStamp: String = dateFormat().format(Date())
 
         val values  = hashMapOf(
             EMerchant.CREATED_DATE.toString() to timeStamp,
@@ -109,39 +106,48 @@ class ProductPresenter(private val view: MainView,
     }
 
     fun retrieveCategories(merchant: String){
-        postListener = object : ValueEventListener {
-            override fun onCancelled(p0: DatabaseError) {
-                database.removeEventListener(this)
-            }
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
 
-            override fun onDataChange(p0: DataSnapshot) {
-                view.loadData(p0, EMessageResult.FETCH_CATEGORY_SUCCESS.toString())
-            }
+                override fun onDataChange(p0: DataSnapshot) {
+                    view.loadData(p0, EMessageResult.FETCH_CATEGORY_SUCCESS.toString())
+                }
 
+            }
+            database.child(ETable.MERCHANT.toString())
+                .child(auth.currentUser!!.uid)
+                .child(merchant)
+                .child(EMerchant.CAT.toString())
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e: Exception){
+            view.response(e.message.toString())
         }
-        database.child(ETable.MERCHANT.toString())
-            .child(auth.currentUser!!.uid)
-            .child(merchant)
-            .child(EMerchant.CAT.toString())
-            .addListenerForSingleValueEvent(postListener)
     }
 
     fun retrieveProducts(merchant: String){
-        postListener = object : ValueEventListener {
-            override fun onCancelled(p0: DatabaseError) {
-                database.removeEventListener(this)
-            }
+        try {
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
 
-            override fun onDataChange(p0: DataSnapshot) {
-                view.loadData(p0, EMessageResult.FETCH_PROD_SUCCESS.toString())
-            }
+                override fun onDataChange(p0: DataSnapshot) {
+                    view.loadData(p0, EMessageResult.FETCH_PROD_SUCCESS.toString())
+                }
 
+            }
+            database.child(ETable.PRODUCT.toString())
+                .child(auth.currentUser!!.uid)
+                .child(merchant)
+                .orderByKey()
+                .addListenerForSingleValueEvent(postListener)
+
+        }catch (e: Exception){
+            view.response(e.message.toString())
         }
-        database.child(ETable.PRODUCT.toString())
-            .child(auth.currentUser!!.uid)
-            .child(merchant)
-            .orderByKey()
-            .addListenerForSingleValueEvent(postListener)
 
     }
 

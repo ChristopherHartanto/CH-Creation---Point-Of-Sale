@@ -4,6 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -135,6 +138,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
     }
     private fun uploadImage(){
         if(filePath != null){
+            layoutProduct.alpha = 0.3F
             pbProduct.visibility = View.VISIBLE
 
             val ref = storage.child("product")
@@ -156,10 +160,12 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                     saveProduct(downloadUri.toString())
                 } else {
                     toast("Failed to Save Image")
+                    layoutProduct.alpha = 1F
                     pbProduct.visibility = View.GONE
                 }
             }.addOnFailureListener{
                 toast("Error : ${it.message}")
+                layoutProduct.alpha = 1F
                 pbProduct.visibility = View.GONE
             }
         }else{
@@ -252,9 +258,6 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                 }
             }
         }
-//
-//        intent.type = "image/*"
-//        intent.action = Intent.ACTION_GET_CONTENT
 
     }
 
@@ -271,6 +274,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                     )
                 //val imageBitmap = data.extras?.get("data") as Bitmap
                 ivProductImage.setImageBitmap(bitmap)
+                //ivProductImage.setImageBitmap(rotateImage(bitmap))
             } catch (e: Exception) {
                 filePath = null
                 e.printStackTrace()
@@ -290,6 +294,35 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                 e.printStackTrace()
             }
         }
+    }
+
+    fun rotateImage(bitmapSource : Bitmap) : Bitmap{
+        val ei = ExifInterface(filePath.toString());
+        val orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+        ExifInterface.ORIENTATION_UNDEFINED);
+
+        var rotatedBitmap = null;
+        var degree = 0F
+        when(orientation) {
+
+            ExifInterface.ORIENTATION_ROTATE_90 -> {
+                degree = 90F
+            }
+            ExifInterface.ORIENTATION_ROTATE_180 -> {
+                degree = 180F
+            }
+            ExifInterface.ORIENTATION_ROTATE_270 -> {
+                degree = 270F
+            }
+            ExifInterface.ORIENTATION_NORMAL -> {
+                degree = 360F
+            }
+        }
+
+        val matrix = Matrix()
+        matrix.postRotate(degree)
+        return Bitmap.createBitmap(bitmapSource, 0, 0, bitmapSource.width, bitmapSource.height,
+            matrix, true)
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
@@ -314,6 +347,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
     override fun response(message: String) {
         if (message == EMessageResult.SUCCESS.toString()) {
             toast("success")
+            layoutProduct.alpha = 1F
             pbProduct.visibility = View.GONE
             finish()
         }else

@@ -15,6 +15,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_product_detail.*
+import org.jetbrains.anko.toast
 
 class ProductDetailActivity : AppCompatActivity(), MainView {
 
@@ -65,6 +66,6 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
     }
 
     override fun response(message: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        toast(message)
     }
 }

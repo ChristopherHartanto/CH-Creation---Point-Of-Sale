@@ -16,6 +16,17 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/tvCartSubTotal"
+        android:text="Sub Total : 0"
+        android:gravity="end"
+        android:padding="10dp"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:id="@+id/tvCartDiscount"
         android:text="No Discount"
         android:gravity="end"
@@ -51,7 +62,7 @@
             android:layout_height="50dp"
             android:orientation="horizontal">
 
-            <ImageView
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -64,10 +75,11 @@
             <Button
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/button_border"
+                android:background="@drawable/button_border_fill"
                 android:layout_margin="5dp"
                 android:padding="10dp"
                 android:layout_weight="9"
+                android:textColor="@color/colorWhite"
                 android:id="@+id/btnCart"/>
 
         </LinearLayout>

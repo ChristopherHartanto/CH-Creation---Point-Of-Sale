@@ -1,20 +1,21 @@
 package com.chcreation.pointofsale.presenter
 
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transCode
+import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transDate
 import com.chcreation.pointofsale.model.Customer
-import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.model.Transaction
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CustomerPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference){
+
+class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference){
 
     var postListener = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
@@ -25,12 +26,12 @@ class CustomerPresenter(private val view: MainView, private val auth: FirebaseAu
 
     }
 
-    fun saveCustomer(customer: Customer, merchant: String){
+    fun saveTransaction(transaction: Transaction, merchant: String){
 
-        getCustomerPrimaryKey(customer,merchant)
+        getTransPrimaryKey(transaction,merchant)
     }
 
-    private fun getCustomerPrimaryKey(customer: Customer, merchant: String){
+    private fun getTransPrimaryKey(transaction: Transaction, merchant: String){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -45,18 +46,24 @@ class CustomerPresenter(private val view: MainView, private val auth: FirebaseAu
                     }
                 }
 
-                customer.CODE = "C"+generateCustomerCode()
-                val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+                transaction.TRANS_CODE = "T"+generateTransCode()
+                val createdDate: String = dateFormat().format(Date())
+                transCode = key
+                transDate = createdDate
                 val values  = hashMapOf(
-                    ECustomer.NAME.toString() to customer.NAME,
-                    ECustomer.EMAIL.toString() to customer.EMAIL,
-                    ECustomer.PHONE.toString() to customer.PHONE,
-                    ECustomer.ADDRESS.toString() to customer.ADDRESS,
-                    ECustomer.CREATED_DATE.toString() to timeStamp,
-                    ECustomer.UPDATED_DATE.toString() to timeStamp,
-                    ECustomer.CODE.toString() to customer.CODE
+                    ETransaction.DETAIL.toString() to transaction.DETAIL,
+                    ETransaction.USER_CODE.toString() to transaction.USER_CODE,
+                    ETransaction.CUST_CODE.toString() to transaction.CUST_CODE,
+                    ETransaction.NOTE.toString() to transaction.NOTE,
+                    ETransaction.CREATED_DATE.toString() to createdDate,
+                    ETransaction.TRANS_CODE.toString() to transaction.TRANS_CODE,
+                    ETransaction.PAYMENT_METHOD.toString() to transaction.PAYMENT_METHOD,
+                    ETransaction.TOTAL_PRICE.toString() to transaction.TOTAL_PRICE,
+                    ETransaction.TOTAL_OUTSTANDING.toString() to transaction.TOTAL_OUTSTANDING,
+                    ETransaction.TOTAL_RECEIVED.toString() to transaction.TOTAL_RECEIVED,
+                    ETransaction.DISCOUNT.toString() to transaction.DISCOUNT
                 )
-                database.child(ETable.CUSTOMER.toString())
+                database.child(ETable.TRANSACTION.toString())
                     .child(auth.currentUser!!.uid)
                     .child(merchant)
                     .child(key.toString())
@@ -69,7 +76,7 @@ class CustomerPresenter(private val view: MainView, private val auth: FirebaseAu
             }
 
         }
-        database.child(ETable.CUSTOMER.toString())
+        database.child(ETable.TRANSACTION.toString())
             .child(auth.currentUser!!.uid)
             .child(merchant)
             .orderByKey()
@@ -95,7 +102,7 @@ class CustomerPresenter(private val view: MainView, private val auth: FirebaseAu
             .addListenerForSingleValueEvent(postListener)
     }
 
-    private fun generateCustomerCode() : String{
+    private fun generateTransCode() : String{
         return database.push().key.toString()
     }
 

@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -19,7 +20,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".checkout.CheckOutActivity"></activity>
+        <activity android:name=".checkout.SelectCustomerActivity"></activity>
+        <activity android:name=".transaction.DetailTransactionActivity" />
+        <activity android:name=".transaction.TransactionFragment" />
+        <activity android:name=".checkout.ReceiptActivity" />
+        <activity android:name=".checkout.PostCheckOutActivity" />
+        <activity android:name=".checkout.CheckOutActivity" />
         <activity android:name=".checkout.DiscountActivity" />
         <activity android:name=".checkout.NoteActivity" />
         <activity android:name=".checkout.CartActivity" />

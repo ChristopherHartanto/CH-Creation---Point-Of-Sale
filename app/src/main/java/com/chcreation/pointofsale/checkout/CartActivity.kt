@@ -2,6 +2,7 @@ package com.chcreation.pointofsale.checkout
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.newTotal
@@ -10,6 +11,7 @@ import com.chcreation.pointofsale.home.HomeFragment
 import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalQty
+import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -27,6 +29,8 @@ class CartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cart)
 
+        supportActionBar!!.title = "Cart"
+
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
 
@@ -36,7 +40,7 @@ class CartActivity : AppCompatActivity() {
         rvCart.adapter = adapter
         rvCart.layoutManager = LinearLayoutManager(this)
 
-        tvCartTotal.text = "Total: Rp $totalPrice,00"
+        tvCartTotal.text = "Total: ${indonesiaCurrencyFormat().format(totalPrice)}"
         btnCart.onClick {
             startActivity<CheckOutActivity>()
         }
@@ -60,7 +64,8 @@ class CartActivity : AppCompatActivity() {
                             yesButton {
                                 cartItems.clear()
                                 totalQty = 0
-                                totalPrice = 0F
+                                totalPrice = 0
+                                PostCheckOutActivity().clearCartData()
                                 finish()
                             }
                             noButton {
@@ -76,20 +81,27 @@ class CartActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        if (newTotal != 0F)
-            tvCartDiscount.text = "Discount $totalPrice - $newTotal"
+        if (newTotal != 0){
+            val discount = totalPrice - newTotal
+            if (newTotal != 0)
+                tvCartDiscount.text = "Discount : $discount"
+
+            tvCartTotal.text = "Total = ${indonesiaCurrencyFormat().format(newTotal)}"
+
+            tvCartSubTotal.text ="Sub Total : $totalPrice"
+            tvCartSubTotal.visibility = View.VISIBLE
+        }else{
+            tvCartTotal.text = "Total= ${indonesiaCurrencyFormat().format(totalPrice)}"
+        }
 
         tvCartNote.text = "Note: ${note}"
+        btnCart.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
 
-        if (newTotal != 0F)
-            btnCart.text = "${HomeFragment.totalQty} Item = Rp ${totalPrice},00"
-        else
-            btnCart.text = "${HomeFragment.totalQty} Item = Rp ${newTotal},00"
     }
 
     override fun onBackPressed() {
         note = ""
-        newTotal = 0F
+        newTotal = 0
         super.onBackPressed()
     }
 }

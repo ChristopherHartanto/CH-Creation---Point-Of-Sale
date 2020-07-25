@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Product
 import com.squareup.picasso.Picasso
@@ -41,8 +42,8 @@ class CartRecyclerViewAdapter(private val context: Context, private val items: L
         fun bindItem(cart: Cart, listener: (listenerProduct: Product) -> Unit, position: Int) {
 
             name.text = cart.NAME
-            price.text = "Rp ${cart.PRICE} ,00"
-            totalPrice.text = "Rp ${cart.PRICE!! * cart.Qty!!},00"
+            price.text = indonesiaCurrencyFormat().format(cart.PRICE)
+            totalPrice.text = indonesiaCurrencyFormat().format(cart.PRICE!! * cart.Qty!!)
             qty.text = "${cart.Qty}x"
 
             itemView.onClick {

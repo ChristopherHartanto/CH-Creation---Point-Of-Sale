@@ -1,7 +1,5 @@
 package com.chcreation.pointofsale.product
 
-import android.content.Context
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,15 +10,12 @@ import com.chcreation.pointofsale.home.HomeRecyclerViewAdapter
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.view.MainView
-import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_list_product.*
-import kotlinx.android.synthetic.main.fragment_home.*
 import org.jetbrains.anko.intentFor
-import org.jetbrains.anko.support.v4.ctx
 
 class ListProductActivity : AppCompatActivity(), MainView {
 
@@ -47,7 +42,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
             this,
             tempProductItems
         ) {
-            startActivity(intentFor<ProductDetailActivity>("prodCode" to it.PROD_CODE))
+            startActivity(intentFor<ProductDetailActivity>("prodCode" to tempProductItems[it].PROD_CODE))
         }
         rvListProduct.layoutManager = LinearLayoutManager(this)
         rvListProduct.adapter = adapter

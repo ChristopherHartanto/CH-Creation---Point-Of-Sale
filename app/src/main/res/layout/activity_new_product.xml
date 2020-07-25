@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".product.NewProductActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/pbProduct"
+        android:visibility="gone"/>
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="10dp"
-        tools:context=".product.NewProductActivity">
+        android:id="@+id/layoutProduct"
+        android:padding="10dp">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="150dp"
@@ -105,13 +112,6 @@
                 android:hint="Buying Price"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:id="@+id/pbProduct"
-            android:visibility="gone"/>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -120,8 +120,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:id="@+id/btnProductSave"
+                android:background="@drawable/button_border_fill"
                 android:text="save"/>
         </LinearLayout>
 
     </LinearLayout>
-</ScrollView>
+</FrameLayout>
