@@ -1,6 +1,5 @@
 package com.chcreation.pointofsale.transaction
 
-import com.chcreation.pointofsale.R
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -9,14 +8,17 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.model.Transaction
 import com.squareup.picasso.Picasso
+import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.textColorResource
 
 class TransactionRecyclerViewAdapter(private val context: Context, private val items: MutableList<Transaction>,
                                      private val customerList: List<String>,
-                                     private val transCodeList: List<String>,
+                                     private val transCodeList: List<Int>,
                                      private val listener: (position: Int) -> Unit)
     : RecyclerView.Adapter<TransactionRecyclerViewAdapter.ViewHolder>() {
 
@@ -31,22 +33,32 @@ class TransactionRecyclerViewAdapter(private val context: Context, private val i
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
 
+        private val ivStatus = view.findViewById<ImageView>(R.id.ivRowTransactionStatus)
         private val code = view.findViewById<TextView>(R.id.tvRowTransactionCode)
         private val customer = view.findViewById<TextView>(R.id.tvRowTransactionCustomer)
         private val date = view.findViewById<TextView>(R.id.tvRowTransactionDate)
         private val totalPrice = view.findViewById<TextView>(R.id.tvRowTransactionTotalPrice)
-        private val customerLayout = view.findViewById<LinearLayout>(R.id.layoutRowTransactionCustomer)
+        private val ivCustomer = view.findViewById<ImageView>(R.id.ivRowTransactionCustomer)
+        private val layoutCustomer = view.findViewById<LinearLayout>(R.id.layoutRowTransactionCustomer)
 
-        fun bindItem(item: Transaction, transCode: String, custName: String, listener: (position: Int) -> Unit, position: Int) {
-            code.text = "#$transCode"
+        fun bindItem(item: Transaction, transCode: Int, custName: String, listener: (position: Int) -> Unit, position: Int) {
+            code.text = receiptFormat(transCode)
             customer.text = custName
             date.text = item.CREATED_DATE
-            totalPrice.text = "Rp ${item.TOTAL_PRICE},00"
+            totalPrice.text = indonesiaCurrencyFormat().format(item.TOTAL_PRICE)
 
-            if (custName == "")
-                customerLayout.visibility = View.GONE
-            else
-                customerLayout.visibility = View.VISIBLE
+            if (custName == ""){
+                layoutCustomer.visibility = View.GONE
+            }
+            else{
+                layoutCustomer.visibility = View.VISIBLE
+            }
+
+            if (item.TOTAL_OUTSTANDING!! > 0){
+                ivStatus.imageResource = R.drawable.pending
+            }else{
+                ivStatus.imageResource = R.drawable.success
+            }
 
             itemView.onClick {
                 listener(position)

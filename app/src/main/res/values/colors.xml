@@ -9,4 +9,7 @@
     <color name="colorSilver">#bdc3c7</color>
     <color name="colorWhite">#ffffff</color>
     <color name="colorRed">#FF0000</color>
+
+    <color name="colorSuccess">#74b741</color>
+    <color name="colorPending">#f7c035</color>
 </resources>

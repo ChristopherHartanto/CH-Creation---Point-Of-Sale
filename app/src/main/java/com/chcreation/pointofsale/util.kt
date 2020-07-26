@@ -10,6 +10,8 @@ import java.util.*
 
 private lateinit var sharedPreference: SharedPreferences
 
+var RESULT_CLOSE_ALL = 1111
+
 fun getMerchant(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 

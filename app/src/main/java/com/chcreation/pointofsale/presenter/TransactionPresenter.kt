@@ -43,6 +43,24 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
             .addListenerForSingleValueEvent(postListener)
     }
 
+    fun retrieveTransactionListPayments(transactionCode:Int,merchant: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_TRANS_LIST_PAYMENT_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.PAYMENT.toString())
+            .child(auth.currentUser!!.uid)
+            .child(merchant)
+            .child(transactionCode.toString())
+            .addListenerForSingleValueEvent(postListener)
+    }
+
     fun retrieveCustomers(merchant: String){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {

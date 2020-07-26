@@ -1,5 +1,6 @@
 package com.chcreation.pointofsale.checkout
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -14,32 +15,55 @@ import org.jetbrains.anko.sdk27.coroutines.textChangedListener
 class DiscountActivity : AppCompatActivity() {
 
     companion object{
-        var newTotal = 0
+        var discount = 0
+        var tax = 0
     }
 
     private var percentageDiscount = 0
     private var cashDiscount = 0
+    private var action = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_discount)
 
+        supportActionBar!!.hide()
+        action = intent.extras!!.getInt("action",1)
+
+        if(action == 2){
+            tvDiscountPercentage.text = "Percentage Tax"
+            tvDiscountCash.text = "Cash Tax"
+            tvDiscountNewTotal.text = "Total After Tax"
+        }
+
         tvDiscountNewTotalContent.text = totalPrice.toString()
 
         etDiscountCash.doOnTextChanged { text, start, before, count ->
             if (etDiscountCash.hasFocus() && etDiscountCash.text.toString() != ""){
+                if (action == 1){
+                    discount = text.toString().toInt()
+                    if (discount > totalPrice){
+                        discount = totalPrice
+                        etDiscountCash.setText(totalPrice.toString())
+                    }
 
-                var value = text.toString().toInt()
-                if (value > totalPrice){
-                    value = totalPrice
-                    etDiscountCash.setText(totalPrice.toString())
+                    percentageDiscount =  (discount / totalPrice) * 100
+
+                    etDiscountPercentage.setText(percentageDiscount.toString())
+                    tvDiscountNewTotalContent.text = (totalPrice - discount).toString()
+                }else if(action == 2){
+                    tax = text.toString().toInt()
+                    if (tax > totalPrice){
+                        tax = totalPrice
+                        etDiscountCash.setText(totalPrice.toString())
+                    }
+
+                    percentageDiscount =  tax / totalPrice * 100
+
+                    etDiscountPercentage.setText(percentageDiscount.toString())
+                    tvDiscountNewTotalContent.text = (totalPrice + tax).toString()
                 }
 
-                newTotal = totalPrice -  value
-                percentageDiscount =  value / totalPrice * 100
-
-                etDiscountPercentage.setText(percentageDiscount.toString())
-                tvDiscountNewTotalContent.text = newTotal.toString()
 
                 etDiscountCash.requestFocus()
             }
@@ -55,7 +79,6 @@ class DiscountActivity : AppCompatActivity() {
             etDiscountCash.setText("")
             etDiscountPercentage.setText("")
             tvDiscountNewTotalContent.text = totalPrice.toString()
-
         }
 
         etDiscountPercentage.doOnTextChanged { text, start, before, count ->
@@ -66,12 +89,18 @@ class DiscountActivity : AppCompatActivity() {
                     value = 100
                     etDiscountPercentage.setText("100")
                 }
+                if (action == 1)
+                    discount = (totalPrice * value / 100)
+                else if(action == 2)
+                    tax = (totalPrice * value / 100)
 
-                newTotal = totalPrice - (totalPrice * value / 100)
                 cashDiscount = totalPrice * value / 100
-
                 etDiscountCash.setText(cashDiscount.toString())
-                tvDiscountNewTotalContent.text = (newTotal).toString()
+
+                if (action == 1)
+                    tvDiscountNewTotalContent.text = (totalPrice - discount).toString()
+                else if (action == 2)
+                    tvDiscountNewTotalContent.text = (totalPrice + tax).toString()
 
                 etDiscountPercentage.requestFocus()
             }
@@ -80,5 +109,13 @@ class DiscountActivity : AppCompatActivity() {
         btnDiscount.onClick {
             finish()
         }
+    }
+
+    override fun onBackPressed() {
+
+        var discount = 0
+        var tax = 0
+
+        super.onBackPressed()
     }
 }

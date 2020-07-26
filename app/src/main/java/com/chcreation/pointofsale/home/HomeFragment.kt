@@ -95,6 +95,7 @@ class HomeFragment : Fragment() , MainView {
 
         tlHome.tabMode = TabLayout.MODE_SCROLLABLE
 
+        tlHome.addTab(tlHome.newTab().setText("All"),true)
         tlHome.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
             override fun onTabReselected(tab: TabLayout.Tab?) {
             }
@@ -196,7 +197,7 @@ class HomeFragment : Fragment() , MainView {
 
     private fun addCart(position: Int){
         if (cartItems.size == 0)
-            cartItems.add(Cart(tempProductItems[position].NAME,tempProductItems[position].PRICE,1))
+            cartItems.add(Cart(tempProductItems[position].NAME,tempProductItems[position].PROD_CODE,tempProductItems[position].PRICE,1))
         else{
             var check = false
             for ((i , data) in cartItems.withIndex()){
@@ -210,7 +211,7 @@ class HomeFragment : Fragment() , MainView {
 
             }
             if (!check)
-                cartItems.add(Cart(tempProductItems[position].NAME,tempProductItems[position].PRICE,1))
+                cartItems.add(Cart(tempProductItems[position].NAME,tempProductItems[position].PROD_CODE,tempProductItems[position].PRICE,1))
         }
     }
 
@@ -236,36 +237,40 @@ class HomeFragment : Fragment() , MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
-            if (dataSnapshot.exists()){
-                productItems.clear()
-                tempProductItems.clear()
-                adapter.notifyDataSetChanged()
+        if (context != null){
+            if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
+                if (dataSnapshot.exists()){
+                    productItems.clear()
+                    tempProductItems.clear()
+                    adapter.notifyDataSetChanged()
 
-                for (data in dataSnapshot.children) {
-                    val item = data.getValue(Product::class.java)!!
-                    tempProductItems.add(item)
+                    for (data in dataSnapshot.children) {
+                        val item = data.getValue(Product::class.java)!!
+                        tempProductItems.add(item)
+                    }
+                    productItems.addAll(tempProductItems)
+
+                    adapter.notifyDataSetChanged()
+                    if (context != null)
+                        srHome.isRefreshing = false
                 }
-                productItems.addAll(tempProductItems)
-
-                adapter.notifyDataSetChanged()
-                srHome.isRefreshing = false
+                else{
+                    if (context != null)
+                        srHome.isRefreshing = false
+                }
             }
-            else
-                srHome.isRefreshing = false
-        }
-        else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
-            categoryItems.clear()
-            tlHome.addTab(tlHome.newTab().setText("All"),true)
-            categoryItems.add("All")
-            if (dataSnapshot.exists()){
-                for (data in dataSnapshot.children) {
-                    tlHome.addTab(tlHome.newTab().setText(data.key))
-                    categoryItems.add(data.key.toString())
+            else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
+                categoryItems.clear()
+                categoryItems.add("All")
+                if (dataSnapshot.exists()){
+                    for (data in dataSnapshot.children) {
+                        tlHome.addTab(tlHome.newTab().setText(data.key))
+                        categoryItems.add(data.key.toString())
+                    }
+                    svHomeSearch.visibility = View.VISIBLE
+                    pbHome.visibility = View.GONE
+                    srHome.visibility = View.VISIBLE
                 }
-                svHomeSearch.visibility = View.VISIBLE
-                pbHome.visibility = View.GONE
-                srHome.visibility = View.VISIBLE
             }
         }
 

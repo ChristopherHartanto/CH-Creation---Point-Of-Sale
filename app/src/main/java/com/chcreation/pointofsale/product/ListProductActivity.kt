@@ -15,7 +15,10 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_list_product.*
+import kotlinx.android.synthetic.main.activity_new_product.*
 import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
+import org.jetbrains.anko.toast
 
 class ListProductActivity : AppCompatActivity(), MainView {
 
@@ -44,6 +47,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
         ) {
             startActivity(intentFor<ProductDetailActivity>("prodCode" to tempProductItems[it].PROD_CODE))
         }
+
         rvListProduct.layoutManager = LinearLayoutManager(this)
         rvListProduct.adapter = adapter
     }
@@ -68,6 +72,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
         if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
             if (dataSnapshot.exists()){
                 tempProductItems.clear()
+                productItems.clear()
                 adapter.notifyDataSetChanged()
 
                 for (data in dataSnapshot.children) {
@@ -96,6 +101,6 @@ class ListProductActivity : AppCompatActivity(), MainView {
     }
 
     override fun response(message: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        toast(message)
     }
 }

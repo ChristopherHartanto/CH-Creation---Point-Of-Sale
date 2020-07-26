@@ -6,7 +6,8 @@ enum class ETable{
     MERCHANT,
     CUSTOMER,
     CAT,
-    TRANSACTION
+    TRANSACTION,
+    PAYMENT
 }
 
 enum class EProduct{
@@ -43,13 +44,21 @@ enum class ETransaction{
     CREATED_DATE,
     TOTAL_PRICE,
     TOTAL_OUTSTANDING,
-    TOTAL_RECEIVED,
     DISCOUNT,
+    TAX,
     PAYMENT_METHOD,
     DETAIL,
     CUST_CODE,
     NOTE,
     TRANS_CODE,
+    USER_CODE
+}
+
+enum class EPayment{
+    CREATED_DATE,
+    TOTAL_RECEIVED,
+    PAYMENT_METHOD,
+    NOTE,
     USER_CODE
 }
 
@@ -60,7 +69,9 @@ enum class EMessageResult{
     FETCH_MERCHANT_SUCCESS,
     FETCH_CATEGORY_SUCCESS,
     FETCH_CUSTOMER_SUCCESS,
-    FETCH_TRANS_SUCCESS
+    FETCH_TRANS_SUCCESS,
+    FETCH_TRANS_LIST_PAYMENT_SUCCESS,
+    FETCH_PEND_PAYMENT_SUCCESS
 }
 
 enum class EPaymentMethod{

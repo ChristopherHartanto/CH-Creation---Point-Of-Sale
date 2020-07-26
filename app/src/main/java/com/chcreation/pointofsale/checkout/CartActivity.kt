@@ -1,11 +1,14 @@
 package com.chcreation.pointofsale.checkout
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.newTotal
+import com.chcreation.pointofsale.RESULT_CLOSE_ALL
+import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
+import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
 import com.chcreation.pointofsale.checkout.NoteActivity.Companion.note
 import com.chcreation.pointofsale.home.HomeFragment
 import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
@@ -47,7 +50,7 @@ class CartActivity : AppCompatActivity() {
 
         ivCartMoreOptions.onClick {
 
-            val options = mutableListOf("Add Note","Add Discount", "Delete Cart")
+            val options = mutableListOf("Add Note","Add Discount","Add Tax", "Delete Cart")
 
 
             selector("More Options",options) { dialogInterface, i ->
@@ -56,9 +59,12 @@ class CartActivity : AppCompatActivity() {
                         startActivity<NoteActivity>()
                     }
                     1 ->{
-                        startActivity<DiscountActivity>()
+                        startActivity(intentFor<DiscountActivity>("action" to 1))
                     }
                     2 ->{
+                        startActivity(intentFor<DiscountActivity>("action" to 2))
+                    }
+                    3 ->{
                         alert ("Do You Want to Remove Cart?"){
                             title = "Delete Cart"
                             yesButton {
@@ -81,27 +87,36 @@ class CartActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        if (newTotal != 0){
-            val discount = totalPrice - newTotal
-            if (newTotal != 0)
-                tvCartDiscount.text = "Discount : $discount"
+        var totalPayment = totalPrice - discount + tax
 
-            tvCartTotal.text = "Total = ${indonesiaCurrencyFormat().format(newTotal)}"
+        if (discount != 0 || tax != 0){
+            tvCartDiscount.text = "Discount : ${indonesiaCurrencyFormat().format(discount)}"
+            tvCartTax.text = "Tax: ${indonesiaCurrencyFormat().format(tax)}"
 
-            tvCartSubTotal.text ="Sub Total : $totalPrice"
+            tvCartSubTotal.text ="Sub Total : ${indonesiaCurrencyFormat().format(totalPrice)}"
             tvCartSubTotal.visibility = View.VISIBLE
-        }else{
-            tvCartTotal.text = "Total= ${indonesiaCurrencyFormat().format(totalPrice)}"
         }
 
-        tvCartNote.text = "Note: ${note}"
-        btnCart.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
+        tvCartTotal.text = "Total : ${indonesiaCurrencyFormat().format(totalPayment)}"
+        if (note != "")
+            tvCartNote.text = "Note: ${note}"
+        btnCart.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPayment)}"
 
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (resultCode) {
+            RESULT_CLOSE_ALL ->{
+                setResult(RESULT_CLOSE_ALL)
+                finish()
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
     override fun onBackPressed() {
-        note = ""
-        newTotal = 0
+//        note = ""
+//        newTotal = 0
         super.onBackPressed()
     }
 }

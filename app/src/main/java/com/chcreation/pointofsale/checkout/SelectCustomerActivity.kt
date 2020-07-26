@@ -74,7 +74,7 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
                     adapter.notifyDataSetChanged()
                 }
             }
-
+            pbSelectCustomer.visibility = View.GONE
         }
     }
 

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".transaction.DetailTransactionListProductFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:id="@+id/rvDetailTransaction"/>
+
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/tvDetailTransactionNote"-->
+<!--        android:gravity="end"-->
+<!--        android:padding="10dp"-->
+<!--        android:textSize="16sp"-->
+<!--        android:textColor="@color/colorGrey"/>-->
+
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/tvDetailTransactionDiscount"-->
+<!--        android:text="No Discount"-->
+<!--        android:gravity="end"-->
+<!--        android:padding="10dp"-->
+<!--        android:textSize="16sp"/>-->
+
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/tvDetailTransactionTax"-->
+<!--        android:text="No Discount"-->
+<!--        android:gravity="end"-->
+<!--        android:padding="10dp"-->
+<!--        android:textSize="16sp"/>-->
+
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/tvDetailTransactionSubTotal"-->
+<!--        android:text="Sub Total : 0"-->
+<!--        android:gravity="end"-->
+<!--        android:padding="10dp"-->
+<!--        android:textSize="16sp"-->
+<!--        android:visibility="gone"-->
+<!--        android:textStyle="bold"/>-->
+
+</LinearLayout>

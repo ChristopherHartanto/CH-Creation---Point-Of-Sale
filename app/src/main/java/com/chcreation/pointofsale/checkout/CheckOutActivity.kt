@@ -8,7 +8,8 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import com.chcreation.pointofsale.*
-import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.newTotal
+import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
+import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
 import com.chcreation.pointofsale.checkout.NoteActivity.Companion.note
 import com.chcreation.pointofsale.checkout.SelectCustomerActivity.Companion.selectCustomerCode
 import com.chcreation.pointofsale.checkout.SelectCustomerActivity.Companion.selectCustomerName
@@ -16,9 +17,15 @@ import com.chcreation.pointofsale.customer.CustomerFragment
 import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalQty
+import com.chcreation.pointofsale.model.Payment
 import com.chcreation.pointofsale.model.Transaction
 import com.chcreation.pointofsale.presenter.CheckOutPresenter
 import com.chcreation.pointofsale.presenter.Homepresenter
+import com.chcreation.pointofsale.transaction.DetailTransactionActivity.Companion.existPayment
+import com.chcreation.pointofsale.transaction.TransactionFragment
+import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.customerItems
+import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transCodeItems
+import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transPosition
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -38,12 +45,13 @@ class CheckOutActivity : AppCompatActivity(), MainView {
         var transDate = ""
         var transCode = 0
         var totalOutStanding = 0
+        var postTotalPayment = 0
     }
     private var paymentMethod = ""
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
     private lateinit var presenter: CheckOutPresenter
-    private var checkOutClicked = false
+    private var totalPayment = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,65 +83,32 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             btnCheckOutCash.textColorResource = R.color.colorBlack
         }
 
-        etCheckOutAmountReceived.setText(totalPrice.toString())
-        tvCheckOutTotal.text = indonesiaCurrencyFormat().format(totalPrice)
-
         etCheckOutAmountReceived.onClick {
             etCheckOutAmountReceived.setText("")
         }
 
-        btnCheckOut.onClick {
-            btnCheckOut.startAnimation(normalClickAnimation())
-
-            if (!checkOutClicked){
-                if (paymentMethod == "")
-                    toast("Please Select Payment Method !")
-                else{
-                    checkOutClicked = true
-
-                    totalReceived = etCheckOutAmountReceived.text.toString().toInt()
-
-                    if (totalPrice - totalReceived > 0)
-                        totalOutStanding = totalPrice - totalReceived
-
-                    val gson = Gson()
-                    val orderDetail = gson.toJson(cartItems)
-
-                    alert ("Continue to Check Out?"){
-                        title = "Confirmation"
-
-                        yesButton {
-                            pbCheckOut.visibility = View.VISIBLE
-                            tvCheckOutProcessTitle.visibility = View.VISIBLE
-                            layoutCheckOutContent.alpha = 0.3F
-
-                            var discount = 0
-                            if (newTotal != 0)
-                                discount = totalPrice - newTotal
-                            presenter.saveTransaction(Transaction("", totalPrice,totalOutStanding,
-                                totalReceived,discount,paymentMethod,orderDetail,selectCustomerCode, note,"",
-                                mAuth.currentUser!!.uid)
-                                , getMerchant(this@CheckOutActivity))
-                        }
-
-                        noButton {
-
-                        }
-                    }.show()
-                }
-
-            }
-        }
+        if (existPayment)
+            existCheckOutSetUp()
+        else
+            newCheckOutSetUp()
 
     }
 
     override fun onStart() {
         super.onStart()
 
-        if (selectCustomerName != "")
-            supportActionBar?.title = selectCustomerName
-        else
-            supportActionBar?.title = "No Customer"
+        btnCheckOut.onClick {
+            btnCheckOut.startAnimation(normalClickAnimation())
+
+            if (!existPayment)
+                newCheckOut()
+            else
+                existCheckOut()
+        }
+
+        if (!existPayment){
+            newCheckOutSetUp()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -146,15 +121,122 @@ class CheckOutActivity : AppCompatActivity(), MainView {
         // Handle item selection
         return when (item.itemId) {
             R.id.action_select_customer -> {
-                isCustomer = 1
-                startActivity<SelectCustomerActivity>()
+                if (!existPayment){
+                    isCustomer = 1
+                    startActivity<SelectCustomerActivity>()
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    private fun newCheckOutSetUp(){
+        if (selectCustomerName != "")
+            supportActionBar?.title = selectCustomerName
+        else
+            supportActionBar?.title = "No Customer"
+
+        totalPayment = totalPrice - discount + tax
+        etCheckOutAmountReceived.setText(totalPayment.toString())
+        tvCheckOutTotal.text = indonesiaCurrencyFormat().format(totalPayment)
+    }
+
+    private fun newCheckOut(){
+        if (paymentMethod == "")
+            toast("Please Select Payment Method !")
+        else{
+
+            totalReceived = etCheckOutAmountReceived.text.toString().toInt()
+
+            if (totalPayment - totalReceived > 0)
+                totalOutStanding = totalPayment - totalReceived
+
+            val gson = Gson()
+            val orderDetail = gson.toJson(cartItems)
+
+            alert ("Continue to Check Out?"){
+                title = "Confirmation"
+
+                yesButton {
+
+                    if (totalOutStanding > 0 && selectCustomerName == ""){
+                        toast("Must be Completed Payment if Without Customer")
+                    }else{
+                        pbCheckOut.visibility = View.VISIBLE
+                        tvCheckOutProcessTitle.visibility = View.VISIBLE
+                        layoutCheckOutContent.alpha = 0.3F
+
+                        presenter.saveTransaction(Transaction("", totalPrice,totalOutStanding,
+                            discount,tax,paymentMethod,orderDetail,selectCustomerCode, note,"",
+                            mAuth.currentUser!!.uid)
+                            , Payment("", totalReceived,paymentMethod, note,
+                                mAuth.currentUser!!.uid)
+                            ,getMerchant(this@CheckOutActivity))
+                    }
+                }
+
+                noButton {
+                }
+            }.show()
+        }
+    }
+
+    private fun existCheckOutSetUp(){
+
+        supportActionBar?.title = customerItems[transPosition]
+
+        presenter.retrievePendingPayment(transCodeItems[transPosition],
+            getMerchant(this))
+    }
+
+    private fun existCheckOut(){
+        if (paymentMethod == "")
+            toast("Please Select Payment Method !")
+        else{
+
+            totalReceived = etCheckOutAmountReceived.text.toString().toInt()
+
+            totalOutStanding = postTotalPayment - totalReceived
+            if (totalOutStanding < 0)
+                totalOutStanding = 0
+
+            val gson = Gson()
+            val orderDetail = gson.toJson(cartItems)
+
+            alert ("Continue to Check Out?"){
+                title = "Confirmation"
+
+                yesButton {
+                    pbCheckOut.visibility = View.VISIBLE
+                    tvCheckOutProcessTitle.visibility = View.VISIBLE
+                    layoutCheckOutContent.alpha = 0.3F
+
+                    presenter.savePendingPayment(transCodeItems[transPosition],
+                        getMerchant(this@CheckOutActivity),
+                        Payment("", totalReceived,paymentMethod, "", mAuth.currentUser?.uid),
+                        totalOutStanding)
+
+                }
+
+                noButton {
+                }
+            }.show()
+
+        }
+    }
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        if (response == EMessageResult.FETCH_PEND_PAYMENT_SUCCESS.toString()){
+            if (dataSnapshot.exists()){
+                val item = dataSnapshot.getValue(Transaction::class.java)
+                if (item != null) {
+                    postTotalPayment = item.TOTAL_OUTSTANDING!!.toInt()
+                    etCheckOutAmountReceived.setText(postTotalPayment.toString())
+                    tvCheckOutTotal.text = indonesiaCurrencyFormat().format(postTotalPayment)
+                }
+            }
+        }
     }
 
     override fun response(message: String) {
@@ -169,6 +251,5 @@ class CheckOutActivity : AppCompatActivity(), MainView {
         pbCheckOut.visibility = View.GONE
         tvCheckOutProcessTitle.visibility = View.GONE
         layoutCheckOutContent.alpha = 1F
-        checkOutClicked = false
     }
 }

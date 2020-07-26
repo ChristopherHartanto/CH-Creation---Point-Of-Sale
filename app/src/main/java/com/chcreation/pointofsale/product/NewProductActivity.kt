@@ -36,6 +36,7 @@ import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_merchant.*
 import kotlinx.android.synthetic.main.activity_new_product.*
+import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.selector
 import org.jetbrains.anko.startActivity
@@ -99,6 +100,16 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         ivProductImage.onClick {
             selectImage()
         }
+
+        swProduct.onCheckedChange { buttonView, isChecked ->
+            if (swProduct.isChecked){
+                layoutProductStock.visibility = View.VISIBLE
+            }else{
+                layoutProductStock.visibility = View.GONE
+            }
+        }
+
+        swProduct.isChecked = !swProduct.isChecked
 
     }
 

@@ -26,6 +26,10 @@ class NewCategory : AppCompatActivity(), MainView {
     private lateinit var sharedPreference: SharedPreferences
     private var merchant = ""
 
+    companion object{
+        var newCategory = ""
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_category)
@@ -42,7 +46,7 @@ class NewCategory : AppCompatActivity(), MainView {
         super.onStart()
 
         btnNewCategory.onClick {
-            val newCategory = etNewCategory.text.toString()
+            newCategory = etNewCategory.text.toString()
 
             if (newCategory.isEmpty())
                 etNewCategory.error = "Please Fill the Field"
@@ -56,9 +60,12 @@ class NewCategory : AppCompatActivity(), MainView {
     }
 
     override fun response(message: String) {
-        if (message == EMessageResult.SUCCESS.toString())
+        if (message == EMessageResult.SUCCESS.toString()){
             finish()
-        else
+        }
+        else{
+            newCategory = ""
             toast(message)
+        }
     }
 }

@@ -21,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_transaction.*
 import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.onRefresh
 import org.jetbrains.anko.support.v4.startActivity
 
 class TransactionFragment : Fragment(), MainView {
@@ -30,14 +31,16 @@ class TransactionFragment : Fragment(), MainView {
     private lateinit var mDatabase : DatabaseReference
     private lateinit var adapter : TransactionRecyclerViewAdapter
     private var tmpCustomerItems: MutableList<Customer> = mutableListOf()
+    private var tmpCustomerNameItems: MutableList<String> = mutableListOf()
     private var tmpTransItems: MutableList<Transaction> = mutableListOf()
+    private var tmpTransCodeItems: MutableList<Int> = mutableListOf()
     private var currentTab = 0
 
    companion object{
        var transPosition = 0
        var transItems: MutableList<Transaction> = mutableListOf()
        var customerItems : MutableList<String> = mutableListOf()
-       var transCodeItems: MutableList<String> = mutableListOf()
+       var transCodeItems: MutableList<Int> = mutableListOf()
    }
 
     override fun onCreateView(
@@ -52,11 +55,15 @@ class TransactionFragment : Fragment(), MainView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        mAuth = FirebaseAuth.getInstance()
+        mDatabase = FirebaseDatabase.getInstance().reference
+        presenter = TransactionPresenter(this,mAuth,mDatabase)
+
         tlTransaction.addTab(tlTransaction.newTab().setText("All"),true)
         tlTransaction.addTab(tlTransaction.newTab().setText("Pending"))
         tlTransaction.addTab(tlTransaction.newTab().setText("Success"))
 
-        tlTransaction.tabMode = TabLayout.MODE_SCROLLABLE
+        tlTransaction.tabMode = TabLayout.MODE_FIXED
 
         tlTransaction.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
             override fun onTabReselected(tab: TabLayout.Tab?) {
@@ -67,18 +74,23 @@ class TransactionFragment : Fragment(), MainView {
 
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 currentTab = tab!!.position
+                clearData()
                 fetchTransByCat()
             }
 
         })
+
+        srTransaction.onRefresh {
+            clearData()
+            fetchTransByCat()
+            srTransaction.isRefreshing = false
+        }
     }
 
     override fun onStart() {
         super.onStart()
 
-        mAuth = FirebaseAuth.getInstance()
-        mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = TransactionPresenter(this,mAuth,mDatabase)
+        clearData()
         adapter = TransactionRecyclerViewAdapter(ctx, transItems, customerItems, transCodeItems){
             transPosition = it
             startActivity<DetailTransactionActivity>()
@@ -94,46 +106,65 @@ class TransactionFragment : Fragment(), MainView {
         presenter.retrieveTransactions(getMerchant(ctx))
     }
 
+    private fun clearData(){
+        transPosition = 0
+        transCodeItems.clear()
+        customerItems.clear()
+        transItems.clear()
+    }
+
     private fun fetchTransByCat(){
-        if (currentTab == 0)
+        if (currentTab == 0){
+            customerItems.addAll(tmpCustomerNameItems)
+            transCodeItems.addAll(tmpTransCodeItems)
             transItems.addAll(tmpTransItems)
+        }
         else{
-            for (data in tmpTransItems){
+            for ((index,data) in tmpTransItems.withIndex()){
                 if (currentTab == 1){
-                    if (data.TOTAL_OUTSTANDING!! > 0)
+                    if (data.TOTAL_OUTSTANDING!! > 0){
                         transItems.add(data)
+                        customerItems.add(tmpCustomerNameItems[index])
+                        transCodeItems.add(tmpTransCodeItems[index])
+                    }
                 }else if (currentTab == 2){
                     if (data.TOTAL_OUTSTANDING!! == 0)
                         transItems.add(data)
+                        customerItems.add(tmpCustomerNameItems[index])
+                        transCodeItems.add(tmpTransCodeItems[index])
                 }
             }
         }
+        adapter.notifyDataSetChanged()
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
-            if (dataSnapshot.exists()){
-                tmpTransItems.clear()
-                for (data in dataSnapshot.children){
-                    val item = data.getValue(com.chcreation.pointofsale.model.Transaction::class.java)
-                    if (item != null) {
-                        tmpTransItems.add(item)
-                        transCodeItems.add(data.key.toString())
+        if (context != null){
+            if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
+                if (dataSnapshot.exists()){
+                    tmpTransItems.clear()
+                    tmpTransCodeItems.clear()
+                    for (data in dataSnapshot.children){
+                        val item = data.getValue(com.chcreation.pointofsale.model.Transaction::class.java)
+                        if (item != null) {
+                            tmpTransItems.add(item)
+                            tmpTransCodeItems.add(data.key!!.toInt())
+                        }
                     }
+                    presenter.retrieveCustomers(getMerchant(ctx))
                 }
-                fetchTransByCat()
-                presenter.retrieveCustomers(getMerchant(ctx))
-            }
-        }else if (response == EMessageResult.FETCH_CUSTOMER_SUCCESS.toString()){
-            if (dataSnapshot.exists()){
-                tmpCustomerItems.clear()
-                for (data in dataSnapshot.children){
-                    val item = data.getValue(Customer::class.java)
-                    if (item != null) {
-                        tmpCustomerItems.add(item)
+            }else if (response == EMessageResult.FETCH_CUSTOMER_SUCCESS.toString()){
+                if (dataSnapshot.exists()){
+                    tmpCustomerItems.clear()
+                    for (data in dataSnapshot.children){
+                        val item = data.getValue(Customer::class.java)
+                        if (item != null) {
+                            tmpCustomerItems.add(item)
+                        }
                     }
+                    fecthCustomer()
+                    fetchTransByCat()
                 }
-                fecthCustomer()
             }
         }
     }
@@ -141,7 +172,7 @@ class TransactionFragment : Fragment(), MainView {
     fun fecthCustomer(){
         customerItems.clear()
 
-        for(data in transItems){
+        for(data in tmpTransItems){
             if (data.CUST_CODE == "")
                 customerItems.add("")
             else{
@@ -157,8 +188,7 @@ class TransactionFragment : Fragment(), MainView {
                     customerItems.add("")
             }
         }
-
-        adapter.notifyDataSetChanged()
+        tmpCustomerNameItems.addAll(customerItems)
     }
 
     override fun response(message: String) {

@@ -3,8 +3,6 @@ package com.chcreation.pointofsale.checkout
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -13,16 +11,21 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.ErrorActivity.Companion.errorMessage
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.totalReceived
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transCode
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transDate
+import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
+import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
 import com.chcreation.pointofsale.checkout.NoteActivity.Companion.note
 import com.chcreation.pointofsale.home.HomeFragment
+import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_receipt.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 import java.io.File
 import java.io.FileOutputStream
@@ -52,15 +55,15 @@ class ReceiptActivity : AppCompatActivity() {
 
         tvReceiptMerchantName.text = getMerchant(this).toUpperCase(Locale.ENGLISH)
         tvReceiptDate.text = transDate
-        tvReceiptTransCode.text = "Receipt: #${receiptFormat(transCode)}"
+        tvReceiptTransCode.text = "Receipt: ${receiptFormat(transCode)}"
 
         btnReceiptShare.onClick {
             btnReceiptShare.startAnimation(normalClickAnimation())
             pbReceipt.visibility = View.VISIBLE
-            layoutReceipt.alpha = 0.3F
+            //layoutReceipt.alpha = 0.3F
 
-            val bitmap = getScreenShot(layoutReceipt)
-            store(bitmap,"#${receiptFormat(transCode)}")
+            val bitmap = getScreenShot(window.decorView.findViewById(R.id.layoutReceipt))
+            store(bitmap,"${receiptFormat(transCode)}")
 
             pbReceipt.visibility = View.GONE
             layoutReceipt.alpha = 1F
@@ -70,29 +73,38 @@ class ReceiptActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        val discount = HomeFragment.totalPrice - DiscountActivity.newTotal
-        var totalPayment = 0
-        totalPayment = if (DiscountActivity.newTotal != 0)
-            0
-        else
-            HomeFragment.totalPrice
+        tvReceiptCashier.text = mAuth.currentUser?.displayName
 
-        if (DiscountActivity.newTotal != 0){
-            tvReceiptDiscount.text = "${indonesiaCurrencyFormat().format(discount)}"
+        val totalPayment = totalPrice - discount + tax
 
-            tvReceiptSubTotal.text ="${indonesiaCurrencyFormat().format(HomeFragment.totalPrice)}"
+        if (discount != 0 || tax != 0){
+            tvReceiptSubTotal.text = indonesiaCurrencyFormat().format(totalPrice)
+            tvReceiptSubTotalTitle.visibility = View.VISIBLE
             tvReceiptSubTotal.visibility = View.VISIBLE
         }
-        else
+        else{
+            tvReceiptSubTotalTitle.visibility = View.GONE
+            tvReceiptSubTotal.visibility = View.GONE
+        }
+
+        if (discount == 0){
             tvReceiptDiscount.visibility = View.GONE
+            tvReceiptDiscountTitle.visibility = View.GONE
+        }
+        if (tax == 0){
+            tvReceiptTax.visibility = View.GONE
+            tvReceiptTaxTitle.visibility = View.GONE
+        }
+
+        tvReceiptDiscount.text = indonesiaCurrencyFormat().format(discount)
+        tvReceiptTax.text = indonesiaCurrencyFormat().format(tax)
+        tvReceiptTotal.text = indonesiaCurrencyFormat().format(totalPayment)
 
         if (note != "")
-            tvReceiptNote.text = "Note: $note"
-
-        if (DiscountActivity.newTotal == 0)
-            tvReceiptTotal.text = indonesiaCurrencyFormat().format(totalPayment)
-        else
-            tvReceiptTotal.text = indonesiaCurrencyFormat().format(DiscountActivity.newTotal)
+            tvReceiptNote.text = "$note"
+        else{
+            layoutReceiptNote.visibility = View.GONE
+        }
 
         tvReceiptAmountReceived.text = indonesiaCurrencyFormat().format(totalReceived)
 
@@ -105,13 +117,17 @@ class ReceiptActivity : AppCompatActivity() {
     }
 
     private fun getScreenShot(view: View): Bitmap {
-        val returnedBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(returnedBitmap)
-        val bgDrawable = view.background
-        if (bgDrawable != null) bgDrawable.draw(canvas)
-        else canvas.drawColor(Color.WHITE)
-        view.draw(canvas)
-        return returnedBitmap
+//        val returnedBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+//        val canvas = Canvas(returnedBitmap)
+//        val bgDrawable = view.background
+//        if (bgDrawable != null) bgDrawable.draw(canvas)
+//        else canvas.drawColor(Color.WHITE)
+//        view.draw(canvas)
+        val screenView = view.rootView
+        screenView.isDrawingCacheEnabled = true
+        val bitmap = Bitmap.createBitmap(screenView.drawingCache)
+        screenView.isDrawingCacheEnabled = false
+        return bitmap
     }
 
     fun store(bm: Bitmap, fileName: String?) {
@@ -128,7 +144,8 @@ class ReceiptActivity : AppCompatActivity() {
 
             shareImage(file)
         } catch (e: Exception) {
-            toast(e.message.toString())
+            errorMessage = e.message.toString()
+            startActivity<ErrorActivity>()
             e.printStackTrace()
         }
     }
