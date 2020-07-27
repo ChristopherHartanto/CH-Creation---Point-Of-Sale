@@ -41,7 +41,6 @@ class HomeFragment : Fragment() , MainView {
     private lateinit var sharedPreference: SharedPreferences
     private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private var categoryItems: ArrayList<String> = arrayListOf()
-    private var merchant = ""
     private var currentCat = 0
     private var searchFilter = ""
 
@@ -66,9 +65,7 @@ class HomeFragment : Fragment() , MainView {
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
-        presenter = Homepresenter(this,mAuth,mDatabase)
-
-        merchant = sharedPreference.getString("merchant","").toString()
+        presenter = Homepresenter(this,mAuth,mDatabase,ctx)
 
         adapter = HomeRecyclerViewAdapter(
             ctx,
@@ -78,7 +75,7 @@ class HomeFragment : Fragment() , MainView {
             totalQty = countQty()
             totalPrice = sumPrice()
 
-            productItems[it] = Product(productItems[it].NAME,productItems[it].PRICE,productItems[it].DESC,productItems[it].COST,
+            productItems[it] = Product(productItems[it].NAME,productItems[it].PRICE,productItems[it].DESC,productItems[it].COST, productItems[it].MANAGE_STOCK,
                 productItems[it].STOCK!! - 1,productItems[it].IMAGE,productItems[it].PROD_CODE,productItems[it].UOM_CODE,productItems[it].CAT,
                 productItems[it].CODE)
 
@@ -93,7 +90,7 @@ class HomeFragment : Fragment() , MainView {
         rvHome.layoutManager = LinearLayoutManager(ctx)
         rvHome.adapter = adapter
 
-        tlHome.tabMode = TabLayout.MODE_SCROLLABLE
+        tlHome.tabMode = TabLayout.MODE_FIXED
 
         tlHome.addTab(tlHome.newTab().setText("All"),true)
         tlHome.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
@@ -143,8 +140,8 @@ class HomeFragment : Fragment() , MainView {
         }
 
         pbHome.visibility = View.VISIBLE
-        presenter.retrieveProducts(merchant)
-        presenter.retrieveCategories(merchant)
+        presenter.retrieveProducts()
+        presenter.retrieveCategories()
 
     }
 
@@ -267,10 +264,12 @@ class HomeFragment : Fragment() , MainView {
                         tlHome.addTab(tlHome.newTab().setText(data.key))
                         categoryItems.add(data.key.toString())
                     }
-                    svHomeSearch.visibility = View.VISIBLE
-                    pbHome.visibility = View.GONE
-                    srHome.visibility = View.VISIBLE
+                    if (categoryItems.size > 4)
+                        tlHome.tabMode = TabLayout.MODE_SCROLLABLE
                 }
+                svHomeSearch.visibility = View.VISIBLE
+                pbHome.visibility = View.GONE
+                srHome.visibility = View.VISIBLE
             }
         }
 

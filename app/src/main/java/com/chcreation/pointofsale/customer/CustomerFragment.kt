@@ -51,7 +51,7 @@ class CustomerFragment : Fragment(), MainView {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = CustomerPresenter(this,mAuth,mDatabase)
+        presenter = CustomerPresenter(this,mAuth,mDatabase,ctx)
 
         adapter = CustomerRecyclerViewAdapter(ctx,customerItems){
         }
@@ -63,13 +63,13 @@ class CustomerFragment : Fragment(), MainView {
         rvCustomer.layoutManager = LinearLayoutManager(ctx)
 
         srCustomer.onRefresh {
-            presenter.retrieveCustomers(getMerchant(ctx))
+            presenter.retrieveCustomers()
         }
     }
 
     override fun onStart() {
         super.onStart()
-        presenter.retrieveCustomers(getMerchant(ctx))
+        presenter.retrieveCustomers()
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

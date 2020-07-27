@@ -48,7 +48,7 @@ class ProductFragment : Fragment(), MainView {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = ProductPresenter(this,mAuth,mDatabase)
+        presenter = ProductPresenter(this,mAuth,mDatabase,ctx)
 
         rvAdapter = ProductRecyclerViewAdapter(ctx,items){
             startActivity(intentFor<ListProductActivity>("category" to it))
@@ -63,7 +63,7 @@ class ProductFragment : Fragment(), MainView {
             ctx.startActivity<NewProductActivity>()
         }
 
-        presenter.retrieveCategories(getMerchant(ctx))
+        presenter.retrieveCategories()
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

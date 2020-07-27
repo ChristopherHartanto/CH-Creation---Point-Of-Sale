@@ -119,4 +119,5 @@ class CartActivity : AppCompatActivity() {
 //        newTotal = 0
         super.onBackPressed()
     }
+
 }

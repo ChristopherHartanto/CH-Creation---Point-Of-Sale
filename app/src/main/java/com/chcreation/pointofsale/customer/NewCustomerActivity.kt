@@ -31,7 +31,7 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = CustomerPresenter(this,mAuth,mDatabase)
+        presenter = CustomerPresenter(this,mAuth,mDatabase,this)
 
         btnCustomerSave.onClick {
             val email = etCustomerEmail.text.toString()
@@ -45,7 +45,7 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
                 return@onClick
             }
 
-            presenter.saveCustomer(Customer(name,email,"","",phone,address,note), getMerchant(this@NewCustomerActivity))
+            presenter.saveCustomer(Customer(name,email,"","",phone,address,note))
         }
     }
 

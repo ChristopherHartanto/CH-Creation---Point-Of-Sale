@@ -20,7 +20,7 @@
 
     <Spinner
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:layout_marginVertical="20sp"
         android:id="@+id/spMerchant"/>
 
@@ -28,6 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/btnMerchant"
+        android:background="@drawable/button_border_fill"
         android:text="Select Merchant"/>
 
 </LinearLayout>

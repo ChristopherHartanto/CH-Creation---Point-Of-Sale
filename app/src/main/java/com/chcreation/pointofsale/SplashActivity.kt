@@ -24,7 +24,6 @@ class SplashActivity : AppCompatActivity() {
 
         supportActionBar!!.hide()
         mAuth = FirebaseAuth.getInstance()
-        sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
         val timer = object: CountDownTimer(1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -32,7 +31,7 @@ class SplashActivity : AppCompatActivity() {
 
             override fun onFinish() {
 
-                if (mAuth.currentUser == null || sharedPreference.getString("merchant",null ) == null)
+                if (mAuth.currentUser == null || getMerchant(this@SplashActivity) == "")
                     startActivity<LoginActivity>()
                 else
                     startActivity<MainActivity>()

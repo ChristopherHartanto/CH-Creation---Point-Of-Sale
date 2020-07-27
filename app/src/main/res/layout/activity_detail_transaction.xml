@@ -1,106 +1,233 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dp"
     tools:context=".transaction.DetailTransactionActivity">
 
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/pbDetailTransaction"
+        android:visibility="gone"
+        android:layout_gravity="center"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal">
+        android:orientation="vertical"
+        android:id="@+id/layoutDetailTransaction">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="32sp"
+                android:textColor="@color/colorBlack"
+                android:id="@+id/tvDetailTransactionTotalPrice"/>
+
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="5dp"
+                android:src="@drawable/pending"
+                android:id="@+id/ivDetailTransactionStatus"/>
+
+        </LinearLayout>
+
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textStyle="bold"
-            android:textSize="32sp"
+            android:textSize="20sp"
+            android:text="Total"
             android:textColor="@color/colorBlack"
-            android:id="@+id/tvDetailTransactionTotalPrice"/>
+            android:id="@+id/tvDetailTransactionTotalPriceTitle"/>
 
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginHorizontal="10dp"
-            android:layout_gravity="center"
-            android:id="@+id/ivDetailTransactionStatus"/>
-    </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorBlack"
+            android:layout_marginVertical="5dp"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="20sp"
-        android:text="Total"
-        android:textColor="@color/colorBlack"
-        android:id="@+id/tvDetailTransactionTotalPriceTitle"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="5dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_marginStart="10dp"
+                android:text="Pending : Rp 10.000"
+                android:textColor="@color/colorBlack"
+                android:id="@+id/tvDetailTransactionStatus"/>
 
-        <TextView
-            android:layout_width="0dp"
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="14sp"
-            android:textColor="@color/colorBlack"
-            android:id="@+id/tvDetailTransactionDate"/>
+            android:layout_marginVertical="5dp">
 
-        <TextView
-            android:layout_width="0dp"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:layout_marginStart="10dp"
+                android:textColor="@color/colorBlack"
+                android:id="@+id/tvDetailTransactionDate"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:textSize="14sp"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/colorBlack"
+                android:id="@+id/tvDetailTransactionCode"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"/>
+
+        <com.google.android.material.tabs.TabLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:tabTextColor="@color/colorWhite"
+            android:background="@color/colorPrimary"
+            android:id="@+id/tlDetailTransaction"/>
+
+        <androidx.viewpager.widget.ViewPager
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:gravity="end"
-            android:textSize="14sp"
-            android:textColor="@color/colorBlack"
-            android:id="@+id/tvDetailTransactionCode"/>
+            android:id="@+id/vpDetailTransaction"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="10dp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorBlack"
+                android:id="@+id/tvDetailTransactionDiscountTitle"
+                android:text="Discount:"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="6"
+                android:id="@+id/tvDetailTransactionDiscount"
+                android:gravity="end"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorBlack"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="10dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorBlack"
+                android:id="@+id/tvDetailTransactionTaxTitle"
+                android:text="Tax:"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="6"
+                android:id="@+id/tvDetailTransactionTax"
+                android:gravity="end"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorBlack"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="10dp"
+            android:layout_marginBottom="5dp"
+            android:id="@+id/layoutDetailTransactionSubTotal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorBlack"
+                android:id="@+id/tvDetailTransactionSubTotalTitle"
+                android:text="Sub Total:"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="6"
+                android:id="@+id/tvDetailTransactionSubTotal"
+                android:gravity="end"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorBlack"/>
+
+        </LinearLayout>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"
+            android:textColor="@color/colorPrimary"
+            android:text="Receipt"
+            android:background="@drawable/button_border"
+            android:id="@+id/btnDetailTransactionReceipt"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="5dp"
+            android:textColor="@color/colorPrimary"
+            android:text="Confirm Payment"
+            android:background="@drawable/button_border"
+            android:id="@+id/btnDetailTransactionConfirmPayment"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel Transaction"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/button_danger"
+            android:id="@+id/btnDetailTransactionCancel"/>
     </LinearLayout>
-    
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"/>
-
-    <com.google.android.material.tabs.TabLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/tlDetailTransaction"/>
-
-    <androidx.viewpager.widget.ViewPager
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:id="@+id/vpDetailTransaction"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="5dp"
-        android:textColor="@color/colorPrimary"
-        android:text="Receipt"
-        android:background="@drawable/button_border"
-        android:id="@+id/btnDetailTransactionReceipt"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="5dp"
-        android:textColor="@color/colorPrimary"
-        android:text="Confirm Payment"
-        android:background="@drawable/button_border"
-        android:id="@+id/btnDetailTransactionConfirmPayment"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Cancel Transaction"
-        android:textColor="@color/colorWhite"
-        android:background="@drawable/button_danger"
-        android:id="@+id/btnDetailTransactionCancel"/>
-</LinearLayout>
+</FrameLayout>

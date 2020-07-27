@@ -6,6 +6,7 @@ import android.os.Bundle
 import com.chcreation.pointofsale.MainActivity
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.postTotalPayment
+import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.totalOutStanding
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.totalReceived
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transDate
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
@@ -100,6 +101,7 @@ class PostCheckOutActivity : AppCompatActivity() {
         postTotalPayment = 0
         totalPrice = 0
         totalReceived = 0
+        totalOutStanding = 0
 
         HomeFragment.cartItems.clear()
         NoteActivity.note = ""

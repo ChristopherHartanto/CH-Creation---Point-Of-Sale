@@ -1,5 +1,6 @@
 package com.chcreation.pointofsale.presenter
 
+import android.content.Context
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transCode
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transDate
@@ -15,7 +16,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class TransactionPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference){
+class TransactionPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference, private val context: Context){
 
     var postListener = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
@@ -26,7 +27,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
 
     }
 
-    fun retrieveTransactions(merchant: String){
+    fun retrieveTransactions(){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -38,12 +39,12 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
 
         }
         database.child(ETable.TRANSACTION.toString())
-            .child(auth.currentUser!!.uid)
-            .child(merchant)
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
             .addListenerForSingleValueEvent(postListener)
     }
 
-    fun retrieveTransactionListPayments(transactionCode:Int,merchant: String){
+    fun retrieveTransactionListPayments(transactionCode:Int){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -55,13 +56,13 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
 
         }
         database.child(ETable.PAYMENT.toString())
-            .child(auth.currentUser!!.uid)
-            .child(merchant)
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
             .child(transactionCode.toString())
             .addListenerForSingleValueEvent(postListener)
     }
 
-    fun retrieveCustomers(merchant: String){
+    fun retrieveCustomers(){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -73,8 +74,56 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
 
         }
         database.child(ETable.CUSTOMER.toString())
-            .child(auth.currentUser!!.uid)
-            .child(merchant)
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun cancelTransaction(transactionCode: Int){
+        database.child(ETable.TRANSACTION.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .child(transactionCode.toString())
+            .child(ETransaction.STATUS_CODE.toString())
+            .setValue(EStatusCode.CANCEL.toString()).addOnFailureListener {
+                view.response(it.message.toString())
+            }
+            .addOnSuccessListener {
+                cancelPayment(transactionCode)
+            }
+    }
+
+    fun cancelPayment(transactionCode: Int){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()){
+                    for (data in dataSnapshot.children){
+                        database.child(ETable.PAYMENT.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchant(context))
+                            .child(transactionCode.toString())
+                            .child(data.key.toString())
+                            .child(EPayment.STATUS_CODE.toString())
+                            .setValue(EStatusCode.CANCEL.toString()).addOnFailureListener {
+                                view.response(it.message.toString())
+                            }
+                            .addOnSuccessListener {
+                                view.response(EMessageResult.SUCCESS.toString())
+                            }
+                    }
+                }else
+                    view.response("No Payment to Cancel !")
+            }
+
+        }
+        database.child(ETable.PAYMENT.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .child(transactionCode.toString())
             .addListenerForSingleValueEvent(postListener)
     }
 

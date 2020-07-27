@@ -9,8 +9,10 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.ESharedPreference
 import com.chcreation.pointofsale.MainActivity
 import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.model.AvailableMerchant
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.presenter.MerchantPresenter
 import com.chcreation.pointofsale.view.MainView
@@ -29,8 +31,9 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
     private lateinit var presenter: MerchantPresenter
-    private var selectedMerchant = ""
-    private var merchantItems : MutableList<String> = mutableListOf()
+    private var selectedMerchant = 0
+    private var merchantItems : MutableList<AvailableMerchant> = mutableListOf()
+    private var merchantNameItems : MutableList<String> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,32 +51,42 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
         super.onStart()
 
         btnMerchant.onClick {
-            editor = sharedPreference.edit()
-            editor.putString("merchant",selectedMerchant)
-            editor.apply()
-
-            startActivity<MainActivity>()
-            finish()
+            presenter.retrieveMerchantInfo(merchantItems[selectedMerchant].CREDENTIAL.toString(),merchantItems[selectedMerchant].NAME.toString())
         }
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_MERCHANT_SUCCESS.toString()){
+        if (response == EMessageResult.FETCH_AVAIL_MERCHANT_SUCCESS.toString()){
             if (dataSnapshot.exists()){
                 merchantItems.clear()
                 for (data in dataSnapshot.children) {
-                    val item = data.key
-                    merchantItems.add(item.toString())
+                    val item = data.getValue(AvailableMerchant::class.java)
+                    merchantItems.add(item!!)
+                }
+                for (data in merchantItems){
+                    merchantNameItems.add(data.NAME.toString())
                 }
 
-                selectedMerchant = merchantItems[0]
-
-                val spAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,merchantItems)
+                val spAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,merchantNameItems)
                 spAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
                 spMerchant.adapter = spAdapter
                 spMerchant.onItemSelectedListener = this
                 spMerchant.gravity = Gravity.CENTER
+            }
+        }else if (response == EMessageResult.FETCH_MERCHANT_SUCCESS.toString()){
+            if (dataSnapshot.exists()){
+                val item = dataSnapshot.getValue(Merchant::class.java)
+                editor = sharedPreference.edit()
+                editor.putString(ESharedPreference.USER_GROUP.toString(), merchantItems[selectedMerchant].USER_GROUP.toString())
+                editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(), merchantItems[selectedMerchant].CREDENTIAL.toString())
+                editor.putString(ESharedPreference.MERCHANT.toString(), merchantItems[selectedMerchant].NAME.toString())
+                editor.putString(ESharedPreference.ADDRESS.toString(), item!!.ADDRESS)
+                editor.putString(ESharedPreference.NO_TELP.toString(), item!!.NO_TELP)
+                editor.apply()
+
+                startActivity<MainActivity>()
+                finish()
             }
         }
     }
@@ -86,6 +99,6 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
     }
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        selectedMerchant = merchantItems[position]
+        selectedMerchant = position
     }
 }

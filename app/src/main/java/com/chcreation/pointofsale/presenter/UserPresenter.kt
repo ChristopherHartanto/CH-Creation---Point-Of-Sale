@@ -15,10 +15,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CustomerPresenter(private val view: MainView,
-                        private val auth: FirebaseAuth,
-                        private val database: DatabaseReference,
-                        private val context: Context){
+class UserPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference, private val context: Context){
 
     var postListener = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {

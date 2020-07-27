@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.EStatusCode
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.getMerchant
 import com.chcreation.pointofsale.model.Customer
@@ -57,11 +58,12 @@ class TransactionFragment : Fragment(), MainView {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = TransactionPresenter(this,mAuth,mDatabase)
+        presenter = TransactionPresenter(this,mAuth,mDatabase,ctx)
 
         tlTransaction.addTab(tlTransaction.newTab().setText("All"),true)
         tlTransaction.addTab(tlTransaction.newTab().setText("Pending"))
         tlTransaction.addTab(tlTransaction.newTab().setText("Success"))
+        tlTransaction.addTab(tlTransaction.newTab().setText("Cancel"))
 
         tlTransaction.tabMode = TabLayout.MODE_FIXED
 
@@ -103,7 +105,7 @@ class TransactionFragment : Fragment(), MainView {
 
         rvTransaction.layoutManager = linearLayoutManager
 
-        presenter.retrieveTransactions(getMerchant(ctx))
+        presenter.retrieveTransactions()
     }
 
     private fun clearData(){
@@ -122,16 +124,23 @@ class TransactionFragment : Fragment(), MainView {
         else{
             for ((index,data) in tmpTransItems.withIndex()){
                 if (currentTab == 1){
-                    if (data.TOTAL_OUTSTANDING!! > 0){
+                    if (data.TOTAL_OUTSTANDING!! > 0 && data.STATUS_CODE != EStatusCode.CANCEL.toString()){
                         transItems.add(data)
                         customerItems.add(tmpCustomerNameItems[index])
                         transCodeItems.add(tmpTransCodeItems[index])
                     }
                 }else if (currentTab == 2){
-                    if (data.TOTAL_OUTSTANDING!! == 0)
+                    if (data.STATUS_CODE == EStatusCode.DONE.toString()){
                         transItems.add(data)
                         customerItems.add(tmpCustomerNameItems[index])
                         transCodeItems.add(tmpTransCodeItems[index])
+                    }
+                }else if (currentTab == 3){
+                    if (data.STATUS_CODE == EStatusCode.CANCEL.toString()){
+                        transItems.add(data)
+                        customerItems.add(tmpCustomerNameItems[index])
+                        transCodeItems.add(tmpTransCodeItems[index])
+                    }
                 }
             }
         }
@@ -151,7 +160,7 @@ class TransactionFragment : Fragment(), MainView {
                             tmpTransCodeItems.add(data.key!!.toInt())
                         }
                     }
-                    presenter.retrieveCustomers(getMerchant(ctx))
+                    presenter.retrieveCustomers()
                 }
             }else if (response == EMessageResult.FETCH_CUSTOMER_SUCCESS.toString()){
                 if (dataSnapshot.exists()){

@@ -36,7 +36,7 @@ class NewCategory : AppCompatActivity(), MainView {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = ProductPresenter(this,mAuth,mDatabase)
+        presenter = ProductPresenter(this,mAuth,mDatabase,this)
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
         merchant = getMerchant(this)
@@ -51,7 +51,7 @@ class NewCategory : AppCompatActivity(), MainView {
             if (newCategory.isEmpty())
                 etNewCategory.error = "Please Fill the Field"
             else
-                presenter.saveNewCategory(merchant,newCategory)
+                presenter.saveNewCategory(newCategory)
         }
     }
 

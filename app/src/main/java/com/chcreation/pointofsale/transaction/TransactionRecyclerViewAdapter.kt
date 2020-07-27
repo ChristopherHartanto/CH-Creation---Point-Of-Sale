@@ -45,7 +45,7 @@ class TransactionRecyclerViewAdapter(private val context: Context, private val i
             code.text = receiptFormat(transCode)
             customer.text = custName
             date.text = item.CREATED_DATE
-            totalPrice.text = indonesiaCurrencyFormat().format(item.TOTAL_PRICE)
+            totalPrice.text = indonesiaCurrencyFormat().format(item.TOTAL_PRICE!! - item.DISCOUNT!! + item.TAX!!)
 
             if (custName == ""){
                 layoutCustomer.visibility = View.GONE
@@ -54,10 +54,16 @@ class TransactionRecyclerViewAdapter(private val context: Context, private val i
                 layoutCustomer.visibility = View.VISIBLE
             }
 
-            if (item.TOTAL_OUTSTANDING!! > 0){
-                ivStatus.imageResource = R.drawable.pending
-            }else{
-                ivStatus.imageResource = R.drawable.success
+            when {
+                item.TOTAL_OUTSTANDING!! > 0 && item.STATUS_CODE != EStatusCode.CANCEL.toString()-> {
+                    ivStatus.imageResource = R.drawable.pending
+                }
+                item.STATUS_CODE == EStatusCode.DONE.toString() -> {
+                    ivStatus.imageResource = R.drawable.success
+                }
+                item.STATUS_CODE == EStatusCode.CANCEL.toString() -> {
+                    ivStatus.imageResource = R.drawable.error
+                }
             }
 
             itemView.onClick {

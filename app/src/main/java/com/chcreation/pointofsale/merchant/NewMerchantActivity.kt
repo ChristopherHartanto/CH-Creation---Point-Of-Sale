@@ -4,9 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.chcreation.pointofsale.EMessageResult
-import com.chcreation.pointofsale.MainActivity
-import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.model.AvailableMerchant
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.presenter.MerchantPresenter
 import com.chcreation.pointofsale.view.MainView
@@ -17,6 +16,7 @@ import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_new_merchant.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -42,11 +42,22 @@ class NewMerchantActivity : AppCompatActivity(), MainView {
         super.onStart()
 
         btnNewMerchant.onClick {
-            val merchantName = etNewMerchant.text.toString()
-            val sdf = SimpleDateFormat("dd MMM yyyy HH:mm:ss")
-            val currentDate = sdf.format(Date())
 
-            presenter.createNewMerchant(Merchant(merchantName,currentDate))
+            val merchantBusinessInfo = etMerchantBusinessInfo.text.toString()
+            val merchantNoTelp = etMerchantNoTelp.text.toString()
+            val merchantAddress = etMerchantAddress.text.toString()
+            val merchantName = etMerchantName.text.toString()
+            val currentDate = dateFormat().format(Date())
+
+            if (merchantName == ""){
+                toast("Please Fill Merchant Name !")
+                return@onClick
+            }
+
+            presenter.createNewMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,
+                "",currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid),
+                AvailableMerchant(EUserGroup.MANAGER.toString(),currentDate,currentDate,
+                    mAuth.currentUser!!.uid,EStatusUser.ACTIVE.toString()))
         }
     }
 
@@ -58,7 +69,9 @@ class NewMerchantActivity : AppCompatActivity(), MainView {
         if (message == EMessageResult.SUCCESS.toString())
         {
             editor = sharedPreference.edit()
-            editor.putString("merchant",etNewMerchant.text.toString())
+            editor.putString(ESharedPreference.MERCHANT.toString(),etMerchantName.text.toString())
+            editor.putString(ESharedPreference.USER_GROUP.toString(),EUserGroup.MANAGER.toString())
+            editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(), mAuth.currentUser?.uid)
             editor.apply()
 
             startActivity<MainActivity>()

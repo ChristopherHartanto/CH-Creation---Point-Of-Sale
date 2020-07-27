@@ -37,7 +37,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = Homepresenter(this,mAuth,mDatabase)
+        presenter = Homepresenter(this,mAuth,mDatabase,this)
 
         currentCat = intent.extras!!.getInt("category",0)
 
@@ -55,7 +55,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
     override fun onStart() {
         super.onStart()
 
-        presenter.retrieveCategories(getMerchant(this))
+        presenter.retrieveCategories()
     }
 
     private fun fetchProductByCat(){
@@ -95,7 +95,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
                     categoryItems.add(data.key.toString())
                 }
 
-                presenter.retrieveProducts(getMerchant(this))
+                presenter.retrieveProducts()
             }
         }
     }

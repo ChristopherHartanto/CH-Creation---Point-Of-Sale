@@ -21,6 +21,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.dateFormat
+import com.chcreation.pointofsale.getMerchant
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.ProductPresenter
@@ -62,6 +64,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
     private var categoryItems : MutableList<String> = mutableListOf()
     private var selectedCategory = ""
     private lateinit var spAdapter: ArrayAdapter<String>
+    private var manageStock = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +73,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         storage = FirebaseStorage.getInstance().reference
-        presenter = ProductPresenter(this,mAuth,mDatabase)
+        presenter = ProductPresenter(this,mAuth,mDatabase,this)
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
         merchant = sharedPreference.getString("merchant","").toString()
@@ -103,8 +106,10 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
 
         swProduct.onCheckedChange { buttonView, isChecked ->
             if (swProduct.isChecked){
+                manageStock = true
                 layoutProductStock.visibility = View.VISIBLE
             }else{
+                manageStock = false
                 layoutProductStock.visibility = View.GONE
             }
         }
@@ -136,16 +141,18 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         else
             selectedCategory
 
-        if (merchant == "")
+        if (getMerchant(this) == "")
             toast("You Haven't Set Up Your Merchant")
         else
-            presenter.saveProduct(Product(name,price,desc,cost,stock,imageUrl,prodCode,uomCode,selectedCategory,code),merchant)
+            presenter.saveProduct(Product(name,price,desc,cost,manageStock,stock,imageUrl,prodCode,uomCode,selectedCategory,code,
+                dateFormat().format(Date()),dateFormat().format(Date()),
+                mAuth.currentUser!!.uid,mAuth.currentUser!!.uid))
     }
 
     override fun onResume() {
         super.onResume()
 
-        presenter.retrieveCategories(merchant)
+        presenter.retrieveCategories()
     }
     private fun uploadImage(){
         if(filePath != null){

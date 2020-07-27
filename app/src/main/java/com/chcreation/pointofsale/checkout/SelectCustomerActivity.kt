@@ -44,7 +44,7 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = CustomerPresenter(this,mAuth,mDatabase)
+        presenter = CustomerPresenter(this,mAuth,mDatabase,this)
 
         adapter = CustomerRecyclerViewAdapter(this,customerItems){
             selectCustomerCode = customerItems[it].CODE.toString()
@@ -60,7 +60,7 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
 
     override fun onStart() {
         super.onStart()
-        presenter.retrieveCustomers(getMerchant(this))
+        presenter.retrieveCustomers()
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

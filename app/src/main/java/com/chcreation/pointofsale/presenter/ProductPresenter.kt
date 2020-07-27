@@ -1,5 +1,6 @@
 package com.chcreation.pointofsale.presenter
 
+import android.content.Context
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.product.NewCategory
@@ -18,7 +19,8 @@ import java.util.*
 
 class ProductPresenter(private val view: MainView,
                        private val auth: FirebaseAuth,
-                       private val database: DatabaseReference){
+                       private val database: DatabaseReference,
+                       private val context: Context){
 
     var postListener = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
@@ -29,12 +31,12 @@ class ProductPresenter(private val view: MainView,
 
     }
 
-    fun saveProduct(product: Product, merchant: String){
+    fun saveProduct(product: Product){
 
-       getProductPrimaryKey(product,merchant)
+       getProductPrimaryKey(product)
     }
 
-    fun getProductPrimaryKey(product: Product, merchant: String){
+    fun getProductPrimaryKey(product: Product){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -58,14 +60,19 @@ class ProductPresenter(private val view: MainView,
                     EProduct.PRICE.toString() to product.PRICE,
                     EProduct.PROD_CODE.toString() to product.PROD_CODE,
                     EProduct.UOM_CODE.toString() to product.UOM_CODE,
+                    EProduct.MANAGE_STOCK.toString() to product.MANAGE_STOCK,
                     EProduct.STOCK.toString() to product.STOCK,
                     EProduct.IMAGE.toString() to product.IMAGE,
                     EProduct.CAT.toString() to product.CAT,
-                    EProduct.CODE.toString() to product.CODE
+                    EProduct.CODE.toString() to product.CODE,
+                    EProduct.CREATED_DATE.toString() to product.CREATED_DATE,
+                    EProduct.CREATED_BY.toString() to product.CREATED_BY,
+                    EProduct.UPDATED_DATE.toString() to product.UPDATED_DATE,
+                    EProduct.UPDATED_BY.toString() to product.UPDATED_BY
                 )
                 database.child(ETable.PRODUCT.toString())
-                    .child(auth.currentUser!!.uid)
-                    .child(merchant)
+                    .child(getMerchantCredential(context))
+                    .child(getMerchant(context))
                     .child(key.toString())
                     .setValue(values).addOnFailureListener {
                         view.response(it.message.toString())
@@ -77,24 +84,25 @@ class ProductPresenter(private val view: MainView,
 
         }
         database.child(ETable.PRODUCT.toString())
-            .child(auth.currentUser!!.uid)
-            .child(merchant)
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
             .orderByKey()
             .limitToLast(1)
             .addListenerForSingleValueEvent(postListener)
     }
 
-    fun saveNewCategory(merchant: String, newCategory: String){
+    fun saveNewCategory(newCategory: String){
         val timeStamp: String = dateFormat().format(Date())
 
         val values  = hashMapOf(
             EMerchant.CREATED_DATE.toString() to timeStamp,
+            EMerchant.UPDATED_DATE.toString() to timeStamp,
             EMerchant.CAT.toString() to newCategory
         )
 
         database.child(ETable.MERCHANT.toString())
-            .child(auth.currentUser!!.uid)
-            .child(merchant)
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
             .child(EMerchant.CAT.toString())
             .child(newCategory)
             .setValue(values).addOnFailureListener {
@@ -105,7 +113,7 @@ class ProductPresenter(private val view: MainView,
             }
     }
 
-    fun retrieveCategories(merchant: String){
+    fun retrieveCategories(){
         try{
             postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -118,8 +126,8 @@ class ProductPresenter(private val view: MainView,
 
             }
             database.child(ETable.MERCHANT.toString())
-                .child(auth.currentUser!!.uid)
-                .child(merchant)
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
                 .child(EMerchant.CAT.toString())
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
@@ -127,7 +135,7 @@ class ProductPresenter(private val view: MainView,
         }
     }
 
-    fun retrieveProducts(merchant: String){
+    fun retrieveProducts(context: Context){
         try {
             postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -140,8 +148,8 @@ class ProductPresenter(private val view: MainView,
 
             }
             database.child(ETable.PRODUCT.toString())
-                .child(auth.currentUser!!.uid)
-                .child(merchant)
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
                 .orderByKey()
                 .addListenerForSingleValueEvent(postListener)
 

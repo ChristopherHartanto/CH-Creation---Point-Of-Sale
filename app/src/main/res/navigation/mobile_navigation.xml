@@ -19,7 +19,7 @@
     <fragment
         android:id="@+id/nav_product"
         android:name="com.chcreation.pointofsale.product.ProductFragment"
-        android:label="@string/menu_gallery"
+        android:label="Product"
         tools:layout="@layout/fragment_product" />
 
     <fragment
@@ -31,7 +31,7 @@
     <fragment
         android:id="@+id/nav_transaction"
         android:name="com.chcreation.pointofsale.transaction.TransactionFragment"
-        android:label="@string/menu_slideshow"
+        android:label="Transaction"
         tools:layout="@layout/fragment_transaction" >
         <action
             android:id="@+id/action_nav_slideshow_to_nav_home"

@@ -10,19 +10,19 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CartRecyclerViewAdapter
 import com.chcreation.pointofsale.checkout.CheckOutActivity
-import com.chcreation.pointofsale.getMerchant
 import com.chcreation.pointofsale.home.HomeFragment
-import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Product
-import com.chcreation.pointofsale.receiptFormat
+import com.chcreation.pointofsale.presenter.TransactionPresenter
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transCodeItems
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transItems
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transPosition
+import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
@@ -33,10 +33,11 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.util.*
 
-class DetailTransactionActivity : AppCompatActivity() {
+class DetailTransactionActivity : AppCompatActivity(), MainView {
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
+    private lateinit var presenter : TransactionPresenter
 
     companion object{
         var existPayment = false
@@ -46,14 +47,20 @@ class DetailTransactionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail_transaction)
 
+        supportActionBar?.hide()
+
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
+        presenter = TransactionPresenter(this,mAuth,mDatabase,this)
 
         btnDetailTransactionCancel.onClick {
             alert ("Are You Sure Want to Cancel?"){
                 title = "Cancel Transaction"
                 yesButton {
+                    pbDetailTransaction.visibility = View.VISIBLE
+                    layoutDetailTransaction.alpha = 0.3F
 
+                    presenter.cancelTransaction(transCodeItems[transPosition])
                 }
                 noButton {
 
@@ -79,19 +86,36 @@ class DetailTransactionActivity : AppCompatActivity() {
         val discount = transItems[transPosition].DISCOUNT
         val note = transItems[transPosition].NOTE
 
-        if (transItems[transPosition].TOTAL_OUTSTANDING == 0){
+        if (transItems[transPosition].TOTAL_OUTSTANDING == 0 &&
+            transItems[transPosition].STATUS_CODE != EStatusCode.CANCEL.toString()){
+            tvDetailTransactionStatus.text = "Status : Done"
             btnDetailTransactionConfirmPayment.visibility = View.GONE
             ivDetailTransactionStatus.imageResource = R.drawable.success
-        }
-        else{
+        }else if (transItems[transPosition].TOTAL_OUTSTANDING!! > 0 &&
+            transItems[transPosition].STATUS_CODE != EStatusCode.CANCEL.toString()){
+            tvDetailTransactionStatus.text = "Pending : ${indonesiaCurrencyFormat().format(transItems[transPosition].TOTAL_OUTSTANDING)}"
             ivDetailTransactionStatus.imageResource = R.drawable.pending
             btnDetailTransactionReceipt.visibility = View.GONE
+        }else if (transItems[transPosition].STATUS_CODE == EStatusCode.CANCEL.toString()){
+            tvDetailTransactionStatus.text = "Status : Cancel"
+            btnDetailTransactionConfirmPayment.visibility = View.GONE
+            btnDetailTransactionCancel.visibility = View.GONE
+            ivDetailTransactionStatus.imageResource = R.drawable.error
         }
 
         tvDetailTransactionDate.text = transItems[transPosition].CREATED_DATE.toString()
         tvDetailTransactionCode.text = receiptFormat(transCodeItems[transPosition].toInt())
+        tvDetailTransactionDiscount.text = indonesiaCurrencyFormat().format(transItems[transPosition].DISCOUNT)
+        tvDetailTransactionTax.text = indonesiaCurrencyFormat().format(transItems[transPosition].TAX)
 
-        tvDetailTransactionTotalPrice.text = indonesiaCurrencyFormat().format(transItems[transPosition].TOTAL_PRICE).toString()
+        if (transItems[transPosition].TAX == 0 && transItems[transPosition].DISCOUNT == 0)
+            layoutDetailTransactionSubTotal.visibility = View.GONE
+        else
+            tvDetailTransactionSubTotal.text = indonesiaCurrencyFormat().format(transItems[transPosition].TOTAL_PRICE)
+
+        tvDetailTransactionTotalPrice.text = indonesiaCurrencyFormat().format(transItems[transPosition].TOTAL_PRICE!! +
+                transItems[transPosition].TAX!! - transItems[transPosition].DISCOUNT!!
+        ).toString()
     }
 
     class TabAdapter(fm: FragmentManager, behavior: Int) : FragmentStatePagerAdapter(fm, behavior) {
@@ -106,6 +130,22 @@ class DetailTransactionActivity : AppCompatActivity() {
 
         override fun getCount(): Int = tabName.size
         override fun getPageTitle(position: Int): CharSequence? = tabName[position]
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun response(message: String) {
+        if (message == EMessageResult.SUCCESS.toString()){
+            toast("Success Cancel Transaction")
+            finish()
+        }else
+            toast(message)
+
+        pbDetailTransaction.visibility = View.GONE
+        layoutDetailTransaction.alpha = 1F
+
     }
 
 }

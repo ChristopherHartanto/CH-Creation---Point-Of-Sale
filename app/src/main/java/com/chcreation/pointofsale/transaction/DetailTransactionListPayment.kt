@@ -53,7 +53,7 @@ class DetailTransactionListPayment : Fragment(), MainView {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = TransactionPresenter(this,mAuth,mDatabase)
+        presenter = TransactionPresenter(this,mAuth,mDatabase,ctx)
 
         adapter = DetailTransactionListPaymentRecyclerViewAdapter(ctx,itemListPayments){
 
@@ -62,7 +62,7 @@ class DetailTransactionListPayment : Fragment(), MainView {
         rvListPayment.adapter = adapter
         rvListPayment.layoutManager = LinearLayoutManager(ctx)
 
-        presenter.retrieveTransactionListPayments(transCodeItems[transPosition],getMerchant(ctx))
+        presenter.retrieveTransactionListPayments(transCodeItems[transPosition])
     }
 
     override fun onStart() {

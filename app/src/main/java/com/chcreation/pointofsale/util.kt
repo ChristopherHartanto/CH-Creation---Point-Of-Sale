@@ -15,7 +15,31 @@ var RESULT_CLOSE_ALL = 1111
 fun getMerchant(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
-    return sharedPreference.getString("merchant","").toString()
+    return sharedPreference.getString(ESharedPreference.MERCHANT.toString(),"").toString()
+}
+
+fun getMerchantCredential(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.MERCHANT_CREDENTIAL.toString(),"").toString()
+}
+
+fun getMerchantUserGroup(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.USER_GROUP.toString(),"").toString()
+}
+
+fun getMerchantAddress(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.ADDRESS.toString(),"").toString()
+}
+
+fun getMerchantNoTep(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.NO_TELP.toString(),"").toString()
 }
 
 fun normalClickAnimation() : AlphaAnimation = AlphaAnimation(3F,0.6F)

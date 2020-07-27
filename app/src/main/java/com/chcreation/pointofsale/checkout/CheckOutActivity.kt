@@ -36,6 +36,7 @@ import kotlinx.android.synthetic.main.activity_check_out.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
+import java.util.*
 
 class CheckOutActivity : AppCompatActivity(), MainView {
 
@@ -52,6 +53,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
     private lateinit var mDatabase : DatabaseReference
     private lateinit var presenter: CheckOutPresenter
     private var totalPayment = 0
+    private var existCheckOutNote = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +61,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = CheckOutPresenter(this,mAuth,mDatabase)
+        presenter = CheckOutPresenter(this,mAuth,mDatabase,this)
 
         btnCheckOutCard.onClick {
             btnCheckOutCard.startAnimation(normalClickAnimation())
@@ -154,6 +156,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
 
             val gson = Gson()
             val orderDetail = gson.toJson(cartItems)
+            var statusCode = if (totalOutStanding > 0) EStatusCode.PENDING else EStatusCode.DONE
 
             alert ("Continue to Check Out?"){
                 title = "Confirmation"
@@ -167,12 +170,12 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                         tvCheckOutProcessTitle.visibility = View.VISIBLE
                         layoutCheckOutContent.alpha = 0.3F
 
-                        presenter.saveTransaction(Transaction("", totalPrice,totalOutStanding,
+                        presenter.saveTransaction(Transaction(totalPrice,totalOutStanding,
                             discount,tax,paymentMethod,orderDetail,selectCustomerCode, note,"",
-                            mAuth.currentUser!!.uid)
+                            statusCode.toString(), dateFormat().format(Date()), dateFormat().format(Date()),
+                            mAuth.currentUser!!.uid,mAuth.currentUser!!.uid)
                             , Payment("", totalReceived,paymentMethod, note,
-                                mAuth.currentUser!!.uid)
-                            ,getMerchant(this@CheckOutActivity))
+                                mAuth.currentUser!!.uid,EStatusCode.DONE.toString()))
                     }
                 }
 
@@ -186,8 +189,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
 
         supportActionBar?.title = customerItems[transPosition]
 
-        presenter.retrievePendingPayment(transCodeItems[transPosition],
-            getMerchant(this))
+        presenter.retrievePendingPayment(transCodeItems[transPosition])
     }
 
     private fun existCheckOut(){
@@ -204,24 +206,40 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             val gson = Gson()
             val orderDetail = gson.toJson(cartItems)
 
-            alert ("Continue to Check Out?"){
-                title = "Confirmation"
+            if (!existCheckOutNote && note == ""){
+                alert ("Need Additional Note?"){
+                    title = "Note"
 
-                yesButton {
-                    pbCheckOut.visibility = View.VISIBLE
-                    tvCheckOutProcessTitle.visibility = View.VISIBLE
-                    layoutCheckOutContent.alpha = 0.3F
+                    yesButton {
+                        startActivity<NoteActivity>()
+                        existCheckOutNote = true
+                        return@yesButton
+                    }
+                    noButton {
 
-                    presenter.savePendingPayment(transCodeItems[transPosition],
-                        getMerchant(this@CheckOutActivity),
-                        Payment("", totalReceived,paymentMethod, "", mAuth.currentUser?.uid),
-                        totalOutStanding)
+                    }
+                }.show()
+            }
+            if (existCheckOutNote){
+                alert ("Continue to Check Out?"){
+                    title = "Confirmation"
 
-                }
 
-                noButton {
-                }
-            }.show()
+                    yesButton {
+                        pbCheckOut.visibility = View.VISIBLE
+                        tvCheckOutProcessTitle.visibility = View.VISIBLE
+                        layoutCheckOutContent.alpha = 0.3F
+
+                        presenter.savePendingPayment(transCodeItems[transPosition],
+                            Payment("", totalReceived,paymentMethod, note, mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
+                            totalOutStanding)
+
+                    }
+
+                    noButton {
+                    }
+                }.show()
+            }
 
         }
     }

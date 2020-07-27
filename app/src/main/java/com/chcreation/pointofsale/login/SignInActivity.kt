@@ -56,10 +56,9 @@ class SignInActivity : AppCompatActivity(), MainView {
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->
                 if (task.isSuccessful) {
                     presenter.retrieveMerchants()
-
-                    Toast.makeText(this, "Successfully registered ", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Login Success ", Toast.LENGTH_LONG).show()
                 }else {
-                    Toast.makeText(this, "Error registering, try again later ", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Error Success, try again later ", Toast.LENGTH_LONG).show()
                 }
             })
         }else {
@@ -70,7 +69,7 @@ class SignInActivity : AppCompatActivity(), MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_MERCHANT_SUCCESS.toString())
+        if (response == EMessageResult.FETCH_AVAIL_MERCHANT_SUCCESS.toString())
         {
             if (dataSnapshot.exists())
             {

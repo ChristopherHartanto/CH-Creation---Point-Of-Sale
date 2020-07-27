@@ -29,9 +29,10 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_detail)
 
+
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = ProductPresenter(this,mAuth,mDatabase)
+        presenter = ProductPresenter(this,mAuth,mDatabase,this)
 
         prodCode = intent.extras!!.getString("prodCode","")
     }
@@ -47,7 +48,7 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
     override fun onStart() {
         super.onStart()
 
-        presenter.retrieveProducts(getMerchant(this))
+        presenter.retrieveProducts(this)
     }
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
