@@ -16,6 +16,7 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
@@ -54,6 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
     }
 
 
@@ -80,5 +82,15 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        when (item.itemId) {
+            R.id.nav_home -> findNavController(R.id.nav_host_fragment).navigate(R.id.nav_home)
+            R.id.nav_customer -> findNavController(R.id.nav_host_fragment).navigate(R.id.nav_customer)
+            R.id.nav_product -> findNavController(R.id.nav_host_fragment).navigate(R.id.nav_product)
+            R.id.nav_transaction -> findNavController(R.id.nav_host_fragment).navigate(R.id.nav_transaction)
+        }
+        false
     }
 }

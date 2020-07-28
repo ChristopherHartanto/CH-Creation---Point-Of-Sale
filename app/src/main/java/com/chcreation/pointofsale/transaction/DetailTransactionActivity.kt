@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CartRecyclerViewAdapter
 import com.chcreation.pointofsale.checkout.CheckOutActivity
+import com.chcreation.pointofsale.checkout.ReceiptActivity
 import com.chcreation.pointofsale.home.HomeFragment
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Product
@@ -69,8 +70,17 @@ class DetailTransactionActivity : AppCompatActivity(), MainView {
         }
 
         btnDetailTransactionConfirmPayment.onClick {
+            btnDetailTransactionConfirmPayment.startAnimation(normalClickAnimation())
+
             existPayment = true
             startActivity<CheckOutActivity>()
+            finish()
+        }
+
+        btnDetailTransactionReceipt.onClick {
+            btnDetailTransactionReceipt.startAnimation(normalClickAnimation())
+
+            startActivity(intentFor<ReceiptActivity>("existReceipt" to true))
             finish()
         }
 

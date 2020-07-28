@@ -2,7 +2,9 @@ package com.chcreation.pointofsale.product
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.getMerchant
@@ -48,7 +50,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
             startActivity(intentFor<ProductDetailActivity>("prodCode" to tempProductItems[it].PROD_CODE))
         }
 
-        rvListProduct.layoutManager = LinearLayoutManager(this)
+        rvListProduct.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         rvListProduct.adapter = adapter
     }
 
@@ -86,6 +88,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
                 else
                     fetchProductByCat()
             }
+            pbListProduct.visibility = View.GONE
         }
         else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
             categoryItems.clear()

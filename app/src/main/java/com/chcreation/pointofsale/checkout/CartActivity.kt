@@ -87,7 +87,7 @@ class CartActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        var totalPayment = totalPrice - discount + tax
+        val totalPayment = totalPrice - discount + tax
 
         if (discount != 0 || tax != 0){
             tvCartDiscount.text = "Discount : ${indonesiaCurrencyFormat().format(discount)}"

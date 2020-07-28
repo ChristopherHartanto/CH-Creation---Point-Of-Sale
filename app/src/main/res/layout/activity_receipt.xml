@@ -93,27 +93,27 @@
                     android:id="@+id/rvReceipt"/>
 
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:id="@+id/layoutReceiptNote">
+<!--                <LinearLayout-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:orientation="horizontal"-->
+<!--                    android:id="@+id/layoutReceiptNote">-->
 
-                    <ImageView
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
-                        android:layout_gravity="center"
-                        android:padding="5dp"
-                        android:src="@drawable/note"/>
+<!--                    <ImageView-->
+<!--                        android:layout_width="35dp"-->
+<!--                        android:layout_height="35dp"-->
+<!--                        android:layout_gravity="center"-->
+<!--                        android:padding="5dp"-->
+<!--                        android:src="@drawable/note"/>-->
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/tvReceiptNote"
-                        android:padding="5dp"
-                        android:textSize="16sp"
-                        android:textColor="@color/colorGrey"/>
-                </LinearLayout>
+<!--                    <TextView-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:id="@+id/tvReceiptNote"-->
+<!--                        android:padding="5dp"-->
+<!--                        android:textSize="16sp"-->
+<!--                        android:textColor="@color/colorGrey"/>-->
+<!--                </LinearLayout>-->
 
                 <View
                     android:layout_width="match_parent"
@@ -248,14 +248,19 @@
                         android:textColor="@color/colorBlack"
                         android:text="Amount:"/>
 
-                    <TextView
+<!--                    -->
+<!--                    <androidx.recyclerview.widget.RecyclerView-->
+<!--                        android:layout_width="0dp"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_weight="6"-->
+<!--                        android:id="@+id/rvReceiptPaymentList"/>-->
+
+                    <androidx.recyclerview.widget.RecyclerView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="6"
-                        android:id="@+id/tvReceiptAmountReceived"
-                        android:gravity="end"
+                        android:id="@+id/rvReceiptPaymentList"
                         android:padding="5dp"
-                        android:textSize="16sp"
                         android:textColor="@color/colorBlack"/>
 
                 </LinearLayout>

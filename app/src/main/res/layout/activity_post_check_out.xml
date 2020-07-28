@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".checkout.PostCheckOutActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_weight="1">
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:id="@+id/ivPostCheckOut"
+            android:layout_marginVertical="20sp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Success"
+            android:gravity="center"
+            android:textSize="36sp"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"/>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Rp 100000"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:id="@+id/tvPostCheckOutTotalPrice"
+            android:textColor="@color/colorBlack"/>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Change = 0"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:id="@+id/tvPostCheckOutChange"
+            android:textColor="@color/colorBlack"/>
+    </LinearLayout>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnPostCheckOutReceipt"
+        android:background="@drawable/button_border"
+        android:textColor="@color/colorBlack"
+        android:layout_margin="10dp"
+        android:text="Receipt"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnPostCheckOut"
+        android:text="Start New Sale"
+        android:background="@drawable/button_border_fill"
+        android:layout_marginHorizontal="10dp"
+        android:textColor="@color/colorWhite"
+        android:layout_marginBottom="10sp"/>
+</LinearLayout>

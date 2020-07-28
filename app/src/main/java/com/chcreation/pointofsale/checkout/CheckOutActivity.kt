@@ -25,6 +25,7 @@ import com.chcreation.pointofsale.transaction.DetailTransactionActivity.Companio
 import com.chcreation.pointofsale.transaction.TransactionFragment
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.customerItems
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transCodeItems
+import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transItems
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transPosition
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
@@ -175,7 +176,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                             statusCode.toString(), dateFormat().format(Date()), dateFormat().format(Date()),
                             mAuth.currentUser!!.uid,mAuth.currentUser!!.uid)
                             , Payment("", totalReceived,paymentMethod, note,
-                                mAuth.currentUser!!.uid,EStatusCode.DONE.toString()))
+                                mAuth.currentUser!!.uid,EStatusCode.DONE.toString()), cartItems)
                     }
                 }
 
@@ -232,7 +233,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
 
                         presenter.savePendingPayment(transCodeItems[transPosition],
                             Payment("", totalReceived,paymentMethod, note, mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
-                            totalOutStanding)
+                            totalOutStanding,transItems[transPosition])
 
                     }
 

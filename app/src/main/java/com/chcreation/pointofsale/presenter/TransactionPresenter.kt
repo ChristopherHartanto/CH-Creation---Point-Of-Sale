@@ -44,6 +44,24 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
             .addListenerForSingleValueEvent(postListener)
     }
 
+    fun retrieveTransaction(transactionCode: Int){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_TRANS_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.TRANSACTION.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .child(transactionCode.toString())
+            .addListenerForSingleValueEvent(postListener)
+    }
+
     fun retrieveTransactionListPayments(transactionCode:Int){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
@@ -89,6 +107,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
                 view.response(it.message.toString())
             }
             .addOnSuccessListener {
+                updateEnquiry(transactionCode,EStatusCode.CANCEL.toString())
                 cancelPayment(transactionCode)
             }
     }
@@ -124,6 +143,55 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
             .child(getMerchantCredential(context))
             .child(getMerchant(context))
             .child(transactionCode.toString())
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    private fun updateEnquiry(transactionCode: Int,statusCode: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if (p0.exists()){
+                    for (data in p0.children){
+
+                        val currentDate: String = dateFormat().format(Date())
+                        database.child(ETable.ENQUIRY.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchant(context))
+                            .child(data.key.toString())
+                            .child(E_Enqury.STATUS_CODE.toString())
+                            .setValue(statusCode).addOnFailureListener {
+                                view.response(it.message.toString())
+                            }
+                        database.child(ETable.ENQUIRY.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchant(context))
+                            .child(data.key.toString())
+                            .child(E_Enqury.UPDATED_DATE.toString())
+                            .setValue(currentDate).addOnFailureListener {
+                                view.response(it.message.toString())
+                            }
+                        database.child(ETable.ENQUIRY.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchant(context))
+                            .child(data.key.toString())
+                            .child(E_Enqury.UPDATED_BY.toString())
+                            .setValue(auth.currentUser!!.uid).addOnFailureListener {
+                                view.response(it.message.toString())
+                            }
+                    }
+                }
+
+            }
+
+        }
+        database.child(ETable.ENQUIRY.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .orderByChild(E_Enqury.TRANS_CODE.toString())
+            .equalTo(transactionCode.toString())
             .addListenerForSingleValueEvent(postListener)
     }
 

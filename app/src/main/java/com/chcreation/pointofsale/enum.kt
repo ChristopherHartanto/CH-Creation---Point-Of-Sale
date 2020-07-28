@@ -8,7 +8,8 @@ enum class ETable{
     CUSTOMER,
     CAT,
     TRANSACTION,
-    PAYMENT
+    PAYMENT,
+    ENQUIRY
 }
 
 enum class EProduct{
@@ -18,6 +19,7 @@ enum class EProduct{
     COST,
     MANAGE_STOCK,
     STOCK,
+    PROD_KEY,
     PROD_CODE,
     UOM_CODE,
     IMAGE,
@@ -77,6 +79,19 @@ enum class ETransaction{
     NOTE,
     TRANS_CODE,
     USER_CODE,
+    STATUS_CODE
+}
+
+enum class E_Enqury{
+    CREATED_DATE,
+    UPDATED_DATE,
+    CREATED_BY,
+    UPDATED_BY,
+    TRANS_CODE,
+    CUST_CODE,
+    PRODUCT_KEY,
+    MANAGE_STOCK,
+    STOCK,
     STATUS_CODE
 }
 

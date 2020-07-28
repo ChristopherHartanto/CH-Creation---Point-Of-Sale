@@ -34,17 +34,18 @@ class HomeFragment : Fragment() , MainView {
 
     private lateinit var adapter: HomeRecyclerViewAdapter
     private var productItems : ArrayList<Product> = arrayListOf()
-    private var tempProductItems : ArrayList<Product> = arrayListOf()
     private lateinit var presenter: Homepresenter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
     private lateinit var sharedPreference: SharedPreferences
-    private val clickAnimation = AlphaAnimation(1.2F,0.6F)
     private var categoryItems: ArrayList<String> = arrayListOf()
+    private var productKeys: ArrayList<Int> = arrayListOf()
+    private var tmpProductKeys: ArrayList<Int> = arrayListOf()
     private var currentCat = 0
     private var searchFilter = ""
 
     companion object{
+        var tempProductItems : ArrayList<Product> = arrayListOf()
         var cartItems: ArrayList<Cart> = arrayListOf()
         var totalQty = 0
         var totalPrice = 0
@@ -75,9 +76,10 @@ class HomeFragment : Fragment() , MainView {
             totalQty = countQty()
             totalPrice = sumPrice()
 
-            productItems[it] = Product(productItems[it].NAME,productItems[it].PRICE,productItems[it].DESC,productItems[it].COST, productItems[it].MANAGE_STOCK,
-                productItems[it].STOCK!! - 1,productItems[it].IMAGE,productItems[it].PROD_CODE,productItems[it].UOM_CODE,productItems[it].CAT,
-                productItems[it].CODE)
+            if (tempProductItems[it].MANAGE_STOCK)
+                tempProductItems[it] = Product(tempProductItems[it].NAME,tempProductItems[it].PRICE,tempProductItems[it].DESC,tempProductItems[it].COST, tempProductItems[it].MANAGE_STOCK,
+                    tempProductItems[it].STOCK!! - 1,tempProductItems[it].IMAGE,tempProductItems[it].PROD_CODE,tempProductItems[it].UOM_CODE,tempProductItems[it].CAT,
+                    tempProductItems[it].CODE)
 
             adapter.notifyDataSetChanged()
 
@@ -136,17 +138,21 @@ class HomeFragment : Fragment() , MainView {
         }
 
         srHome.onRefresh {
+            presenter.retrieveProducts()
             fetchProductByCat()
         }
 
         pbHome.visibility = View.VISIBLE
-        presenter.retrieveProducts()
-        presenter.retrieveCategories()
+
 
     }
 
     override fun onStart() {
         super.onStart()
+
+        if (tempProductItems.size == 0)
+            presenter.retrieveProducts()
+        presenter.retrieveCategories()
 
         btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
 
@@ -194,7 +200,8 @@ class HomeFragment : Fragment() , MainView {
 
     private fun addCart(position: Int){
         if (cartItems.size == 0)
-            cartItems.add(Cart(tempProductItems[position].NAME,tempProductItems[position].PROD_CODE,tempProductItems[position].PRICE,1))
+            cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
+                tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1))
         else{
             var check = false
             for ((i , data) in cartItems.withIndex()){
@@ -208,23 +215,29 @@ class HomeFragment : Fragment() , MainView {
 
             }
             if (!check)
-                cartItems.add(Cart(tempProductItems[position].NAME,tempProductItems[position].PROD_CODE,tempProductItems[position].PRICE,1))
+                cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
+                    tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1))
         }
     }
 
     fun fetchProductByCat(){
         tempProductItems.clear()
+        tmpProductKeys.clear()
         adapter.notifyDataSetChanged()
 
         if (searchFilter != ""){
             for ((index, data) in productItems.withIndex()) {
-                if (data.NAME.toString().contains(searchFilter) || data.CAT.toString().contains(searchFilter))
+                if (data.NAME.toString().contains(searchFilter) || data.CAT.toString().contains(searchFilter)){
                     tempProductItems.add(productItems[index])
+                    tmpProductKeys.add(productKeys[index])
+                }
             }
         }else{
             for ((index, data) in productItems.withIndex()) {
-                if (currentCat == 0 || data.CAT.toString() == categoryItems[currentCat])
+                if (currentCat == 0 || data.CAT.toString() == categoryItems[currentCat]){
                     tempProductItems.add(productItems[index])
+                    tmpProductKeys.add(productKeys[index])
+                }
             }
         }
 
@@ -237,6 +250,7 @@ class HomeFragment : Fragment() , MainView {
         if (context != null){
             if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
                 if (dataSnapshot.exists()){
+                    productKeys.clear()
                     productItems.clear()
                     tempProductItems.clear()
                     adapter.notifyDataSetChanged()
@@ -244,8 +258,10 @@ class HomeFragment : Fragment() , MainView {
                     for (data in dataSnapshot.children) {
                         val item = data.getValue(Product::class.java)!!
                         tempProductItems.add(item)
+                        productKeys.add(data.key!!.toInt())
                     }
                     productItems.addAll(tempProductItems)
+                    tmpProductKeys.addAll(productKeys)
 
                     adapter.notifyDataSetChanged()
                     if (context != null)

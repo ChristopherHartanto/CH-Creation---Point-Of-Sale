@@ -1,5 +1,6 @@
 package com.chcreation.pointofsale.transaction
 
+import android.app.ActionBar
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,7 @@ import com.squareup.picasso.Picasso
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.textColorResource
+import java.text.SimpleDateFormat
 
 class TransactionRecyclerViewAdapter(private val context: Context, private val items: MutableList<Transaction>,
                                      private val customerList: List<String>,
@@ -44,14 +46,20 @@ class TransactionRecyclerViewAdapter(private val context: Context, private val i
         fun bindItem(item: Transaction, transCode: Int, custName: String, listener: (position: Int) -> Unit, position: Int) {
             code.text = receiptFormat(transCode)
             customer.text = custName
-            date.text = item.CREATED_DATE
+            date.text = parseDateFormat(item.UPDATED_DATE.toString())
             totalPrice.text = indonesiaCurrencyFormat().format(item.TOTAL_PRICE!! - item.DISCOUNT!! + item.TAX!!)
 
             if (custName == ""){
-                layoutCustomer.visibility = View.GONE
+                totalPrice.layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
             }
             else{
-                layoutCustomer.visibility = View.VISIBLE
+                totalPrice.layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
             }
 
             when {

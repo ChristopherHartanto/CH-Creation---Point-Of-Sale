@@ -8,6 +8,7 @@ import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.postTotalPayment
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.totalOutStanding
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.totalReceived
+import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transCode
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transDate
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
@@ -15,6 +16,7 @@ import com.chcreation.pointofsale.checkout.SelectCustomerActivity.Companion.sele
 import com.chcreation.pointofsale.checkout.SelectCustomerActivity.Companion.selectCustomerName
 import com.chcreation.pointofsale.customer.CustomerFragment
 import com.chcreation.pointofsale.home.HomeFragment
+import com.chcreation.pointofsale.home.HomeFragment.Companion.tempProductItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.chcreation.pointofsale.transaction.DetailTransactionActivity.Companion.existPayment
@@ -102,8 +104,10 @@ class PostCheckOutActivity : AppCompatActivity() {
         totalPrice = 0
         totalReceived = 0
         totalOutStanding = 0
+        transCode = 0
 
         HomeFragment.cartItems.clear()
+        tempProductItems.clear()
         NoteActivity.note = ""
         DiscountActivity.discount = 0
         tax = 0

@@ -52,6 +52,8 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
 
             if (product.STOCK!! <= 0)
                 stock.textColorResource = R.color.colorRed
+            else if (!product.MANAGE_STOCK)
+                stock.textColorResource = R.color.colorPrimary
             else
                 stock.textColorResource = R.color.colorBlack
 

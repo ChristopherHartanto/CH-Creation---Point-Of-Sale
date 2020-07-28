@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.chcreation.pointofsale.EMessageResult
 
 import com.chcreation.pointofsale.R
@@ -56,7 +57,7 @@ class ProductFragment : Fragment(), MainView {
 
         rvProductCat.apply {
             adapter = rvAdapter
-            layoutManager = LinearLayoutManager(ctx)
+            layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         }
 
         fbProduct.onClick {

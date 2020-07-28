@@ -46,6 +46,13 @@ fun normalClickAnimation() : AlphaAnimation = AlphaAnimation(3F,0.6F)
 
 fun dateFormat() : SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
+fun parseDateFormat(date: String) : String {
+    var currentFormat = dateFormat().parse(date)
+    var newFormat = SimpleDateFormat("dd MMM yyyy").format(currentFormat).toString()
+
+    return newFormat
+}
+
 fun indonesiaCurrencyFormat() : NumberFormat{  //  ex : indoCurrencyFormat().format(10000)
     val format = NumberFormat.getCurrencyInstance()
     format.maximumFractionDigits = 0

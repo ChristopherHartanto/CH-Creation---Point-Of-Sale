@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.AvailableMerchant
 import com.chcreation.pointofsale.model.Merchant
@@ -43,6 +44,10 @@ class NewMerchantActivity : AppCompatActivity(), MainView {
 
         btnNewMerchant.onClick {
 
+            btnNewMerchant.startAnimation(normalClickAnimation())
+            btnNewMerchant.isEnabled = false
+            pbMerchant.visibility = View.VISIBLE
+
             val merchantBusinessInfo = etMerchantBusinessInfo.text.toString()
             val merchantNoTelp = etMerchantNoTelp.text.toString()
             val merchantAddress = etMerchantAddress.text.toString()
@@ -77,5 +82,7 @@ class NewMerchantActivity : AppCompatActivity(), MainView {
             startActivity<MainActivity>()
             finish()
         }
+        btnNewMerchant.isEnabled = true
+        pbMerchant.visibility = View.GONE
     }
 }

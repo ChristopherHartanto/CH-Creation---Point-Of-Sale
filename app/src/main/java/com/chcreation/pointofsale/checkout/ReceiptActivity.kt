@@ -19,10 +19,22 @@ import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
 import com.chcreation.pointofsale.checkout.NoteActivity.Companion.note
 import com.chcreation.pointofsale.home.HomeFragment
+import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
+import com.chcreation.pointofsale.model.Cart
+import com.chcreation.pointofsale.model.Payment
+import com.chcreation.pointofsale.presenter.TransactionPresenter
+import com.chcreation.pointofsale.transaction.TransactionFragment
+import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transCodeItems
+import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transPosition
+import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.Transaction
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_receipt.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
@@ -32,11 +44,15 @@ import java.io.FileOutputStream
 import java.util.*
 
 
-class ReceiptActivity : AppCompatActivity() {
+class ReceiptActivity : AppCompatActivity(), MainView {
 
     private lateinit var adapter: CartRecyclerViewAdapter
+    private lateinit var adapterPaymentList : ReceiptPaymentListRecyclerViewAdapter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
+    private lateinit var presenter : TransactionPresenter
+    private var paymentLists : MutableList<Payment> = mutableListOf()
+    private lateinit var boughtList: com.chcreation.pointofsale.model.Transaction
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,15 +62,15 @@ class ReceiptActivity : AppCompatActivity() {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
+        presenter = TransactionPresenter(this,mAuth,mDatabase,this)
 
-        adapter = CartRecyclerViewAdapter(this, HomeFragment.cartItems){
+        adapterPaymentList = ReceiptPaymentListRecyclerViewAdapter(this,paymentLists)
 
-        }
-        rvReceipt.adapter = adapter
-        rvReceipt.layoutManager = LinearLayoutManager(this)
+        rvReceiptPaymentList.adapter = adapterPaymentList
+        rvReceiptPaymentList.layoutManager = LinearLayoutManager(this)
 
         tvReceiptMerchantName.text = getMerchant(this).toUpperCase(Locale.ENGLISH)
-        tvReceiptDate.text = transDate
+
         tvReceiptTransCode.text = "Receipt: ${receiptFormat(transCode)}"
 
         btnReceiptShare.onClick {
@@ -73,7 +89,31 @@ class ReceiptActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
+        if (transCode != 0){
+            presenter.retrieveTransactionListPayments(transCode)
+        }
+        else{
+            presenter.retrieveTransactionListPayments(transCodeItems[transPosition])
+        }
+    }
+
+    private fun fetchData(){
+        val gson = Gson()
+        val arrayCartType = object : TypeToken<MutableList<Cart>>() {}.type
+        val purchasedItems : MutableList<Cart> = gson.fromJson(boughtList.DETAIL,arrayCartType)
+
+        adapter = CartRecyclerViewAdapter(this,purchasedItems){
+
+        }
+        rvReceipt.adapter = adapter
+        rvReceipt.layoutManager = LinearLayoutManager(this)
+
         tvReceiptCashier.text = mAuth.currentUser?.displayName
+
+        val discount = boughtList.DISCOUNT!!
+        val tax = boughtList.TAX!!
+        val totalPrice = boughtList.TOTAL_PRICE!!
+        val totalOutstanding = boughtList.TOTAL_OUTSTANDING!!
 
         val totalPayment = totalPrice - discount + tax
 
@@ -99,21 +139,33 @@ class ReceiptActivity : AppCompatActivity() {
         tvReceiptDiscount.text = indonesiaCurrencyFormat().format(discount)
         tvReceiptTax.text = indonesiaCurrencyFormat().format(tax)
         tvReceiptTotal.text = indonesiaCurrencyFormat().format(totalPayment)
+//
+//        if (note != "")
+//            tvReceiptNote.text = "$note"
+//        else{
+//            layoutReceiptNote.visibility = View.GONE
+//        }
+//        if (transCode != 0){ // 0 berarti new receipt
+//            if (totalReceived >= totalPayment)
+//                tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalReceived-totalPayment)
+//            else{
+//                tvReceiptAmountReceivedTitle.text = "Pending:"
+//                tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalPayment-totalReceived)
+//            }
+//        }
 
-        if (note != "")
-            tvReceiptNote.text = "$note"
-        else{
-            layoutReceiptNote.visibility = View.GONE
-        }
-
-        tvReceiptAmountReceived.text = indonesiaCurrencyFormat().format(totalReceived)
-
-        if (totalReceived >= totalPayment)
-            tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalReceived-totalPayment)
-        else{
+        if (totalOutstanding > 0){
             tvReceiptAmountReceivedTitle.text = "Pending:"
-            tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalPayment-totalReceived)
+            tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalOutstanding)
+        }else{
+            var totalPaid = 0
+            for (data in paymentLists){
+                totalPaid += data.TOTAL_RECEIVED!!
+            }
+            tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalPaid - totalPayment)
         }
+
+        tvReceiptDate.text = boughtList.UPDATED_DATE.toString()
     }
 
     private fun getScreenShot(view: View): Bitmap {
@@ -163,5 +215,35 @@ class ReceiptActivity : AppCompatActivity() {
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(this, "No App Available", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        if (response == EMessageResult.FETCH_TRANS_LIST_PAYMENT_SUCCESS.toString()){
+            if (dataSnapshot.exists()){
+                paymentLists.clear()
+                for (data in dataSnapshot.children){
+                    val item = data.getValue(Payment::class.java)
+                    paymentLists.add(item!!)
+
+                    adapterPaymentList.notifyDataSetChanged()
+                }
+                if (transCode != 0){
+                    presenter.retrieveTransaction(transCode)
+                }
+                else{
+                    presenter.retrieveTransaction(transCodeItems[transPosition])
+                }
+            }
+        }else if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
+            if (dataSnapshot.exists()){
+                val item = dataSnapshot.getValue(com.chcreation.pointofsale.model.Transaction::class.java)
+                this.boughtList = item!!
+                fetchData()
+            }
+        }
+    }
+
+    override fun response(message: String) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
