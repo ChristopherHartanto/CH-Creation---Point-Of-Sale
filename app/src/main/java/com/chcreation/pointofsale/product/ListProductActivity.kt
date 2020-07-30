@@ -24,9 +24,10 @@ import org.jetbrains.anko.toast
 
 class ListProductActivity : AppCompatActivity(), MainView {
 
-    private lateinit var adapter: HomeRecyclerViewAdapter
+    private lateinit var adapter: ProductListRecyclerViewAdapter
     private var productItems : MutableList<Product> = mutableListOf()
     private var tempProductItems : MutableList<Product> = mutableListOf()
+    private var tempProductImageItems : MutableList<String> = mutableListOf()
     private lateinit var presenter: Homepresenter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
@@ -43,9 +44,9 @@ class ListProductActivity : AppCompatActivity(), MainView {
 
         currentCat = intent.extras!!.getInt("category",0)
 
-        adapter = HomeRecyclerViewAdapter(
+        adapter = ProductListRecyclerViewAdapter(
             this,
-            tempProductItems
+            tempProductImageItems
         ) {
             startActivity(intentFor<ProductDetailActivity>("prodCode" to tempProductItems[it].PROD_CODE))
         }
@@ -63,8 +64,10 @@ class ListProductActivity : AppCompatActivity(), MainView {
     private fun fetchProductByCat(){
         tempProductItems.clear()
         for ((index, data) in productItems.withIndex()) {
-            if (currentCat == 0 || data.CAT.toString() == categoryItems[currentCat])
+            if (currentCat == 0 || data.CAT.toString() == categoryItems[currentCat]){
+                tempProductImageItems.add(productItems[index].IMAGE.toString())
                 tempProductItems.add(productItems[index])
+            }
 
         }
         adapter.notifyDataSetChanged()
@@ -73,6 +76,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
             if (dataSnapshot.exists()){
+                tempProductImageItems.clear()
                 tempProductItems.clear()
                 productItems.clear()
                 adapter.notifyDataSetChanged()

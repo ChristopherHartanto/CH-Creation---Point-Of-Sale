@@ -1,14 +1,24 @@
 package com.chcreation.pointofsale.checkout
 
+import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Rect
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.provider.MediaStore
+import android.util.Log
+import android.view.PixelCopy
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.ErrorActivity.Companion.errorMessage
@@ -36,11 +46,11 @@ import com.google.firebase.database.Transaction
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_receipt.*
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.toast
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.util.*
 
 
@@ -53,6 +63,9 @@ class ReceiptActivity : AppCompatActivity(), MainView {
     private lateinit var presenter : TransactionPresenter
     private var paymentLists : MutableList<Payment> = mutableListOf()
     private lateinit var boughtList: com.chcreation.pointofsale.model.Transaction
+    private var receiptCode = 0
+    private var screenShotPath : Uri? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,19 +83,29 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         rvReceiptPaymentList.layoutManager = LinearLayoutManager(this)
 
         tvReceiptMerchantName.text = getMerchant(this).toUpperCase(Locale.ENGLISH)
+        tvReceiptMerchantAddress.text = getMerchantAddress(this)
+        tvReceiptMerchantTel.text = getMerchantNoTel(this)
 
         tvReceiptTransCode.text = "Receipt: ${receiptFormat(transCode)}"
 
         btnReceiptShare.onClick {
             btnReceiptShare.startAnimation(normalClickAnimation())
-            pbReceipt.visibility = View.VISIBLE
-            //layoutReceipt.alpha = 0.3F
 
-            val bitmap = getScreenShot(window.decorView.findViewById(R.id.layoutReceipt))
-            store(bitmap,"${receiptFormat(transCode)}")
+            alert ("Are You want to Share?"){
+                title = "Share"
+                yesButton {
+                    pbReceipt.visibility = View.VISIBLE
+                    getBitmapFromView(layoutReceipt,this@ReceiptActivity){
 
-            pbReceipt.visibility = View.GONE
-            layoutReceipt.alpha = 1F
+                        layoutReceipt.alpha = 1F
+                        //                store(it,"${receiptFormat(receiptCode)}")
+                    }
+
+                }
+                noButton {
+
+                }
+            }.show()
         }
     }
 
@@ -164,46 +187,100 @@ class ReceiptActivity : AppCompatActivity(), MainView {
             }
             tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalPaid - totalPayment)
         }
-
+        tvReceiptTransCode.text = "Receipt: ${receiptFormat(receiptCode)}"
         tvReceiptDate.text = boughtList.UPDATED_DATE.toString()
     }
 
-    private fun getScreenShot(view: View): Bitmap {
-//        val returnedBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-//        val canvas = Canvas(returnedBitmap)
-//        val bgDrawable = view.background
-//        if (bgDrawable != null) bgDrawable.draw(canvas)
-//        else canvas.drawColor(Color.WHITE)
-//        view.draw(canvas)
-        val screenView = view.rootView
-        screenView.isDrawingCacheEnabled = true
-        val bitmap = Bitmap.createBitmap(screenView.drawingCache)
-        screenView.isDrawingCacheEnabled = false
-        return bitmap
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = dateFormat().format(Date(1000))
+        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+
+        }
+
     }
 
-    fun store(bm: Bitmap, fileName: String?) {
+    private fun getScreenShot(view: View): Bitmap {
+        val returnedBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(returnedBitmap)
+        val bgDrawable = view.background
+        if (bgDrawable != null) bgDrawable.draw(canvas)
+        else canvas.drawColor(Color.WHITE)
+        view.draw(canvas)
+
+        return returnedBitmap
+    }
+
+    fun getBitmapFromView(view: View, activity: Activity, callback: (Bitmap) -> Unit) {
+        activity.window?.let { window ->
+            val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+            val locationOfViewInWindow = IntArray(2)
+            view.getLocationInWindow(locationOfViewInWindow)
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    PixelCopy.request(window,
+                        Rect(
+                            locationOfViewInWindow[0],
+                            locationOfViewInWindow[1],
+                            locationOfViewInWindow[0] + view.width,
+                            locationOfViewInWindow[1] + view.height
+                        ), bitmap, { copyResult ->
+                        if (copyResult == PixelCopy.SUCCESS) {
+                            val photoURI: Uri = FileProvider.getUriForFile(
+                                this,
+                                "com.example.android.fileprovider",
+                                store(bitmap,"${receiptFormat(receiptCode)}")
+                            )
+
+                            shareImage(photoURI)
+                            callback(bitmap)
+                        }
+                        // possible to handle other result codes ...
+                    },
+                        Handler())
+                }else
+                    toast("Screenshot is not support for this device")
+            } catch (e: IllegalArgumentException) {
+                // PixelCopy may throw IllegalArgumentException, make sure to handle it
+                toast(e.message.toString())
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun store(bm: Bitmap, fileName: String?): File {
         val dirPath: String =
-            Environment.getExternalStorageDirectory().absolutePath.toString() + "/Screenshots"
+            getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath.toString()
         val dir = File(dirPath)
         if (!dir.exists()) dir.mkdirs()
-        val file = File(dirPath, fileName)
+        val file = File(dirPath, "${fileName}.jpg")
         try {
             val fOut = FileOutputStream(file)
             bm.compress(Bitmap.CompressFormat.PNG, 85, fOut)
             fOut.flush()
             fOut.close()
+//
+//            val photoURI: Uri = FileProvider.getUriForFile(
+//                this,
+//                "com.example.android.fileprovider",
+//                file
+//            )
 
-            shareImage(file)
         } catch (e: Exception) {
             errorMessage = e.message.toString()
             startActivity<ErrorActivity>()
             e.printStackTrace()
         }
+        return file
     }
 
-    private fun shareImage(file: File) {
-        val uri: Uri = Uri.fromFile(file)
+    private fun shareImage(uri: Uri) {
         val intent = Intent()
         intent.action = Intent.ACTION_SEND
         intent.type = "image/*"
@@ -237,6 +314,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         }else if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
             if (dataSnapshot.exists()){
                 val item = dataSnapshot.getValue(com.chcreation.pointofsale.model.Transaction::class.java)
+                receiptCode = dataSnapshot.key!!.toInt()
                 this.boughtList = item!!
                 fetchData()
             }

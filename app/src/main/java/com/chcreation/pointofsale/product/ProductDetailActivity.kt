@@ -29,7 +29,7 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_detail)
 
-
+        supportActionBar?.hide()
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = ProductPresenter(this,mAuth,mDatabase,this)

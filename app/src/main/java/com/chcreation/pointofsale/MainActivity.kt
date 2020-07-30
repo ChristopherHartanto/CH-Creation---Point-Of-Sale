@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
 
         var view = navView.getHeaderView(0)
         val tvNavHeaderMerchantName = view.findViewById<TextView>(R.id.tvNavHeaderMerchantName)
-        tvNavHeaderMerchantName.text = "CH"
+        tvNavHeaderMerchantName.text = getMerchant(this)
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.main, menu)
+        //menuInflater.inflate(R.menu.main, menu)
         return true
     }
 

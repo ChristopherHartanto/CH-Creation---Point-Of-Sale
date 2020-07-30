@@ -36,7 +36,7 @@ fun getMerchantAddress(context: Context) : String{
     return sharedPreference.getString(ESharedPreference.ADDRESS.toString(),"").toString()
 }
 
-fun getMerchantNoTep(context: Context) : String{
+fun getMerchantNoTel(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
     return sharedPreference.getString(ESharedPreference.NO_TELP.toString(),"").toString()

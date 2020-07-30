@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
@@ -19,6 +20,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.view.size
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.dateFormat
@@ -26,6 +28,7 @@ import com.chcreation.pointofsale.getMerchant
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.ProductPresenter
+import com.chcreation.pointofsale.product.NewCategory.Companion.newCategory
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
@@ -90,6 +93,11 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
 
     override fun onStart() {
         super.onStart()
+
+        if (newCategory != "")
+            spProduct.setSelection(spProduct.size)
+        else
+            spProduct.setSelection(0)
 
         btnProductSave.onClick {
             toast("filepath: ${filePath}")
@@ -211,6 +219,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
             currentPhotoPath = "File = $absolutePath"
 
         }
+
     }
 
     // Select Image method
@@ -291,10 +300,12 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                         filePath
                     )
                 //val imageBitmap = data.extras?.get("data") as Bitmap
-                ivProductImage.setImageBitmap(bitmap)
-                //ivProductImage.setImageBitmap(rotateImage(bitmap))
+                //ivProductImage.setImageBitmap(bitmap)
+                galleryAddPic()
+                ivProductImage.setImageBitmap(rotateImage(bitmap))
             } catch (e: Exception) {
                 filePath = null
+                toast(e.message.toString())
                 e.printStackTrace()
             }
         }
@@ -314,8 +325,16 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         }
     }
 
+    private fun galleryAddPic() {
+        Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
+            val f = File(currentPhotoPath)
+            mediaScanIntent.data = Uri.fromFile(f)
+            sendBroadcast(mediaScanIntent)
+        }
+    }
+
     fun rotateImage(bitmapSource : Bitmap) : Bitmap{
-        val ei = ExifInterface(filePath.toString());
+        val ei = ExifInterface(currentPhotoPath);
         val orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
         ExifInterface.ORIENTATION_UNDEFINED);
 
@@ -341,6 +360,31 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         matrix.postRotate(degree)
         return Bitmap.createBitmap(bitmapSource, 0, 0, bitmapSource.width, bitmapSource.height,
             matrix, true)
+    }
+
+    private fun decodePicture() {
+        // Get the dimensions of the View
+        val targetW: Int = ivProductImage.width
+        val targetH: Int = ivProductImage.height
+
+        val bmOptions = BitmapFactory.Options().apply {
+            // Get the dimensions of the bitmap
+            inJustDecodeBounds = true
+
+            val photoW: Int = outWidth
+            val photoH: Int = outHeight
+
+            // Determine how much to scale down the image
+            val scaleFactor: Int = (photoW / targetW).coerceAtMost(photoH / targetH)
+
+            // Decode the image file into a Bitmap sized to fill the View
+            inJustDecodeBounds = false
+            inSampleSize = scaleFactor
+            inPurgeable = true
+        }
+        BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
+            ivProductImage.setImageBitmap(bitmap)
+        }
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

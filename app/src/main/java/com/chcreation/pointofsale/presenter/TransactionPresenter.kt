@@ -12,6 +12,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -191,7 +192,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
             .child(getMerchantCredential(context))
             .child(getMerchant(context))
             .orderByChild(E_Enqury.TRANS_CODE.toString())
-            .equalTo(transactionCode.toString())
+            .equalTo(transactionCode.toDouble())
             .addListenerForSingleValueEvent(postListener)
     }
 

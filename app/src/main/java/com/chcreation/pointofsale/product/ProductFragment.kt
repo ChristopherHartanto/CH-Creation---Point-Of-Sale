@@ -1,6 +1,7 @@
 package com.chcreation.pointofsale.product
 
 import android.os.Bundle
+import android.os.Handler
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -21,9 +22,7 @@ import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_product.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.intentFor
-import org.jetbrains.anko.support.v4.startActivity
+import org.jetbrains.anko.support.v4.*
 
 /**
  * A simple [Fragment] subclass.
@@ -34,6 +33,8 @@ class ProductFragment : Fragment(), MainView {
     private lateinit var mDatabase : DatabaseReference
     private lateinit var rvAdapter: ProductRecyclerViewAdapter
     private lateinit var presenter: ProductPresenter
+    private lateinit var handle: Handler
+    private lateinit var runnable: Runnable
     private var items: MutableList<String> = mutableListOf()
 
     override fun onCreateView(
@@ -50,6 +51,7 @@ class ProductFragment : Fragment(), MainView {
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = ProductPresenter(this,mAuth,mDatabase,ctx)
+        handle = Handler()
 
         rvAdapter = ProductRecyclerViewAdapter(ctx,items){
             startActivity(intentFor<ListProductActivity>("category" to it))
@@ -64,7 +66,17 @@ class ProductFragment : Fragment(), MainView {
             ctx.startActivity<NewProductActivity>()
         }
 
-        presenter.retrieveCategories()
+        runnable = Runnable {
+            pbProduct.visibility = View.GONE
+            srProduct.isRefreshing = false
+            toast("No Data")
+        }
+        handle.postDelayed(runnable,5000)
+
+        srProduct.onRefresh {
+            handle.postDelayed(runnable,5000)
+            presenter.retrieveCategories()
+        }
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
@@ -77,6 +89,9 @@ class ProductFragment : Fragment(), MainView {
                 }
                 rvAdapter.notifyDataSetChanged()
             }
+            handle.removeCallbacks(runnable)
+            pbProduct.visibility = View.GONE
+            srProduct.isRefreshing = false
         }
     }
 
