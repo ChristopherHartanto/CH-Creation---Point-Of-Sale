@@ -5,7 +5,6 @@ import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transCode
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transDate
 import com.chcreation.pointofsale.model.Cart
-import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.model.Payment
 import com.chcreation.pointofsale.model.Transaction
 import com.chcreation.pointofsale.view.MainView
@@ -14,10 +13,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import java.text.SimpleDateFormat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.E
 
 
 class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference,private val context: Context){
@@ -72,7 +72,8 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                     getTransPrimaryKey(transaction,payment,cartItems)
             }
         }catch (e: Exception){
-            view.response(e.message.toString())
+            showError(context,e.message.toString())
+            e.printStackTrace()
         }
     }
 
@@ -93,16 +94,17 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                 for ((index,data) in cartItems.withIndex()){
 
                     val values  = hashMapOf(
-                        E_Enqury.TRANS_CODE.toString() to transCode,
-                        E_Enqury.PRODUCT_KEY.toString() to cartItems[index].PROD_KEY,
-                        E_Enqury.CUST_CODE.toString() to transaction.CUST_CODE,
-                        E_Enqury.MANAGE_STOCK.toString() to cartItems[index].MANAGE_STOCK,
-                        E_Enqury.STOCK.toString() to cartItems[index].Qty,
-                        E_Enqury.STATUS_CODE.toString() to transaction.STATUS_CODE,
-                        E_Enqury.CREATED_DATE.toString() to transaction.CREATED_DATE,
-                        E_Enqury.UPDATED_DATE.toString() to transaction.UPDATED_DATE,
-                        E_Enqury.CREATED_BY.toString() to transaction.CREATED_BY,
-                        E_Enqury.UPDATED_BY.toString() to transaction.UPDATED_BY
+                        E_Enquiry.TRANS_KEY.toString() to transCode,
+                        E_Enquiry.PROD_CODE.toString() to cartItems[index].PROD_CODE,
+                        E_Enquiry.PROD_KEY.toString() to cartItems[index].PROD_KEY,
+                        E_Enquiry.CUST_CODE.toString() to transaction.CUST_CODE,
+                        E_Enquiry.MANAGE_STOCK.toString() to cartItems[index].MANAGE_STOCK,
+                        E_Enquiry.STOCK.toString() to cartItems[index].Qty,
+                        E_Enquiry.STATUS_CODE.toString() to transaction.STATUS_CODE,
+                        E_Enquiry.CREATED_DATE.toString() to transaction.CREATED_DATE,
+                        E_Enquiry.UPDATED_DATE.toString() to transaction.UPDATED_DATE,
+                        E_Enquiry.CREATED_BY.toString() to transaction.CREATED_BY,
+                        E_Enquiry.UPDATED_BY.toString() to transaction.UPDATED_BY
                     )
 
                     database.child(ETable.ENQUIRY.toString())
@@ -129,6 +131,57 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
             .addListenerForSingleValueEvent(postListener)
     }
 
+    private fun saveStockMovement(transaction: Transaction, cartItems: ArrayList<Cart>){
+        var stockMovementKey = 0
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if (p0.exists()){
+                    for (data in p0.children){
+                        stockMovementKey = data.key.toString().toInt() + 1
+                        break
+                    }
+                }
+                for ((index,data) in cartItems.withIndex()){
+
+                    val values  = hashMapOf(
+                        EStock_Movement.TRANS_KEY.toString() to transCode,
+                        EStock_Movement.PROD_CODE.toString() to cartItems[index].PROD_CODE,
+                        EStock_Movement.PROD_KEY.toString() to cartItems[index].PROD_KEY,
+                        EStock_Movement.STATUS.toString() to EStatusStock.OUTBOUND,
+                        EStock_Movement.QTY.toString() to cartItems[index].Qty,
+                        EStock_Movement.STATUS_CODE.toString() to transaction.STATUS_CODE,
+                        EStock_Movement.CREATED_DATE.toString() to transaction.CREATED_DATE,
+                        EStock_Movement.UPDATED_DATE.toString() to transaction.UPDATED_DATE
+                    )
+
+                    database.child(ETable.STOCK_MOVEMENT.toString())
+                        .child(getMerchantCredential(context))
+                        .child(getMerchant(context))
+                        .child(stockMovementKey.toString())
+                        .setValue(values).addOnFailureListener {
+                            view.response(it.message.toString())
+                        }
+                        .addOnSuccessListener {
+                        }
+
+                    stockMovementKey += 1
+                }
+
+            }
+
+        }
+        database.child(ETable.STOCK_MOVEMENT.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .orderByKey()
+            .limitToLast(1)
+            .addListenerForSingleValueEvent(postListener)
+    }
+
     private fun getTransPrimaryKey(transaction: Transaction,payment: Payment, cartItems: ArrayList<Cart>){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
@@ -145,7 +198,11 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
 
                 transaction.TRANS_CODE = "T"+generateTransCode()
                 transCode = transactionKey
-                saveEnquiry(transaction,cartItems)
+
+                GlobalScope.launch(Dispatchers.IO) {
+                    saveEnquiry(transaction,cartItems)
+                    saveStockMovement(transaction,cartItems)
+                }
 
                 transDate = transaction.CREATED_DATE.toString()
                 val values  = hashMapOf(
@@ -331,6 +388,10 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                 view.response(it.message.toString())
             }
             .addOnSuccessListener {
+                if (status == EStatusCode.DONE.toString()){
+                    updateStockMovement(transactionCode,status)
+                    updateEnquiry(transactionCode,status, transaction.UPDATED_BY.toString())
+                }
                 view.response(EMessageResult.SUCCESS.toString())
             }
 
@@ -338,8 +399,105 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
 
 
 
-    private fun updateStock(transactionCode: Int,cart: Cart){
+    private fun updateStockMovement(transactionKey: Int,status: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
 
+            override fun onDataChange(p0: DataSnapshot) {
+                if (p0.exists()){
+                    for (data in p0.children){
+                        database.child(ETable.STOCK_MOVEMENT.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchant(context))
+                            .child(data.key.toString())
+                            .child(EStock_Movement.STATUS_CODE.toString())
+                            .setValue(status).addOnFailureListener {
+                                view.response(it.message.toString())
+                            }
+                            .addOnSuccessListener {
+                            }
+
+                        database.child(ETable.STOCK_MOVEMENT.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchant(context))
+                            .child(data.key.toString())
+                            .child(EStock_Movement.UPDATED_DATE.toString())
+                            .setValue(dateFormat().format(Date())).addOnFailureListener {
+                                view.response(it.message.toString())
+                            }
+                            .addOnSuccessListener {
+                            }
+                    }
+                }
+
+
+            }
+
+        }
+        database.child(ETable.STOCK_MOVEMENT.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .orderByChild(EStock_Movement.TRANS_KEY.toString())
+            .equalTo(transactionKey.toDouble())
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    private fun updateEnquiry(transactionKey: Int,status: String, updatedBy: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if (p0.exists()){
+                    for (data in p0.children){
+                        database.child(ETable.ENQUIRY.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchant(context))
+                            .child(data.key.toString())
+                            .child(E_Enquiry.STATUS_CODE.toString())
+                            .setValue(status).addOnFailureListener {
+                                view.response(it.message.toString())
+                            }
+                            .addOnSuccessListener {
+                            }
+
+                        database.child(ETable.ENQUIRY.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchant(context))
+                            .child(data.key.toString())
+                            .child(E_Enquiry.UPDATED_DATE.toString())
+                            .setValue(dateFormat().format(Date())).addOnFailureListener {
+                                view.response(it.message.toString())
+                            }
+                            .addOnSuccessListener {
+                            }
+
+                        database.child(ETable.ENQUIRY.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchant(context))
+                            .child(data.key.toString())
+                            .child(E_Enquiry.UPDATED_BY.toString())
+                            .setValue(updatedBy).addOnFailureListener {
+                                view.response(it.message.toString())
+                            }
+                            .addOnSuccessListener {
+                            }
+                    }
+                }
+
+
+            }
+
+        }
+        database.child(ETable.ENQUIRY.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .orderByChild(E_Enquiry.TRANS_KEY.toString())
+            .equalTo(transactionKey.toDouble())
+            .addListenerForSingleValueEvent(postListener)
     }
 
     private fun generateTransCode() : String{

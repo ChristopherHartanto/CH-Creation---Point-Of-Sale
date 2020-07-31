@@ -32,7 +32,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
     private var categoryItems: MutableList<String> = mutableListOf()
-    private var currentCat = 0
+    private var currentCat = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +42,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = Homepresenter(this,mAuth,mDatabase,this)
 
-        currentCat = intent.extras!!.getInt("category",0)
+        currentCat = intent.extras!!.getString("category","")
 
         adapter = ProductListRecyclerViewAdapter(
             this,
@@ -64,7 +64,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
     private fun fetchProductByCat(){
         tempProductItems.clear()
         for ((index, data) in productItems.withIndex()) {
-            if (currentCat == 0 || data.CAT.toString() == categoryItems[currentCat]){
+            if (data.CAT.toString() == currentCat){
                 tempProductImageItems.add(productItems[index].IMAGE.toString())
                 tempProductItems.add(productItems[index])
             }
@@ -87,10 +87,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
                 }
                 productItems.addAll(tempProductItems)
 
-                if (currentCat == 0)
-                    adapter.notifyDataSetChanged()
-                else
-                    fetchProductByCat()
+                fetchProductByCat()
             }
             pbListProduct.visibility = View.GONE
         }

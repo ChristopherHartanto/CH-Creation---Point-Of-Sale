@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="5dp"
+    tools:context=".product.ManageProductManageStockActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Manage Stocks"
+            android:textSize="28sp"
+            android:textColor="@color/colorBlack"
+            android:gravity="center"
+            android:textStyle="bold"/>
+
+        <EditText
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:layout_gravity="center"
+            android:textColor="@color/colorBlack"
+            android:gravity="center"
+            android:text="0"
+            android:textSize="52sp"
+            android:layout_marginVertical="30dp"
+            android:id="@+id/etManageProductManageStockQty"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Additional Note"
+                android:inputType="text"
+                android:id="@+id/etManageProductManageStockNote"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:id="@+id/pbManageProductManageStock"
+            android:layout_marginTop="10dp"/>
+
+    </LinearLayout>
+
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_border_fill"
+        android:textColor="@color/colorWhite"
+        android:id="@+id/btnManageStockAddStock"
+        android:text="Add Incoming Stock"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_danger"
+        android:textColor="@color/colorWhite"
+        android:id="@+id/btnManageStockMissingStock"
+        android:layout_marginTop="5dp"
+        android:text="Add Missing Stock"/>
+
+</LinearLayout>

@@ -8,27 +8,60 @@
     android:orientation="vertical"
     tools:context=".product.ProductDetailActivity">
 
-    <ImageView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:id="@+id/ivProductDetailImage"/>
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:id="@+id/layoutProductDetail"
+        android:orientation="vertical">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/ivProductDetailImage"/>
 
-    <TextView
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvProductDetailName"
+            android:gravity="center"
+            android:layout_marginTop="5dp"
+            android:layout_marginHorizontal="10dp"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorBlack"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvProductDetailPrice"
+            android:layout_marginTop="5dp"
+            android:layout_marginHorizontal="10dp"
+            android:textSize="20sp"
+            android:textColor="@color/colorPrimary"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvProductDetailDesc"
+            android:layout_marginTop="5dp"
+            android:layout_marginHorizontal="10dp"
+            android:textSize="20sp"
+            android:textColor="@color/colorBlack"/>
+
+    </LinearLayout>
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/tvProductDetailName"
-        android:gravity="center"
-        android:layout_marginTop="5dp"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/colorBlack"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/tvProductDetailDesc"
-        android:layout_marginTop="5dp"
-        android:textSize="16sp"
-        android:textColor="@color/colorBlack"/>
-
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="bottom">
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnProductDetail"
+            android:background="@drawable/button_border_fill"
+            android:text="Share"
+            android:layout_margin="2dp"
+            android:textColor="@color/colorWhite"/>
+    </LinearLayout>
 </LinearLayout>

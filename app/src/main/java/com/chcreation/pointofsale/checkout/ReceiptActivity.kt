@@ -97,6 +97,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                     pbReceipt.visibility = View.VISIBLE
                     getBitmapFromView(layoutReceipt,this@ReceiptActivity){
 
+                        pbReceipt.visibility = View.GONE
                         layoutReceipt.alpha = 1F
                         //                store(it,"${receiptFormat(receiptCode)}")
                     }

@@ -2,18 +2,16 @@ package com.chcreation.pointofsale.presenter
 
 import android.content.Context
 import com.chcreation.pointofsale.*
-import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transCode
-import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transDate
-import com.chcreation.pointofsale.model.Customer
-import com.chcreation.pointofsale.model.Transaction
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.tasks.await
-import java.text.SimpleDateFormat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.lang.Exception
 import java.util.*
 
 
@@ -99,18 +97,26 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
     }
 
     fun cancelTransaction(transactionCode: Int){
-        database.child(ETable.TRANSACTION.toString())
-            .child(getMerchantCredential(context))
-            .child(getMerchant(context))
-            .child(transactionCode.toString())
-            .child(ETransaction.STATUS_CODE.toString())
-            .setValue(EStatusCode.CANCEL.toString()).addOnFailureListener {
-                view.response(it.message.toString())
-            }
-            .addOnSuccessListener {
-                updateEnquiry(transactionCode,EStatusCode.CANCEL.toString())
-                cancelPayment(transactionCode)
-            }
+        try {
+            database.child(ETable.TRANSACTION.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
+                .child(transactionCode.toString())
+                .child(ETransaction.STATUS_CODE.toString())
+                .setValue(EStatusCode.CANCEL.toString()).addOnFailureListener {
+                    view.response(it.message.toString())
+                }
+                .addOnSuccessListener {
+                    GlobalScope.launch(Dispatchers.IO) {
+                        updateEnquiry(transactionCode,EStatusCode.CANCEL.toString())
+                        updateStockMovement(transactionCode,EStatusCode.CANCEL.toString())
+                        cancelPayment(transactionCode)
+                    }
+                }
+        }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
     }
 
     fun cancelPayment(transactionCode: Int){
@@ -162,7 +168,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
                             .child(getMerchantCredential(context))
                             .child(getMerchant(context))
                             .child(data.key.toString())
-                            .child(E_Enqury.STATUS_CODE.toString())
+                            .child(E_Enquiry.STATUS_CODE.toString())
                             .setValue(statusCode).addOnFailureListener {
                                 view.response(it.message.toString())
                             }
@@ -170,7 +176,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
                             .child(getMerchantCredential(context))
                             .child(getMerchant(context))
                             .child(data.key.toString())
-                            .child(E_Enqury.UPDATED_DATE.toString())
+                            .child(E_Enquiry.UPDATED_DATE.toString())
                             .setValue(currentDate).addOnFailureListener {
                                 view.response(it.message.toString())
                             }
@@ -178,7 +184,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
                             .child(getMerchantCredential(context))
                             .child(getMerchant(context))
                             .child(data.key.toString())
-                            .child(E_Enqury.UPDATED_BY.toString())
+                            .child(E_Enquiry.UPDATED_BY.toString())
                             .setValue(auth.currentUser!!.uid).addOnFailureListener {
                                 view.response(it.message.toString())
                             }
@@ -191,7 +197,48 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
         database.child(ETable.ENQUIRY.toString())
             .child(getMerchantCredential(context))
             .child(getMerchant(context))
-            .orderByChild(E_Enqury.TRANS_CODE.toString())
+            .orderByChild(E_Enquiry.TRANS_KEY.toString())
+            .equalTo(transactionCode.toDouble())
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    private fun updateStockMovement(transactionCode: Int,statusCode: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if (p0.exists()){
+                    for (data in p0.children){
+
+                        val currentDate: String = dateFormat().format(Date())
+                        database.child(ETable.ENQUIRY.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchant(context))
+                            .child(data.key.toString())
+                            .child(EStock_Movement.STATUS_CODE.toString())
+                            .setValue(statusCode).addOnFailureListener {
+                                view.response(it.message.toString())
+                            }
+                        database.child(ETable.STOCK_MOVEMENT.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchant(context))
+                            .child(data.key.toString())
+                            .child(EStock_Movement.UPDATED_DATE.toString())
+                            .setValue(currentDate).addOnFailureListener {
+                                view.response(it.message.toString())
+                            }
+                    }
+                }
+
+            }
+
+        }
+        database.child(ETable.STOCK_MOVEMENT.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .orderByChild(EStock_Movement.TRANS_KEY.toString())
             .equalTo(transactionCode.toDouble())
             .addListenerForSingleValueEvent(postListener)
     }

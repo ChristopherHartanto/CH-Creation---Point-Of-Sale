@@ -21,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_select_customer.*
 import kotlinx.android.synthetic.main.fragment_customer.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.onRefresh
 import org.jetbrains.anko.support.v4.startActivity
@@ -42,6 +43,8 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_customer)
 
+        supportActionBar!!.title = "Select Customer"
+
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = CustomerPresenter(this,mAuth,mDatabase,this)
@@ -61,6 +64,11 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
     override fun onStart() {
         super.onStart()
         presenter.retrieveCustomers()
+
+        fbSelectCustomer.onClick {
+            startActivity<NewCustomerActivity>()
+            finish()
+        }
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:elevation="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="5dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="25sp"
+            android:layout_height="25dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="5dp"
+            android:src="@drawable/inbound"
+            android:id="@+id/ivRowStockMovementList"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textColor="@color/colorBlack"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginHorizontal="5dp"
+            android:gravity="center_vertical"
+            android:id="@+id/tvRowStockMovementListDesc"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textColor="@color/colorBlack"
+            android:textSize="16sp"
+            android:layout_marginHorizontal="5dp"
+            android:gravity="end |center_vertical"
+            android:id="@+id/tvRowStockMovementListDate"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

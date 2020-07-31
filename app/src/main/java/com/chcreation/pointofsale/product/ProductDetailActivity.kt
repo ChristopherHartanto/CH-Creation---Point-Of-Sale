@@ -1,10 +1,22 @@
 package com.chcreation.pointofsale.product
 
+import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Rect
+import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.chcreation.pointofsale.EMessageResult
-import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.getMerchant
+import android.os.Environment
+import android.os.Handler
+import android.view.PixelCopy
+import android.view.View
+import android.widget.Toast
+import androidx.core.content.FileProvider
+import com.bumptech.glide.Glide
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
@@ -15,7 +27,11 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_product_detail.*
+import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
+import java.io.File
+import java.io.FileOutputStream
 
 class ProductDetailActivity : AppCompatActivity(), MainView {
 
@@ -37,19 +53,107 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
         prodCode = intent.extras!!.getString("prodCode","")
     }
 
-    private fun fetchData(){
-        if (product.IMAGE.toString() != "")
-            Picasso.get().load(product.IMAGE.toString()).into(ivProductDetailImage)
-
-        tvProductDetailName.text = product.NAME.toString()
-        tvProductDetailDesc.text = product.DESC.toString()
-    }
-
     override fun onStart() {
         super.onStart()
 
-        presenter.retrieveProducts(this)
+        presenter.retrieveProducts()
+
+        btnProductDetail.onClick {
+            btnProductDetail.startAnimation(normalClickAnimation())
+
+            getBitmapFromView(layoutProductDetail,this@ProductDetailActivity){
+
+            }
+        }
     }
+
+    private fun fetchData(){
+        if (product.IMAGE.toString() != "")
+            Glide.with(this).load(product.IMAGE.toString()).into(ivProductDetailImage)
+
+        tvProductDetailName.text = product.NAME.toString()
+        tvProductDetailDesc.text = product.DESC.toString()
+        tvProductDetailPrice.text = indonesiaCurrencyFormat().format(product.PRICE)
+    }
+
+    fun getBitmapFromView(view: View, activity: Activity, callback: (Bitmap) -> Unit) {
+        activity.window?.let { window ->
+            val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+            val locationOfViewInWindow = IntArray(2)
+            view.getLocationInWindow(locationOfViewInWindow)
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    PixelCopy.request(window,
+                        Rect(
+                            locationOfViewInWindow[0],
+                            locationOfViewInWindow[1],
+                            locationOfViewInWindow[0] + view.width,
+                            locationOfViewInWindow[1] + view.height
+                        ), bitmap, { copyResult ->
+                            if (copyResult == PixelCopy.SUCCESS) {
+                                val photoURI: Uri = FileProvider.getUriForFile(
+                                    this,
+                                    "com.example.android.fileprovider",
+                                    store(bitmap,"share_catalog")
+                                )
+
+                                shareImage(photoURI)
+                                callback(bitmap)
+                            }
+                            // possible to handle other result codes ...
+                        },
+                        Handler()
+                    )
+                }else
+                    toast("Screenshot is not support for this device")
+            } catch (e: IllegalArgumentException) {
+                // PixelCopy may throw IllegalArgumentException, make sure to handle it
+                toast(e.message.toString())
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun store(bm: Bitmap, fileName: String?): File {
+        val dirPath: String =
+            getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath.toString()
+        val dir = File(dirPath)
+        if (!dir.exists()) dir.mkdirs()
+        val file = File(dirPath, "${fileName}.jpg")
+        try {
+            val fOut = FileOutputStream(file)
+            bm.compress(Bitmap.CompressFormat.PNG, 85, fOut)
+            fOut.flush()
+            fOut.close()
+//
+//            val photoURI: Uri = FileProvider.getUriForFile(
+//                this,
+//                "com.example.android.fileprovider",
+//                file
+//            )
+
+        } catch (e: Exception) {
+            ErrorActivity.errorMessage = e.message.toString()
+            startActivity<ErrorActivity>()
+            e.printStackTrace()
+        }
+        return file
+    }
+
+    private fun shareImage(uri: Uri) {
+        val intent = Intent()
+        intent.action = Intent.ACTION_SEND
+        intent.type = "image/*"
+        intent.putExtra(Intent.EXTRA_SUBJECT, "")
+        intent.putExtra(Intent.EXTRA_TEXT, "")
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        try {
+            startActivity(Intent.createChooser(intent, "Share Screenshot"))
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, "No App Available", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
             if (dataSnapshot.exists()){

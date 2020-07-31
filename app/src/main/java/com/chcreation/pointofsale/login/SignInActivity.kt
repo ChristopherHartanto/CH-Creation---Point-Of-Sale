@@ -10,6 +10,7 @@ import com.chcreation.pointofsale.MainActivity
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.merchant.MerchantActivity
 import com.chcreation.pointofsale.merchant.NewMerchantActivity
+import com.chcreation.pointofsale.normalClickAnimation
 import com.chcreation.pointofsale.presenter.MerchantPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.OnCompleteListener
@@ -32,6 +33,8 @@ class SignInActivity : AppCompatActivity(), MainView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in)
 
+        supportActionBar?.hide()
+
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = MerchantPresenter(this,mAuth,mDatabase)
@@ -42,6 +45,7 @@ class SignInActivity : AppCompatActivity(), MainView {
         super.onStart()
 
         btnSignIn.onClick {
+            btnSignIn.startAnimation(normalClickAnimation())
             login()
         }
     }

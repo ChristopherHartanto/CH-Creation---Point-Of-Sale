@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:elevation="10dp">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_margin="5dp"
-        android:src="@drawable/user"/>
-
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/tvRowCustomerName"
-        android:gravity="center_vertical"
-        android:textColor="@color/colorBlack"/>
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:orientation="horizontal">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="5dp"
+            android:src="@drawable/user"/>
 
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/tvRowCustomerName"
+            android:gravity="center_vertical"
+            android:textColor="@color/colorBlack"/>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

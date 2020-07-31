@@ -60,8 +60,8 @@ class NewMerchantActivity : AppCompatActivity(), MainView {
             }
 
             presenter.createNewMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,
-                "",currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid),
-                AvailableMerchant(EUserGroup.MANAGER.toString(),currentDate,currentDate,
+                currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid),
+                AvailableMerchant(merchantName,EUserGroup.MANAGER.toString(),currentDate,currentDate,
                     mAuth.currentUser!!.uid,EStatusUser.ACTIVE.toString()))
         }
     }

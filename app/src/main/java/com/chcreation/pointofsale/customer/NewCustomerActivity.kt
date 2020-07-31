@@ -6,6 +6,7 @@ import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.getMerchant
 import com.chcreation.pointofsale.model.Customer
+import com.chcreation.pointofsale.normalClickAnimation
 import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
@@ -28,12 +29,16 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_customer)
 
+        supportActionBar!!.title = "New Customer"
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = CustomerPresenter(this,mAuth,mDatabase,this)
 
         btnCustomerSave.onClick {
+
+            btnCustomerSave.startAnimation(normalClickAnimation())
+
             val email = etCustomerEmail.text.toString()
             val name = etCustomerName.text.toString()
             val phone = etCustomerPhone.text.toString()

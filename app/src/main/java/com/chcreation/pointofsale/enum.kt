@@ -9,7 +9,8 @@ enum class ETable{
     CAT,
     TRANSACTION,
     PAYMENT,
-    ENQUIRY
+    ENQUIRY,
+    STOCK_MOVEMENT
 }
 
 enum class EProduct{
@@ -82,16 +83,28 @@ enum class ETransaction{
     STATUS_CODE
 }
 
-enum class E_Enqury{
+enum class E_Enquiry{
     CREATED_DATE,
     UPDATED_DATE,
     CREATED_BY,
     UPDATED_BY,
-    TRANS_CODE,
+    TRANS_KEY,
     CUST_CODE,
-    PRODUCT_KEY,
+    PROD_KEY,
+    PROD_CODE,
     MANAGE_STOCK,
     STOCK,
+    STATUS_CODE
+}
+
+enum class EStock_Movement{
+    CREATED_DATE,
+    UPDATED_DATE,
+    TRANS_KEY,
+    QTY,
+    PROD_CODE,
+    PROD_KEY,
+    STATUS,
     STATUS_CODE
 }
 
@@ -117,6 +130,7 @@ enum class EMessageResult{
     FETCH_CUSTOMER_SUCCESS,
     FETCH_TRANS_SUCCESS,
     FETCH_TRANS_LIST_PAYMENT_SUCCESS,
+    FETCH_STOCK_MOVEMENT_SUCCESS,
     FETCH_PEND_PAYMENT_SUCCESS
 }
 
@@ -136,6 +150,12 @@ enum class EStatusCode{
 enum class EStatusUser{
     ACTIVE,
     DE_ACTIVE
+}
+
+enum class EStatusStock{
+    INBOUND,
+    OUTBOUND,
+    OTHER
 }
 
 enum class EUserGroup{

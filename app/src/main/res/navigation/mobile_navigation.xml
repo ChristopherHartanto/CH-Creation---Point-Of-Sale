@@ -3,30 +3,43 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_check_out">
 
     <fragment
-        android:id="@+id/nav_home"
+        android:id="@+id/nav_check_out"
         android:name="com.chcreation.pointofsale.home.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home">
 
-        <action
-            android:id="@+id/action_nav_home_to_nav_slideshow"
-            app:destination="@id/nav_slideshow" />
     </fragment>
 
     <fragment
-        android:id="@+id/nav_product"
+        android:id="@+id/nav_catalog"
         android:name="com.chcreation.pointofsale.product.ProductFragment"
-        android:label="Product"
+        android:label="Catalog"
         tools:layout="@layout/fragment_product" />
+
+    <fragment
+        android:id="@+id/nav_manage_product"
+        android:name="com.chcreation.pointofsale.product.ManageProductFragment"
+        android:label="Manage Product"
+        tools:layout="@layout/fragment_manage_product" >
+
+        <action
+            android:id="@+id/action_nav_slideshow_to_nav_home"
+            app:destination="@id/nav_check_out" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_customer"
         android:name="com.chcreation.pointofsale.customer.CustomerFragment"
         android:label="Customer"
-        tools:layout="@layout/fragment_customer" />
+        tools:layout="@layout/fragment_customer" >
+
+        <action
+            android:id="@+id/action_nav_slideshow_to_nav_home"
+            app:destination="@id/nav_check_out" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_transaction"
@@ -35,6 +48,6 @@
         tools:layout="@layout/fragment_transaction" >
         <action
             android:id="@+id/action_nav_slideshow_to_nav_home"
-            app:destination="@id/nav_home" />
+            app:destination="@id/nav_check_out" />
     </fragment>
 </navigation>

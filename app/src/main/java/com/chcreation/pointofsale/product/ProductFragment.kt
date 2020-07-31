@@ -12,6 +12,7 @@ import com.chcreation.pointofsale.EMessageResult
 
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.getMerchant
+import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.ProductPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
@@ -35,7 +36,9 @@ class ProductFragment : Fragment(), MainView {
     private lateinit var presenter: ProductPresenter
     private lateinit var handle: Handler
     private lateinit var runnable: Runnable
-    private var items: MutableList<String> = mutableListOf()
+    private var items: MutableList<Product> = mutableListOf()
+    private var productItems: MutableList<Product> = mutableListOf()
+    private var categoryTotalItems: MutableList<Int> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,8 +56,8 @@ class ProductFragment : Fragment(), MainView {
         presenter = ProductPresenter(this,mAuth,mDatabase,ctx)
         handle = Handler()
 
-        rvAdapter = ProductRecyclerViewAdapter(ctx,items){
-            startActivity(intentFor<ListProductActivity>("category" to it))
+        rvAdapter = ProductRecyclerViewAdapter(ctx,productItems,categoryTotalItems){
+            startActivity(intentFor<ListProductActivity>("category" to productItems[it].CAT))
         }
 
         rvProductCat.apply {
@@ -75,24 +78,64 @@ class ProductFragment : Fragment(), MainView {
 
         srProduct.onRefresh {
             handle.postDelayed(runnable,5000)
-            presenter.retrieveCategories()
+            presenter.retrieveProducts()
         }
+        presenter.retrieveProducts()
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        handle.removeCallbacks(runnable)
+    }
+
+    fun fetchData(){
+        productItems.clear()
+        categoryTotalItems.clear()
+        var count = 1
+
+        for ((index,item) in items.withIndex()){
+            var check = false
+
+            for ((index,data) in productItems.withIndex()){
+                if (data.CAT == item.CAT)
+                    check = true
+            }
+            if (!check){
+                productItems.add(item)
+            }
+
+            if (index > 0 && items[index].CAT != items[index-1].CAT){
+                categoryTotalItems.add(count)
+                count = 1
+            }
+            else if (index == items.size-1 && items[index].CAT == items[index-1].CAT){
+                categoryTotalItems.add(count+1)
+            }
+            else if (index > 0)
+                count++
+
+        }
+
+        rvAdapter.notifyDataSetChanged()
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()) {
+        if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()) {
             items.clear()
-            items.add("All")
+
             if (dataSnapshot.exists()) {
                 for (data in dataSnapshot.children) {
-                    items.add(data.key.toString())
+                    items.add(data.getValue(Product::class.java)!!)
                 }
-                rvAdapter.notifyDataSetChanged()
+                fetchData()
             }
             handle.removeCallbacks(runnable)
             pbProduct.visibility = View.GONE
             srProduct.isRefreshing = false
         }
+
+
     }
 
     override fun response(message: String) {

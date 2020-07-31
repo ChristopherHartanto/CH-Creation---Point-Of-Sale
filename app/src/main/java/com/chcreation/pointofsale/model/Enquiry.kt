@@ -3,9 +3,10 @@ package com.chcreation.pointofsale.model
 import com.chcreation.pointofsale.EStatusCode
 
 data class Enquiry(
-    var TRANS_CODE: Int? = 0,
+    var TRANS_KEY: Int? = 0,
     var CUST_CODE: String? = "",
-    var PRODUCT_KEY: Int? = 0,
+    var PROD_KEY: Int? = 0,
+    var PROD_CODE: String? = "",
     var MANAGE_STOCK: Int? = 0,
     var STOCK: Int? = 0,
     var STATUS_CODE : String? = "",

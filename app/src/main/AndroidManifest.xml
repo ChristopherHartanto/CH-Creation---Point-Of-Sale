@@ -17,11 +17,14 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:requestLegacyExternalStorage="true">
-        <activity android:name=".ErrorActivity"></activity>
+        android:theme="@style/AppTheme">
+        <activity android:name=".product.ManageProductManageStockActivity"></activity>
+        <activity android:name=".product.ManageProductStockMovementListActivity" />
+        <activity android:name=".product.ManageProductDetailActivity" />
+        <activity android:name=".ErrorActivity" />
         <activity android:name=".checkout.SelectCustomerActivity" />
         <activity android:name=".transaction.DetailTransactionActivity" />
         <activity android:name=".transaction.TransactionFragment" />

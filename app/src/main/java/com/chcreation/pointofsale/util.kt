@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
+import org.jetbrains.anko.startActivity
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -53,6 +54,13 @@ fun parseDateFormat(date: String) : String {
     return newFormat
 }
 
+fun parseTimeFormat(date: String) : String {
+    var currentFormat = dateFormat().parse(date)
+    var newFormat = SimpleDateFormat("HH:mm:ss").format(currentFormat).toString()
+
+    return newFormat
+}
+
 fun indonesiaCurrencyFormat() : NumberFormat{  //  ex : indoCurrencyFormat().format(10000)
     val format = NumberFormat.getCurrencyInstance()
     format.maximumFractionDigits = 0
@@ -61,3 +69,9 @@ fun indonesiaCurrencyFormat() : NumberFormat{  //  ex : indoCurrencyFormat().for
 }
 
 fun receiptFormat(number: Int) : String = "#"+String.format("%05d",number)
+
+fun showError(context: Context,message: String)
+{
+    ErrorActivity.errorMessage = message
+    context.startActivity<ErrorActivity>()
+}

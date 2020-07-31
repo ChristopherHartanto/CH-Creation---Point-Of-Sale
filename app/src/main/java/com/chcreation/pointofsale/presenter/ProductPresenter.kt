@@ -2,7 +2,11 @@ package com.chcreation.pointofsale.presenter
 
 import android.content.Context
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.CheckOutActivity
+import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.model.StockMovement
+import com.chcreation.pointofsale.model.Transaction
 import com.chcreation.pointofsale.product.NewCategory
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
@@ -32,8 +36,13 @@ class ProductPresenter(private val view: MainView,
     }
 
     fun saveProduct(product: Product){
+        try {
+            getProductPrimaryKey(product)
 
-       getProductPrimaryKey(product)
+        }catch (e:java.lang.Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
     }
 
     fun getProductPrimaryKey(product: Product){
@@ -52,34 +61,10 @@ class ProductPresenter(private val view: MainView,
                 }
 
                 product.PROD_CODE = "P${generateProdCode()}"
+                saveProduct(product,key)
 
-                val values  = hashMapOf(
-                    EProduct.NAME.toString() to product.NAME,
-                    EProduct.COST.toString() to product.COST,
-                    EProduct.DESC.toString() to product.DESC,
-                    EProduct.PRICE.toString() to product.PRICE,
-                    EProduct.PROD_CODE.toString() to product.PROD_CODE,
-                    EProduct.UOM_CODE.toString() to product.UOM_CODE,
-                    EProduct.MANAGE_STOCK.toString() to product.MANAGE_STOCK,
-                    EProduct.STOCK.toString() to product.STOCK,
-                    EProduct.IMAGE.toString() to product.IMAGE,
-                    EProduct.CAT.toString() to product.CAT,
-                    EProduct.CODE.toString() to product.CODE,
-                    EProduct.CREATED_DATE.toString() to product.CREATED_DATE,
-                    EProduct.CREATED_BY.toString() to product.CREATED_BY,
-                    EProduct.UPDATED_DATE.toString() to product.UPDATED_DATE,
-                    EProduct.UPDATED_BY.toString() to product.UPDATED_BY
-                )
-                database.child(ETable.PRODUCT.toString())
-                    .child(getMerchantCredential(context))
-                    .child(getMerchant(context))
-                    .child(key.toString())
-                    .setValue(values).addOnFailureListener {
-                        view.response(it.message.toString())
-                    }
-                    .addOnSuccessListener {
-                        view.response(EMessageResult.SUCCESS.toString())
-                    }
+                if (product.MANAGE_STOCK)
+                    saveStockMovement(product,key)
             }
 
         }
@@ -89,6 +74,37 @@ class ProductPresenter(private val view: MainView,
             .orderByKey()
             .limitToLast(1)
             .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun saveProduct(product: Product, key: Int){
+
+        val values  = hashMapOf(
+            EProduct.NAME.toString() to product.NAME,
+            EProduct.COST.toString() to product.COST,
+            EProduct.DESC.toString() to product.DESC,
+            EProduct.PRICE.toString() to product.PRICE,
+            EProduct.PROD_CODE.toString() to product.PROD_CODE,
+            EProduct.UOM_CODE.toString() to product.UOM_CODE,
+            EProduct.MANAGE_STOCK.toString() to product.MANAGE_STOCK,
+            EProduct.STOCK.toString() to product.STOCK,
+            EProduct.IMAGE.toString() to product.IMAGE,
+            EProduct.CAT.toString() to product.CAT,
+            EProduct.CODE.toString() to product.CODE,
+            EProduct.CREATED_DATE.toString() to product.CREATED_DATE,
+            EProduct.CREATED_BY.toString() to product.CREATED_BY,
+            EProduct.UPDATED_DATE.toString() to product.UPDATED_DATE,
+            EProduct.UPDATED_BY.toString() to product.UPDATED_BY
+        )
+        database.child(ETable.PRODUCT.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .child(key.toString())
+            .setValue(values).addOnFailureListener {
+                view.response(it.message.toString())
+            }
+            .addOnSuccessListener {
+                view.response(EMessageResult.SUCCESS.toString())
+            }
     }
 
     fun saveNewCategory(newCategory: String){
@@ -135,7 +151,7 @@ class ProductPresenter(private val view: MainView,
         }
     }
 
-    fun retrieveProducts(context: Context){
+    fun retrieveProducts(){
         try {
             postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -150,7 +166,7 @@ class ProductPresenter(private val view: MainView,
             database.child(ETable.PRODUCT.toString())
                 .child(getMerchantCredential(context))
                 .child(getMerchant(context))
-                .orderByKey()
+                .orderByChild(EProduct.CAT.toString())
                 .addListenerForSingleValueEvent(postListener)
 
         }catch (e: Exception){
@@ -158,6 +174,148 @@ class ProductPresenter(private val view: MainView,
         }
 
     }
+
+    fun retrieveProductByProdCode(prodCode: String){
+        try {
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    view.loadData(p0, EMessageResult.FETCH_PROD_SUCCESS.toString())
+                }
+
+            }
+            database.child(ETable.PRODUCT.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
+                .orderByChild(EProduct.PROD_CODE.toString())
+                .equalTo(prodCode)
+                .addListenerForSingleValueEvent(postListener)
+
+        }catch (e: Exception){
+            view.response(e.message.toString())
+        }
+
+    }
+
+    fun retrieveStockMovement(prodCode: String){
+        try {
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    view.loadData(p0, EMessageResult.FETCH_STOCK_MOVEMENT_SUCCESS.toString())
+                }
+
+            }
+            database.child(ETable.STOCK_MOVEMENT.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
+                .orderByChild(EProduct.PROD_CODE.toString())
+                .equalTo(prodCode)
+                .addListenerForSingleValueEvent(postListener)
+
+        }catch (e: Exception){
+            view.response(e.message.toString())
+        }
+    }
+
+    private fun saveStockMovement(product: Product, prodKey: Int){
+        var stockMovementKey = 0
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if (p0.exists()){
+                    for (data in p0.children){
+                        stockMovementKey = data.key.toString().toInt() + 1
+                        break
+                    }
+                }
+                val values  = hashMapOf(
+                    EStock_Movement.PROD_CODE.toString() to product.PROD_CODE,
+                    EStock_Movement.PROD_KEY.toString() to prodKey,
+                    EStock_Movement.STATUS.toString() to EStatusStock.INBOUND,
+                    EStock_Movement.QTY.toString() to product.STOCK,
+                    EStock_Movement.STATUS_CODE.toString() to EStatusCode.DONE,
+                    EStock_Movement.CREATED_DATE.toString() to product.CREATED_DATE,
+                    EStock_Movement.UPDATED_DATE.toString() to product.UPDATED_DATE
+                )
+
+                database.child(ETable.STOCK_MOVEMENT.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchant(context))
+                    .child(stockMovementKey.toString())
+                    .setValue(values).addOnFailureListener {
+                        view.response(it.message.toString())
+                    }
+                    .addOnSuccessListener {
+                        view.response(EMessageResult.SUCCESS.toString())
+                    }
+
+            }
+
+        }
+        database.child(ETable.STOCK_MOVEMENT.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .orderByKey()
+            .limitToLast(1)
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun addStockMovement(stockMovement: StockMovement){
+        var stockMovementKey = 0
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if (p0.exists()){
+                    for (data in p0.children){
+                        stockMovementKey = data.key.toString().toInt() + 1
+                        break
+                    }
+                }
+                val values  = hashMapOf(
+                    EStock_Movement.PROD_CODE.toString() to stockMovement.PROD_CODE,
+                    EStock_Movement.PROD_KEY.toString() to stockMovement.PROD_KEY,
+                    EStock_Movement.STATUS.toString() to stockMovement.STATUS,
+                    EStock_Movement.QTY.toString() to stockMovement.QTY,
+                    EStock_Movement.STATUS_CODE.toString() to stockMovement.STATUS_CODE,
+                    EStock_Movement.CREATED_DATE.toString() to stockMovement.CREATED_DATE,
+                    EStock_Movement.UPDATED_DATE.toString() to stockMovement.UPDATED_DATE
+                )
+
+                database.child(ETable.STOCK_MOVEMENT.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchant(context))
+                    .child(stockMovementKey.toString())
+                    .setValue(values).addOnFailureListener {
+                        view.response(it.message.toString())
+                    }
+                    .addOnSuccessListener {
+                        view.response(EMessageResult.SUCCESS.toString())
+                    }
+
+            }
+
+        }
+        database.child(ETable.STOCK_MOVEMENT.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .orderByKey()
+            .limitToLast(1)
+            .addListenerForSingleValueEvent(postListener)
+    }
+
 
     private fun generateProdCode() : String{
         return database.push().key.toString()

@@ -1,4 +1,6 @@
-package com.chcreation.pointofsale.home
+package com.chcreation.pointofsale.product
+
+import com.chcreation.pointofsale.home.HomeRecyclerViewAdapter
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -23,11 +25,12 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.fragment_manage_product.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.*
 
-class HomeFragment : Fragment() , MainView {
+class ManageProductFragment : Fragment() , MainView {
 
     private lateinit var adapter: HomeRecyclerViewAdapter
     private var productItems : ArrayList<Product> = arrayListOf()
@@ -38,17 +41,9 @@ class HomeFragment : Fragment() , MainView {
     private var categoryItems: ArrayList<String> = arrayListOf()
     private var productKeys: ArrayList<Int> = arrayListOf()
     private var tmpProductKeys: ArrayList<Int> = arrayListOf()
+    private var tempProductItems : ArrayList<Product> = arrayListOf()
     private var currentCat = 0
     private var searchFilter = ""
-
-    companion object{
-        var tempProductItems : ArrayList<Product> = arrayListOf()
-        var cartItems: ArrayList<Cart> = arrayListOf()
-        var totalQty = 0
-        var totalPrice = 0
-
-        var active = false // to end application
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,7 +51,7 @@ class HomeFragment : Fragment() , MainView {
         savedInstanceState: Bundle?
     ): View? {
 
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        return inflater.inflate(R.layout.fragment_manage_product, container, false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -64,7 +59,6 @@ class HomeFragment : Fragment() , MainView {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
         presenter = Homepresenter(this,mAuth,mDatabase,ctx)
 
         adapter = HomeRecyclerViewAdapter(
@@ -72,34 +66,20 @@ class HomeFragment : Fragment() , MainView {
             tempProductItems
         ) {
             try {
+                startActivity(intentFor<ManageProductDetailActivity>(EProduct.PROD_CODE.toString() to tempProductItems[it].PROD_CODE))
 
-                addCart(it)
-                totalQty = countQty()
-                totalPrice = sumPrice()
-
-                if (tempProductItems[it].MANAGE_STOCK)
-                    tempProductItems[it] = Product(tempProductItems[it].NAME,tempProductItems[it].PRICE,tempProductItems[it].DESC,tempProductItems[it].COST, tempProductItems[it].MANAGE_STOCK,
-                        tempProductItems[it].STOCK!! - 1,tempProductItems[it].IMAGE,tempProductItems[it].PROD_CODE,tempProductItems[it].UOM_CODE,tempProductItems[it].CAT,
-                        tempProductItems[it].CODE)
-
-                adapter.notifyDataSetChanged()
-
-                btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
-                btnHomeAddItem.startAnimation(normalClickAnimation())
-                btnHomeAddItem.backgroundResource = R.drawable.button_border_fill
-                btnHomeAddItem.textColorResource = R.color.colorWhite
             }catch (e: Exception){
                 showError(ctx,e.message.toString())
             }
         }
 
-        rvHome.layoutManager = LinearLayoutManager(ctx)
-        rvHome.adapter = adapter
+        rvManageProduct.layoutManager = LinearLayoutManager(ctx)
+        rvManageProduct.adapter = adapter
 
-        tlHome.tabMode = TabLayout.MODE_FIXED
+        tlManageProduct.tabMode = TabLayout.MODE_FIXED
 
-        tlHome.addTab(tlHome.newTab().setText("All"),true)
-        tlHome.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
+        tlManageProduct.addTab(tlManageProduct.newTab().setText("All"),true)
+        tlManageProduct.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
             override fun onTabReselected(tab: TabLayout.Tab?) {
             }
 
@@ -114,7 +94,7 @@ class HomeFragment : Fragment() , MainView {
 
         })
 
-        svHomeSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        svManageProduct.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
 
             override fun onQueryTextChange(newText: String): Boolean {
                 searchFilter = newText
@@ -128,24 +108,11 @@ class HomeFragment : Fragment() , MainView {
 
         })
 
-        btnHomeAddItem.onClick {
-            if (cartItems.size == 0)
-                alert("Add some Items to Your Cart First.") {
-                    title = "Empty Cart"
-
-                    yesButton {  }
-                }.show()
-            else{
-                btnHomeAddItem.startAnimation(normalClickAnimation())
-                startActivity<CartActivity>()
-            }
-        }
-
-        srHome.onRefresh {
+        srManageProduct.onRefresh {
             presenter.retrieveProducts()
         }
 
-        pbHome.visibility = View.VISIBLE
+        pbManageProduct.visibility = View.VISIBLE
 
 
     }
@@ -157,23 +124,7 @@ class HomeFragment : Fragment() , MainView {
             presenter.retrieveProducts()
         presenter.retrieveCategories()
 
-        btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
-
-        if (totalPrice != 0){
-            btnHomeAddItem.backgroundResource = R.drawable.button_border_fill
-            btnHomeAddItem.textColorResource = R.color.colorWhite
-        }
-        else{
-            btnHomeAddItem.backgroundResource = R.drawable.button_border
-            btnHomeAddItem.textColorResource = R.color.colorBlack
-        }
         currentCat = 0
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        active = true
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -187,45 +138,6 @@ class HomeFragment : Fragment() , MainView {
 
         if (savedInstanceState != null) {
             savedInstanceState.getStringArray("categoryItems")?.let { categoryItems.addAll(it) }
-        }
-    }
-
-    private fun countQty() : Int{
-        var total = 0
-        for (data in cartItems){
-            total += data.Qty!!
-        }
-        return total
-    }
-
-    private fun sumPrice() : Int{
-        var total = 0
-
-        for (data in cartItems){
-            total += (data.PRICE!! * data.Qty!!)
-        }
-        return total
-    }
-
-    private fun addCart(position: Int){
-        if (cartItems.size == 0)
-            cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
-                tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1))
-        else{
-            var check = false
-            for ((i , data) in cartItems.withIndex()){
-                if (data.NAME.equals(tempProductItems[position].NAME)){
-                    val lastQty = data.Qty
-                    cartItems[i].Qty = lastQty!! + 1
-
-                    check = true
-                    break
-                }
-
-            }
-            if (!check)
-                cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
-                    tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1))
         }
     }
 
@@ -250,7 +162,7 @@ class HomeFragment : Fragment() , MainView {
 
         adapter.notifyDataSetChanged()
 
-        srHome.isRefreshing = false
+        srManageProduct.isRefreshing = false
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
@@ -271,13 +183,13 @@ class HomeFragment : Fragment() , MainView {
 
                     adapter.notifyDataSetChanged()
                     if (context != null)
-                        srHome.isRefreshing = false
+                        srManageProduct.isRefreshing = false
 
                     fetchProductByCat()
                 }
                 else{
                     if (context != null)
-                        srHome.isRefreshing = false
+                        srManageProduct.isRefreshing = false
                 }
             }
             else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
@@ -285,15 +197,15 @@ class HomeFragment : Fragment() , MainView {
                 categoryItems.add("All")
                 if (dataSnapshot.exists()){
                     for (data in dataSnapshot.children) {
-                        tlHome.addTab(tlHome.newTab().setText(data.key))
+                        tlManageProduct.addTab(tlManageProduct.newTab().setText(data.key))
                         categoryItems.add(data.key.toString())
                     }
                     if (categoryItems.size > 4)
-                        tlHome.tabMode = TabLayout.MODE_SCROLLABLE
+                        tlManageProduct.tabMode = TabLayout.MODE_SCROLLABLE
                 }
-                svHomeSearch.visibility = View.VISIBLE
-                pbHome.visibility = View.GONE
-                srHome.visibility = View.VISIBLE
+                svManageProduct.visibility = View.VISIBLE
+                pbManageProduct.visibility = View.GONE
+                srManageProduct.visibility = View.VISIBLE
             }
         }
 

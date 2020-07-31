@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/layoutManageProductStock"
+    tools:context=".product.ManageProductUpdateStockFragment">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:textSize="20sp"
+        android:textColor="@color/colorBlack"
+        android:gravity="bottom |center"
+        android:text="Current Stock" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:textSize="56sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorBlack"
+        android:gravity="center"
+        android:id="@+id/tvManageProductStockMovementStock"
+        android:text="100" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_border_fill"
+        android:textColor="@color/colorWhite"
+        android:layout_marginHorizontal="5dp"
+        android:id="@+id/btnManageProductStockMovement"
+        android:text="Stock Movement"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_border_fill"
+        android:textColor="@color/colorWhite"
+        android:layout_margin="5dp"
+        android:id="@+id/btnManageProductManageStock"
+        android:text="Manage Stocks"/>
+
+</LinearLayout>

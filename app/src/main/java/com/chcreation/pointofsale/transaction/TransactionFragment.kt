@@ -100,8 +100,8 @@ class TransactionFragment : Fragment(), MainView {
 
         rvTransaction.adapter = adapter
         val linearLayoutManager = LinearLayoutManager(ctx)
-        linearLayoutManager.reverseLayout = true
-        linearLayoutManager.stackFromEnd = true
+//        linearLayoutManager.reverseLayout = true
+//        linearLayoutManager.stackFromEnd = true
 
         rvTransaction.layoutManager = linearLayoutManager
 
@@ -144,6 +144,10 @@ class TransactionFragment : Fragment(), MainView {
                 }
             }
         }
+
+        transItems.reverse()
+        customerItems.reverse()
+        transCodeItems.reverse()
         adapter.notifyDataSetChanged()
     }
 

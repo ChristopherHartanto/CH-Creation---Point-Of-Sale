@@ -1,12 +1,8 @@
 package com.chcreation.pointofsale.product
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.database.Cursor
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
 import android.net.Uri
@@ -16,18 +12,25 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.core.view.size
-import com.chcreation.pointofsale.*
-import com.chcreation.pointofsale.model.Merchant
+import com.bumptech.glide.Glide
+import com.chcreation.pointofsale.EMessageResult
+
+import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.dateFormat
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
-import com.chcreation.pointofsale.product.NewCategory.Companion.newCategory
+import com.chcreation.pointofsale.product.ManageProductDetailActivity.Companion.prodCode
+import com.chcreation.pointofsale.showError
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
@@ -38,136 +41,137 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
-import kotlinx.android.synthetic.main.activity_merchant.*
 import kotlinx.android.synthetic.main.activity_new_product.*
+import kotlinx.android.synthetic.main.fragment_manage_product_update_product.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.selector
-import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.support.v4.alert
+import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.selector
+import org.jetbrains.anko.support.v4.toast
 import java.io.File
 import java.io.IOException
-import java.text.SimpleDateFormat
+import java.lang.Exception
 import java.util.*
-import kotlin.collections.ArrayList
 
 
-class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSelectedListener {
+class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnItemSelectedListener {
 
+    private lateinit var presenter: ProductPresenter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
-    private lateinit var presenter : ProductPresenter
     private lateinit var storage: StorageReference
-    private lateinit var sharedPreference: SharedPreferences
-    private var PICK_IMAGE_CAMERA  = 111
-    private var PICK_IMAGE_GALLERY = 222
-    private var filePath: Uri? = null
-    private var prodCode = ""
-    private var merchant = ""
     private var categoryItems : MutableList<String> = mutableListOf()
     private var selectedCategory = ""
     private var positionSpinner = 0
     private lateinit var spAdapter: ArrayAdapter<String>
-    private var manageStock = false
+    private var manageStock = true
+    private var PICK_IMAGE_CAMERA  = 111
+    private var PICK_IMAGE_GALLERY = 222
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_new_product)
+    companion object{
+        var filePath: Uri? = null
+        var bitmap: Bitmap? = null
+        var productKey = 0
+        var product: Product = Product()
+        var currentPhotoPath = ""
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_manage_product_update_product, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         storage = FirebaseStorage.getInstance().reference
-        presenter = ProductPresenter(this,mAuth,mDatabase,this)
-        sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+        presenter = ProductPresenter(this,mAuth,mDatabase,ctx)
 
-        merchant = sharedPreference.getString("merchant","").toString()
-        prodCode = generateProdCode()
-
-        spAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,categoryItems)
+        spAdapter = ArrayAdapter(ctx, android.R.layout.simple_spinner_item,categoryItems)
         spAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        spProduct.adapter = spAdapter
-        spProduct.onItemSelectedListener = this
-        spProduct.gravity = Gravity.CENTER
+        spManageProduct.adapter = spAdapter
+        spManageProduct.onItemSelectedListener = this
+        spManageProduct.gravity = Gravity.CENTER
 
+        swManageProduct.onCheckedChange { buttonView, isChecked ->
+            manageStock = swManageProduct.isChecked
+        }
+
+        swManageProduct.isChecked = !swManageProduct.isChecked
+//
+//        GlobalScope.launch (Dispatchers.Main){
+//            presenter.retrieveCategories()
+//            presenter.retrieveProductByProdCode(prodCode)
+//        }
+        presenter.retrieveCategories()
+        ivManageProductImage.onClick {
+            selectImage()
+        }
     }
 
     override fun onStart() {
         super.onStart()
 
-        spProduct.setSelection(0)
+        btnManageProductSave.onClick {
+            alert ("Are You Sure want to Update?"){
+                title = "Update"
+                yesButton {
+                    if (positionSpinner == 0 || positionSpinner == 1)
+                        toast("Please Select Category")
+                    else if (etManageProductName.text.toString() == "")
+                        toast("Name Must be Fill !!")
+                    else{
+                        pbManageProduct.visibility = View.VISIBLE
 
-        btnProductSave.onClick {
+                        if (filePath == null)
+                            updateProduct(null)
+                        else
+                            uploadImage()
+                    }
+                }
+                noButton {
 
-            if (positionSpinner == 0)
-                toast("Please Select Category")
-            else{
-                if (filePath == null)
-                    saveProduct("")
-                else
-                    uploadImage()
-            }
-
+                }
+            }.show()
         }
-
-        ivProductImage.onClick {
-            selectImage()
-        }
-
-        swProduct.onCheckedChange { buttonView, isChecked ->
-            if (swProduct.isChecked){
-                manageStock = true
-                layoutProductStock.visibility = View.VISIBLE
-            }else{
-                manageStock = false
-                layoutProductStock.visibility = View.GONE
-            }
-        }
-
-        swProduct.isChecked = !swProduct.isChecked
-
     }
 
-    private fun saveProduct(imageUrl: String){
-        val name = etProductName.text.toString()
-        val desc = etProductDescription.text.toString()
+    private fun updateProduct(imageUri: String?){
+        val name = etManageProductName.text.toString()
+        val desc = etManageProductDescription.text.toString()
+        val prodCode = etManageProductCode.text.toString()
+
         var price = 0
-        if (etProductPrice.text.toString() != "")
-            price = etProductPrice.text.toString().toInt()
+        if (etManageProductPrice.text.toString() != "")
+            price = etManageProductPrice.text.toString().toInt()
 
         var cost = 0
-        if (etProductCost.text.toString() != "")
-            cost = etProductCost.text.toString().toInt()
+        if (etManageProductCost.text.toString() != "")
+            cost =  etManageProductCost.text.toString().toInt()
 
-        var stock = 0
-        if (etProductStock.text.toString() != "")
-            stock = etProductStock.text.toString().toInt()
+        var image = product.IMAGE
+        if (imageUri != null)
+            image = imageUri
 
-        val code = etProductCode.text.toString()
-        val uomCode = "Unit"
-        var cat = ""
-        cat = if (selectedCategory == categoryItems[0])
-            "ALL"
-        else
-            selectedCategory
-
-        if (getMerchant(this) == "")
-            toast("You Haven't Set Up Your Merchant")
-        else
-            presenter.saveProduct(Product(name,price,desc,cost,manageStock,stock,imageUrl,prodCode,uomCode,selectedCategory,code,
-                dateFormat().format(Date()),dateFormat().format(Date()),
-                mAuth.currentUser!!.uid,mAuth.currentUser!!.uid))
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        presenter.retrieveCategories()
+        presenter.saveProduct(Product(name,price,desc,cost,manageStock,product.STOCK,image,
+            product.PROD_CODE,product.UOM_CODE,categoryItems[positionSpinner],prodCode,product.CREATED_DATE,
+            dateFormat().format(Date()), product.CREATED_BY,mAuth.currentUser!!.uid),productKey)
     }
     private fun uploadImage(){
         if(filePath != null){
-            layoutProduct.alpha = 0.3F
-            pbProduct.visibility = View.VISIBLE
+            layoutManageProduct.alpha = 0.3F
+            pbManageProduct.visibility = View.VISIBLE
 
             val ref = storage.child("product")
                 .child(mAuth.currentUser!!.uid)
@@ -185,33 +189,30 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
             }).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val downloadUri = task.result
-                    saveProduct(downloadUri.toString())
+                    updateProduct(downloadUri.toString())
                 } else {
                     toast("Failed to Save Image")
-                    layoutProduct.alpha = 1F
-                    pbProduct.visibility = View.GONE
+                    layoutManageProduct.alpha = 1F
+                    pbManageProduct.visibility = View.GONE
                 }
             }.addOnFailureListener{
                 toast("Error : ${it.message}")
-                layoutProduct.alpha = 1F
-                pbProduct.visibility = View.GONE
+                layoutManageProduct.alpha = 1F
+                pbManageProduct.visibility = View.GONE
             }
         }else{
-            Toast.makeText(this, "Please Upload an Image", Toast.LENGTH_SHORT).show()
+            toast("Please Upload an Image")
+            layoutManageProduct.alpha = 1F
+            pbManageProduct.visibility = View.GONE
         }
     }
 
-    private fun generateProdCode() : String{
-        return "P${mDatabase.push().key.toString()}"
-    }
-
-    lateinit var currentPhotoPath: String
 
     @Throws(IOException::class)
     private fun createImageFile(): File {
         // Create an image file name
         val timeStamp: String = dateFormat().format(Date(1000))
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val storageDir: File? = ctx.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
             "JPEG_${timeStamp}_", /* prefix */
             ".jpg", /* suffix */
@@ -224,10 +225,9 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
 
     }
 
-    // Select Image method
     private fun selectImage() { // Defining Implicit Intent to mobile gallery
 
-        intent = Intent()
+        var intent = Intent()
         val options = mutableListOf("Take a Photo", "Pick from Gallery")
 
 
@@ -235,22 +235,9 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                 dialogInterface, i ->
             when(i){
                 0 -> {
-//                    val values = ContentValues()
-//                    values.put(MediaStore.Images.Media.TITLE, "New Picture")
-//                    values.put(MediaStore.Images.Media.DESCRIPTION, "From the Camera")
-//                    val image_uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-//                    //camera intent
-//                    intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-//                    //intent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri)
-//
-//                    startActivityForResult(
-//                        intent,
-//                        PICK_IMAGE_CAMERA
-//                    )
-
                     Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
                         // Ensure that there's a camera activity to handle the intent
-                        takePictureIntent.resolveActivity(packageManager)?.also {
+                        takePictureIntent.resolveActivity(ctx.packageManager)?.also {
                             // Create the File where the photo should go
                             val photoFile: File? = try {
                                 createImageFile()
@@ -260,27 +247,21 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                             // Continue only if the File was successfully created
                             photoFile?.also {
                                 val photoURI: Uri = FileProvider.getUriForFile(
-                                    this,
+                                    ctx,
                                     "com.example.android.fileprovider",
                                     it
                                 )
                                 Log.d("uri: ",photoURI.toString())
                                 filePath = photoURI
                                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                                startActivityForResult(takePictureIntent, PICK_IMAGE_CAMERA)
+                                this.startActivityForResult(takePictureIntent, PICK_IMAGE_CAMERA)
                             }
                         }
                     }
-//
-//                    Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-//                        takePictureIntent.resolveActivity(packageManager)?.also {
-//                            startActivityForResult(takePictureIntent, PICK_IMAGE_CAMERA)
-//                        }
-//                    }
                 }
                 1 -> {
                     intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                    startActivityForResult(
+                    this.startActivityForResult(
                         intent,
                         PICK_IMAGE_GALLERY
                     )
@@ -296,18 +277,14 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
 
         if (requestCode == PICK_IMAGE_CAMERA && resultCode == Activity.RESULT_OK) {
             try {
-                val bitmap = MediaStore.Images.Media
+                bitmap = MediaStore.Images.Media
                     .getBitmap(
-                        contentResolver,
+                        ctx.contentResolver,
                         filePath
                     )
-                //val imageBitmap = data.extras?.get("data") as Bitmap
-                //ivProductImage.setImageBitmap(bitmap)
-                //galleryAddPic()
-                ivProductImage.setImageBitmap(rotateImage(bitmap))
             } catch (e: Exception) {
                 filePath = null
-                showError(this,e.message.toString())
+                showError(ctx,e.message.toString())
                 e.printStackTrace()
             }
         }
@@ -316,36 +293,27 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
             filePath = data.data
             currentPhotoPath = getRealPathFromURI(filePath!!)
             try { // Setting image on image view using Bitmap
-                val bitmap = MediaStore.Images.Media
+                bitmap = MediaStore.Images.Media
                     .getBitmap(
-                        contentResolver,
+                        ctx.contentResolver,
                         filePath
                     )
-                //currentPhotoPath = photoURI.toString()
-                ivProductImage.setImageBitmap(rotateImage(bitmap))
             } catch (e: IOException) { // Log the exception
-                showError(this,e.message.toString())
+                showError(ctx,e.message.toString())
                 e.printStackTrace()
             }
         }
     }
 
-    private fun galleryAddPic() {
-        Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
-            val f = File(currentPhotoPath)
-            mediaScanIntent.data = Uri.fromFile(f)
-            sendBroadcast(mediaScanIntent)
-        }
-    }
-
-    fun rotateImage(bitmapSource : Bitmap) : Bitmap{
+    fun rotateImage(bitmapSource : Bitmap) : Bitmap {
         val ei = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ExifInterface(File(currentPhotoPath))
         } else {
             ExifInterface(filePath.toString())
         };
-        val orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
-        ExifInterface.ORIENTATION_UNDEFINED);
+        val orientation = ei.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_UNDEFINED);
 
         var rotatedBitmap = null;
         var degree = 0F
@@ -371,42 +339,54 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
             matrix, true)
     }
 
-    private fun decodePicture() {
-        // Get the dimensions of the View
-        val targetW: Int = ivProductImage.width
-        val targetH: Int = ivProductImage.height
-
-        val bmOptions = BitmapFactory.Options().apply {
-            // Get the dimensions of the bitmap
-            inJustDecodeBounds = true
-
-            val photoW: Int = outWidth
-            val photoH: Int = outHeight
-
-            // Determine how much to scale down the image
-            val scaleFactor: Int = (photoW / targetW).coerceAtMost(photoH / targetH)
-
-            // Decode the image file into a Bitmap sized to fill the View
-            inJustDecodeBounds = false
-            inSampleSize = scaleFactor
-            inPurgeable = true
-        }
-        BitmapFactory.decodeFile(currentPhotoPath, bmOptions)?.also { bitmap ->
-            ivProductImage.setImageBitmap(bitmap)
-        }
-    }
-
     fun getRealPathFromURI(uri: Uri): String {
         @SuppressWarnings("deprecation")
-        val cursor = managedQuery(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null);
+        val cursor = requireActivity().managedQuery(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null);
         val column_index = cursor
-                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         return cursor.getString(column_index);
     }
 
+    private fun fetchData(){
+        etManageProductCode.setText(product.CODE.toString())
+        etManageProductCost.setText(product.COST.toString())
+        etManageProductDescription.setText(product.DESC.toString())
+        etManageProductName.setText(product.NAME.toString())
+        etManageProductPrice.setText(product.PRICE.toString())
+        (activity as AppCompatActivity).supportActionBar?.title = product.NAME.toString()
+
+        if (bitmap != null)
+            ivManageProductImage.setImageBitmap(rotateImage(bitmap!!))
+        else if (product.IMAGE.toString() != "")
+            Glide.with(ctx).load(product.IMAGE).into(ivManageProductImage)
+
+        if (categoryItems.size != 0){
+            val index = categoryItems.indexOf(product.CAT)
+            spManageProduct.setSelection(index)
+        }
+
+        swManageProduct.isChecked = product.MANAGE_STOCK
+    }
+
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()) {
+        if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
+            if (dataSnapshot.exists())
+            {
+                try{
+                    for (data in dataSnapshot.children){
+                        productKey = data.key!!.toInt()
+                        val item = data.getValue(Product::class.java)
+                        product = item!!
+                    }
+                    fetchData()
+                }catch (e: Exception){
+                    showError(ctx,e.message.toString())
+                    e.printStackTrace()
+                }
+            }
+        }else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()) {
             categoryItems.clear()
             categoryItems.add("")
             categoryItems.add("Create Category")
@@ -417,21 +397,32 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                     if (item != "")
                         categoryItems.add(item.toString())
                 }
-                spProduct.setSelection(0)
+
                 selectedCategory = categoryItems[0]
+                presenter.retrieveProductByProdCode(prodCode)
+                spAdapter.notifyDataSetChanged()
+                spManageProduct.setSelection(0)
             }
-            spAdapter.notifyDataSetChanged()
         }
     }
 
+    fun clearData(){
+        filePath = null
+        bitmap = null
+        currentPhotoPath = ""
+        product = Product()
+        productKey = 0
+    }
+
     override fun response(message: String) {
-        if (message == EMessageResult.SUCCESS.toString()) {
-            toast("success")
-            layoutProduct.alpha = 1F
-            pbProduct.visibility = View.GONE
-            finish()
-        }else
-            toast("" + message)
+        if (message == EMessageResult.SUCCESS.toString()){
+            clearData()
+            toast("Update Success")
+            if (swManageProduct.isChecked)
+                product.MANAGE_STOCK = true
+        }
+        layoutManageProduct.alpha = 1F
+        pbManageProduct.visibility = View.GONE
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -442,6 +433,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         selectedCategory = categoryItems[position]
         positionSpinner = position
         if (position == 1)
-            startActivity<NewCategory>()
+            ctx.startActivity<NewCategory>()
     }
+
 }

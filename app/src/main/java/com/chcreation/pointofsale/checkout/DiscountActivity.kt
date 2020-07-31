@@ -8,6 +8,8 @@ import android.text.TextWatcher
 import androidx.core.widget.doOnTextChanged
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
+import com.chcreation.pointofsale.indonesiaCurrencyFormat
+import com.chcreation.pointofsale.normalClickAnimation
 import kotlinx.android.synthetic.main.activity_discount.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.sdk27.coroutines.textChangedListener
@@ -50,7 +52,7 @@ class DiscountActivity : AppCompatActivity() {
                     percentageDiscount =  (discount / totalPrice) * 100
 
                     etDiscountPercentage.setText(percentageDiscount.toString())
-                    tvDiscountNewTotalContent.text = (totalPrice - discount).toString()
+                    tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice - discount)
                 }else if(action == 2){
                     tax = text.toString().toInt()
                     if (tax > totalPrice){
@@ -61,7 +63,7 @@ class DiscountActivity : AppCompatActivity() {
                     percentageDiscount =  tax / totalPrice * 100
 
                     etDiscountPercentage.setText(percentageDiscount.toString())
-                    tvDiscountNewTotalContent.text = (totalPrice + tax).toString()
+                    tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice + tax)
                 }
 
 
@@ -98,15 +100,16 @@ class DiscountActivity : AppCompatActivity() {
                 etDiscountCash.setText(cashDiscount.toString())
 
                 if (action == 1)
-                    tvDiscountNewTotalContent.text = (totalPrice - discount).toString()
+                    tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice - discount)
                 else if (action == 2)
-                    tvDiscountNewTotalContent.text = (totalPrice + tax).toString()
+                    tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice + tax)
 
                 etDiscountPercentage.requestFocus()
             }
         }
 
         btnDiscount.onClick {
+            btnDiscount.startAnimation(normalClickAnimation())
             finish()
         }
     }
