@@ -1,4 +1,4 @@
-package com.chcreation.pointofsale.product
+package com.chcreation.pointofsale.customer
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,12 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.FragmentStatePagerAdapter
+import com.chcreation.pointofsale.ECustomer
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.EProduct
 import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.checkout.CheckOutActivity
-import com.chcreation.pointofsale.checkout.SelectCustomerActivity
-import com.chcreation.pointofsale.presenter.ProductPresenter
+import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.Companion.custKey
+import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.bitmap
 import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.currentPhotoPath
 import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.filePath
@@ -27,36 +27,40 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
+import kotlinx.android.synthetic.main.activity_customer_detail.*
 import kotlinx.android.synthetic.main.activity_detail_transaction.*
 import kotlinx.android.synthetic.main.activity_manage_product_detail.*
-import org.jetbrains.anko.*
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.noButton
+import org.jetbrains.anko.toast
+import org.jetbrains.anko.yesButton
 
-class ManageProductDetailActivity : AppCompatActivity(),MainView {
+class CustomerDetailActivity : AppCompatActivity(),MainView {
 
     companion object{
-        var prodCode = ""
+        var custCode = ""
     }
-    private lateinit var presenter: ProductPresenter
+
+    private lateinit var presenter: CustomerPresenter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_manage_product_detail)
+        setContentView(R.layout.activity_customer_detail)
+
+        supportActionBar?.title = "Customer Detail"
+        custCode = intent.extras!!.getString(ECustomer.CODE.toString(),"")
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = ProductPresenter(this,mAuth,mDatabase,this)
-
-        supportActionBar?.title = "Product Detail"
-        prodCode = intent.extras!!.getString(EProduct.PROD_CODE.toString(),"")
+        presenter = CustomerPresenter(this,mAuth,mDatabase,this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        prodCode = ""
+        custCode = ""
     }
 
     override fun onStart() {
@@ -66,9 +70,9 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
             supportFragmentManager,
             FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
         )
-        vpManageProductDetail.adapter = adapter
+        vpCustomerDetail.adapter = adapter
 
-        tlManageProductDetail.setupWithViewPager(vpManageProductDetail)
+        tlCustomerDetail.setupWithViewPager(vpCustomerDetail)
     }
 
     override fun onBackPressed() {
@@ -76,15 +80,11 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
             alert ("Are you want to Discard Edit?"){
                 title = "Discard"
                 yesButton {
-                    pbManageProductDetail.visibility = View.VISIBLE
-                    vpManageProductDetail.visibility = View.GONE
-                    ManageProductUpdateProductFragment().clearData()
                     super.onBackPressed()
                 }
                 noButton {  }
             }.show()
         else{
-            ManageProductUpdateProductFragment().clearData()
             super.onBackPressed()
         }
     }
@@ -102,7 +102,7 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
                 alert ("Are Sure Want to Delete?"){
                     title = "Delete"
                     yesButton {
-                        presenter.deleteProduct(prodCode)
+                        presenter.deleteCustomer(custKey)
                     }
                     noButton {
 
@@ -115,13 +115,13 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
     }
 
     class TabAdapter(fm: FragmentManager, behavior: Int) : FragmentStatePagerAdapter(fm, behavior) {
-        private val tabName : Array<String> = arrayOf("Product", "Stock")
+        private val tabName : Array<String> = arrayOf("Profile", "Transaction")
 
         override fun getItem(position: Int): Fragment = when (position) {
             0 -> {
-                ManageProductUpdateProductFragment()
+                CustomerDetailManageCustomerFragment()
             }
-            else -> ManageProductUpdateStockFragment()
+            else -> CustomerDetailTransactionFragment()
         }
 
         override fun getCount(): Int = tabName.size
@@ -129,14 +129,10 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-
     }
 
     override fun response(message: String) {
         if (message == EMessageResult.DELETE_SUCCESS.toString()){
-            pbManageProductDetail.visibility = View.GONE
-            vpManageProductDetail.visibility = View.VISIBLE
-
             toast("Delete Success")
             finish()
         }

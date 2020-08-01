@@ -2,6 +2,7 @@ package com.chcreation.pointofsale.product
 
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -94,28 +95,37 @@ class ProductFragment : Fragment(), MainView {
         categoryTotalItems.clear()
         var count = 1
 
-        for ((index,item) in items.withIndex()){
-            var check = false
+        val itemGroup = items.groupBy { it.CAT }
+        Log.d("group by:", itemGroup.toString())
 
-            for ((index,data) in productItems.withIndex()){
-                if (data.CAT == item.CAT)
-                    check = true
-            }
-            if (!check){
-                productItems.add(item)
-            }
-
-            if (index > 0 && items[index].CAT != items[index-1].CAT){
-                categoryTotalItems.add(count)
-                count = 1
-            }
-            else if (index == items.size-1 && items[index].CAT == items[index-1].CAT){
-                categoryTotalItems.add(count+1)
-            }
-            else if (index > 0)
-                count++
-
+        for (data in itemGroup){
+            val item = data.value
+            categoryTotalItems.add(item.size)
+            productItems.add(item[0])
         }
+
+//        for ((index,item) in items.withIndex()){
+//            var check = false
+//
+//            for ((index,data) in productItems.withIndex()){
+//                if (data.CAT == item.CAT)
+//                    check = true
+//            }
+//            if (!check){
+//                productItems.add(item)
+//            }
+//
+//            if (index > 0 && items[index].CAT != items[index-1].CAT){
+//                categoryTotalItems.add(count)
+//                count = 1
+//            }
+//            else if (index == items.size-1 && items[index].CAT == items[index-1].CAT){
+//                categoryTotalItems.add(count+1)
+//            }
+//            else if (index > 0)
+//                count++
+//
+//        }
 
         rvAdapter.notifyDataSetChanged()
     }

@@ -11,9 +11,32 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:orientation="horizontal">
+        <FrameLayout
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:id="@+id/layoutRowCustomerDefaultImage">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@color/colorPrimary"/>
+
+            <TextView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:text="P"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textColor="@color/colorBlack"
+                android:id="@+id/tvRowCustomerFirstName"/>
+        </FrameLayout>
+
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:id="@+id/ivRowCustomerImage"
             android:layout_margin="5dp"
             android:src="@drawable/user"/>
 
@@ -22,6 +45,7 @@
             android:layout_height="match_parent"
             android:id="@+id/tvRowCustomerName"
             android:gravity="center_vertical"
+            android:layout_marginStart="5dp"
             android:textColor="@color/colorBlack"/>
     </LinearLayout>
 

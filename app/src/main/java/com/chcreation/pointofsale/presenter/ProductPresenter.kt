@@ -45,7 +45,46 @@ class ProductPresenter(private val view: MainView,
         }
     }
 
-    fun getProductPrimaryKey(product: Product){
+    fun deleteProduct(prodCode: String){
+        try {
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        for (data in p0.children){
+                            database.child(ETable.PRODUCT.toString())
+                                .child(getMerchantCredential(context))
+                                .child(getMerchant(context))
+                                .child(data.key.toString())
+                                .child(EProduct.STATUS_CODE.toString())
+                                .setValue(EStatusCode.DELETE.toString()).addOnFailureListener {
+                                    view.response(it.message.toString())
+                                }
+                                .addOnSuccessListener {
+                                    view.response(EMessageResult.DELETE_SUCCESS.toString())
+                                }
+                        }
+                    }
+                }
+
+            }
+            database.child(ETable.PRODUCT.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
+                .orderByChild(EProduct.PROD_CODE.toString())
+                .equalTo(prodCode)
+                .addListenerForSingleValueEvent(postListener)
+
+        }catch (e:java.lang.Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    private fun getProductPrimaryKey(product: Product){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -90,6 +129,7 @@ class ProductPresenter(private val view: MainView,
             EProduct.IMAGE.toString() to product.IMAGE,
             EProduct.CAT.toString() to product.CAT,
             EProduct.CODE.toString() to product.CODE,
+            EProduct.STATUS_CODE.toString() to product.STATUS_CODE,
             EProduct.CREATED_DATE.toString() to product.CREATED_DATE,
             EProduct.CREATED_BY.toString() to product.CREATED_BY,
             EProduct.UPDATED_DATE.toString() to product.UPDATED_DATE,

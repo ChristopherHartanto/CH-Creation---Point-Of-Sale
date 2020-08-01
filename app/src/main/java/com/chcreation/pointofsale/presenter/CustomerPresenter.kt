@@ -29,9 +29,46 @@ class CustomerPresenter(private val view: MainView,
 
     }
 
+    fun saveCustomer(customer: Customer, custKey: Int){
+        val values  = hashMapOf(
+            ECustomer.NAME.toString() to customer.NAME,
+            ECustomer.EMAIL.toString() to customer.EMAIL,
+            ECustomer.PHONE.toString() to customer.PHONE,
+            ECustomer.ADDRESS.toString() to customer.ADDRESS,
+            ECustomer.CREATED_DATE.toString() to customer.CREATED_DATE,
+            ECustomer.UPDATED_DATE.toString() to customer.UPDATED_DATE,
+            ECustomer.CODE.toString() to customer.CODE
+        )
+        database.child(ETable.CUSTOMER.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .child(custKey.toString())
+            .setValue(values).addOnFailureListener {
+                view.response(it.message.toString())
+            }
+            .addOnSuccessListener {
+                view.response(EMessageResult.SUCCESS.toString())
+            }
+    }
+
     fun saveCustomer(customer: Customer){
 
         getCustomerPrimaryKey(customer)
+    }
+
+    fun deleteCustomer(custKey: Int){
+
+        database.child(ETable.CUSTOMER.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .child(custKey.toString())
+            .child(ECustomer.STATUS_CODE.toString())
+            .setValue(EStatusCode.DELETE.toString()).addOnFailureListener {
+                view.response(it.message.toString())
+            }
+            .addOnSuccessListener {
+                view.response(EMessageResult.DELETE_SUCCESS.toString())
+            }
     }
 
     private fun getCustomerPrimaryKey(customer: Customer){
@@ -96,6 +133,44 @@ class CustomerPresenter(private val view: MainView,
         database.child(ETable.CUSTOMER.toString())
             .child(getMerchantCredential(context))
             .child(getMerchant(context))
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun retrieveCustomerByCustCode(custCode: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_CUSTOMER_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.CUSTOMER.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .orderByChild(ECustomer.CODE.toString())
+            .equalTo(custCode)
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun retrieveCustomerTransaction(custCode: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_CUSTOMER_TRANSACTION_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.ENQUIRY.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .orderByChild(E_Enquiry.CUST_CODE.toString())
+            .equalTo(custCode)
             .addListenerForSingleValueEvent(postListener)
     }
 

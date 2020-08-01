@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
+import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -18,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.chcreation.pointofsale.home.HomeFragment.Companion.active
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
@@ -52,6 +54,7 @@ class MainActivity : AppCompatActivity() {
 
         var view = navView.getHeaderView(0)
         val tvNavHeaderMerchantName = view.findViewById<TextView>(R.id.tvNavHeaderMerchantName)
+        val layoutNavHeader = view.findViewById<LinearLayout>(R.id.layoutNavHeader)
         tvNavHeaderMerchantName.text = getMerchant(this)
 
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -70,7 +73,8 @@ class MainActivity : AppCompatActivity() {
         if (active){
             this.doubleBackToExitPressedOnce = true
             toast("Please click BACK again to exit")
-        }
+        }else
+            super.onBackPressed()
 
         Handler().postDelayed(Runnable { doubleBackToExitPressedOnce = false }, 2000)
     }

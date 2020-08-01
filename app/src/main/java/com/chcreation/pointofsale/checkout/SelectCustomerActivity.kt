@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.EStatusCode
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.customer.CustomerRecyclerViewAdapter
 import com.chcreation.pointofsale.customer.NewCustomerActivity
@@ -77,9 +78,11 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
                 customerItems.clear()
                 for (data in dataSnapshot.children){
                     val item = data.getValue(Customer::class.java)
+                    if(item!!.STATUS_CODE == EStatusCode.ACTIVE.toString()){
 
-                    customerItems.add(item!!)
-                    adapter.notifyDataSetChanged()
+                        customerItems.add(item)
+                        adapter.notifyDataSetChanged()
+                    }
                 }
             }
             pbSelectCustomer.visibility = View.GONE

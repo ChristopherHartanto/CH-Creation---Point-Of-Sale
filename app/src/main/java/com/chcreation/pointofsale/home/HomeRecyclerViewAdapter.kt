@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +16,7 @@ import com.squareup.picasso.Picasso
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.textColorResource
+import java.util.*
 
 class HomeRecyclerViewAdapter(private val context: Context, private val items: List<Product>,private val listener: (position: Int) -> Unit)
     : RecyclerView.Adapter<HomeRecyclerViewAdapter.ViewHolder>() {
@@ -40,12 +42,22 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
         private val name = view.findViewById<TextView>(R.id.tvRowProductName)
         private val price = view.findViewById<TextView>(R.id.tvRowProductPrice)
         private val stock = view.findViewById<TextView>(R.id.tvRowProductStock)
+        private val firstName = view.findViewById<TextView>(R.id.tvRowProductFirstName)
+        private val layoutDefaultImage = view.findViewById<FrameLayout>(R.id.layoutRowProductDefaultImage)
 
         fun bindItem(product: Product, listener: (position: Int) -> Unit, position: Int,context: Context) {
-            if (product.IMAGE != "")
+            if (product.IMAGE != ""){
+                image.visibility = View.VISIBLE
+                layoutDefaultImage.visibility = View.GONE
+
                 Glide.with(context).load(product.IMAGE).into(image)
-            else
-                image.imageResource = R.drawable.default_image
+            }
+            else{
+                image.visibility = View.GONE
+                layoutDefaultImage.visibility = View.VISIBLE
+
+                firstName.text = product.NAME!!.first().toString().toUpperCase(Locale.getDefault())
+            }
 
             name.text = product.NAME
             price.text = indonesiaCurrencyFormat().format(product.PRICE)

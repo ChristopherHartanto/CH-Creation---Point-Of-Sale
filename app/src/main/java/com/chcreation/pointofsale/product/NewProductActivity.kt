@@ -131,6 +131,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
     private fun saveProduct(imageUrl: String){
         val name = etProductName.text.toString()
         val desc = etProductDescription.text.toString()
+
         var price = 0
         if (etProductPrice.text.toString() != "")
             price = etProductPrice.text.toString().toInt()
@@ -154,7 +155,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         if (getMerchant(this) == "")
             toast("You Haven't Set Up Your Merchant")
         else
-            presenter.saveProduct(Product(name,price,desc,cost,manageStock,stock,imageUrl,prodCode,uomCode,selectedCategory,code,
+            presenter.saveProduct(Product(name,price,desc,cost,manageStock,stock,imageUrl,prodCode,uomCode,selectedCategory,code,EStatusCode.ACTIVE.toString(),
                 dateFormat().format(Date()),dateFormat().format(Date()),
                 mAuth.currentUser!!.uid,mAuth.currentUser!!.uid))
     }
@@ -235,18 +236,6 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                 dialogInterface, i ->
             when(i){
                 0 -> {
-//                    val values = ContentValues()
-//                    values.put(MediaStore.Images.Media.TITLE, "New Picture")
-//                    values.put(MediaStore.Images.Media.DESCRIPTION, "From the Camera")
-//                    val image_uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-//                    //camera intent
-//                    intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-//                    //intent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri)
-//
-//                    startActivityForResult(
-//                        intent,
-//                        PICK_IMAGE_CAMERA
-//                    )
 
                     Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
                         // Ensure that there's a camera activity to handle the intent
@@ -271,12 +260,6 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                             }
                         }
                     }
-//
-//                    Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-//                        takePictureIntent.resolveActivity(packageManager)?.also {
-//                            startActivityForResult(takePictureIntent, PICK_IMAGE_CAMERA)
-//                        }
-//                    }
                 }
                 1 -> {
                     intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -327,14 +310,6 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                 showError(this,e.message.toString())
                 e.printStackTrace()
             }
-        }
-    }
-
-    private fun galleryAddPic() {
-        Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
-            val f = File(currentPhotoPath)
-            mediaScanIntent.data = Uri.fromFile(f)
-            sendBroadcast(mediaScanIntent)
         }
     }
 

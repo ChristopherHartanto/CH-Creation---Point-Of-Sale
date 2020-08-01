@@ -31,7 +31,7 @@
             android:layout_gravity="center"
             android:textColor="@color/colorBlack"
             android:gravity="center"
-            android:text="0"
+            android:hint="0"
             android:textSize="52sp"
             android:layout_marginVertical="30dp"
             android:id="@+id/etManageProductManageStockQty"/>

@@ -21,20 +21,29 @@
             android:id="@+id/ivRowProductCatImage"
             android:src="@drawable/default_image"/>
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/tvRowProductCatTitle"
-            android:textColor="@color/colorBlack"
-            android:textSize="20sp"
-            android:layout_marginTop="5dp"/>
+            android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvRowProductTotalProduct"
-            android:textColor="@color/colorBlack"
-            android:textSize="16sp"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="8"
+                android:id="@+id/tvRowProductCatTitle"
+                android:textColor="@color/colorBlack"
+                android:textSize="20sp"
+                android:layout_marginTop="5dp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:id="@+id/tvRowProductTotalProduct"
+                android:textColor="@color/colorBlack"
+                android:gravity="center"
+                android:textSize="16sp"/>
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

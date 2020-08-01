@@ -115,8 +115,10 @@ class CheckOutActivity : AppCompatActivity(), MainView {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.menu_check_out, menu)
+        if (!existPayment){
+            val inflater: MenuInflater = menuInflater
+            inflater.inflate(R.menu.menu_check_out, menu)
+        }
         return true
     }
 

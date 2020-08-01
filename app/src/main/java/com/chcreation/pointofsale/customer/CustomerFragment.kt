@@ -6,12 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.*
 
-import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.checkout.CheckOutActivity
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.isCustomer
-import com.chcreation.pointofsale.getMerchant
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.view.MainView
@@ -22,6 +20,7 @@ import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.fragment_customer.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.intentFor
 import org.jetbrains.anko.support.v4.onRefresh
 import org.jetbrains.anko.support.v4.startActivity
 
@@ -54,6 +53,7 @@ class CustomerFragment : Fragment(), MainView {
         presenter = CustomerPresenter(this,mAuth,mDatabase,ctx)
 
         adapter = CustomerRecyclerViewAdapter(ctx,customerItems){
+            ctx.startActivity(intentFor<CustomerDetailActivity>(ECustomer.CODE.toString() to customerItems[it].CODE))
         }
 
         fbCustomer.onClick {
@@ -80,9 +80,11 @@ class CustomerFragment : Fragment(), MainView {
 
                 for (data in dataSnapshot.children){
                     val item = data.getValue(Customer::class.java)
+                    if (item!!.STATUS_CODE == EStatusCode.ACTIVE.toString()){
+                        customerItems.add(item)
+                        adapter.notifyDataSetChanged()
 
-                    customerItems.add(item!!)
-                    adapter.notifyDataSetChanged()
+                    }
                 }
                 srCustomer.isRefreshing = false
             }

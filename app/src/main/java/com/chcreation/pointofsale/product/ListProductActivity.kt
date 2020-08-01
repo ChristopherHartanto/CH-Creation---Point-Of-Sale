@@ -44,6 +44,8 @@ class ListProductActivity : AppCompatActivity(), MainView {
 
         currentCat = intent.extras!!.getString("category","")
 
+        supportActionBar?.title = currentCat
+
         adapter = ProductListRecyclerViewAdapter(
             this,
             tempProductImageItems

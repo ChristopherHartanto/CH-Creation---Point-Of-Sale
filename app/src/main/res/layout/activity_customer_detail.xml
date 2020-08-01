@@ -6,21 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".product.ManageProductDetailActivity">
+    tools:context=".customer.CustomerDetailActivity">
 
     <com.google.android.material.tabs.TabLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tlManageProductDetail"/>
+        android:id="@+id/tlCustomerDetail"/>
 
-    <ProgressBar
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/pbManageProductDetail"
-        android:visibility="gone"/>
     <androidx.viewpager.widget.ViewPager
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/vpManageProductDetail"/>
+        android:id="@+id/vpCustomerDetail"/>
 
 </LinearLayout>

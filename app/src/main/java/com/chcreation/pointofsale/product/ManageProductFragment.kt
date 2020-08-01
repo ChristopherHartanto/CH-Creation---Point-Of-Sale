@@ -175,8 +175,11 @@ class ManageProductFragment : Fragment() , MainView {
 
                     for (data in dataSnapshot.children) {
                         val item = data.getValue(Product::class.java)!!
-                        tempProductItems.add(item)
-                        productKeys.add(data.key!!.toInt())
+
+                        if (item.STATUS_CODE == EStatusCode.ACTIVE.toString()){
+                            tempProductItems.add(item)
+                            productKeys.add(data.key!!.toInt())
+                        }
                     }
                     productItems.addAll(tempProductItems)
                     tmpProductKeys.addAll(productKeys)

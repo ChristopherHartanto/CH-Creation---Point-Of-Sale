@@ -9,7 +9,7 @@ import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.MainActivity
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.merchant.MerchantActivity
-import com.chcreation.pointofsale.merchant.NewMerchantActivity
+import com.chcreation.pointofsale.merchant.ManageMerchant
 import com.chcreation.pointofsale.normalClickAnimation
 import com.chcreation.pointofsale.presenter.MerchantPresenter
 import com.chcreation.pointofsale.view.MainView
@@ -83,7 +83,7 @@ class SignInActivity : AppCompatActivity(), MainView {
                     startActivity<MainActivity>()
             }
             else
-                startActivity<NewMerchantActivity>()
+                startActivity<ManageMerchant>()
 
             finish()
         }

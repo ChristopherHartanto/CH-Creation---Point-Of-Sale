@@ -26,6 +26,7 @@ enum class EProduct{
     IMAGE,
     CAT,
     CODE,
+    STATUS_CODE,
     CREATED_DATE,
     UPDATED_DATE,
     CREATED_BY,
@@ -62,7 +63,8 @@ enum class ECustomer{
     PHONE,
     ADDRESS,
     NOTE,
-    CODE
+    CODE,
+    STATUS_CODE
 }
 
 enum class ETransaction{
@@ -122,12 +124,14 @@ enum class EPayment{
 
 enum class EMessageResult{
     SUCCESS,
+    DELETE_SUCCESS,
     FAILURE,
     FETCH_PROD_SUCCESS,
     FETCH_AVAIL_MERCHANT_SUCCESS,
     FETCH_MERCHANT_SUCCESS,
     FETCH_CATEGORY_SUCCESS,
     FETCH_CUSTOMER_SUCCESS,
+    FETCH_CUSTOMER_TRANSACTION_SUCCESS,
     FETCH_TRANS_SUCCESS,
     FETCH_TRANS_LIST_PAYMENT_SUCCESS,
     FETCH_STOCK_MOVEMENT_SUCCESS,
@@ -145,6 +149,7 @@ enum class EStatusCode{
     DONE,
     CANCEL,
     DELETE,
+    ACTIVE
 }
 
 enum class EStatusUser{
@@ -155,7 +160,7 @@ enum class EStatusUser{
 enum class EStatusStock{
     INBOUND,
     OUTBOUND,
-    OTHER
+    MISSING
 }
 
 enum class EUserGroup{

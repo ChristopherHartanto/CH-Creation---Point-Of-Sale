@@ -42,26 +42,28 @@ class ManageProductManageStockActivity : AppCompatActivity(), MainView {
 
         btnManageStockAddStock.onClick {
             btnManageStockAddStock.startAnimation(normalClickAnimation())
-            btnManageStockAddStock.isEnabled = false
             action = 1
+            btnManageStockAddStock.isEnabled = false
 
             when {
                 etManageProductManageStockQty.text.toString() == "" -> toast("Quantity Must be Fill !!")
                 etManageProductManageStockQty.text.toString().toInt() <= 0 -> toast("Quantity Must be Greater than Zero !!")
                 etManageProductManageStockNote.text.toString() == "" -> showAlert()
+                else -> save()
             }
             btnManageStockAddStock.isEnabled = true
         }
 
         btnManageStockMissingStock.onClick {
             btnManageStockMissingStock.startAnimation(normalClickAnimation())
+            action = 2
             btnManageStockMissingStock.isEnabled = false
 
-            action = 2
             when {
                 etManageProductManageStockQty.text.toString() == "" -> toast("Quantity Must be Fill !!")
                 etManageProductManageStockQty.text.toString().toInt() <= 0 -> toast("Quantity Must be Greater than Zero !!")
                 etManageProductManageStockNote.text.toString() == "" -> showAlert()
+                else -> save()
             }
             btnManageStockMissingStock.isEnabled = true
         }
@@ -92,9 +94,11 @@ class ManageProductManageStockActivity : AppCompatActivity(), MainView {
         else if (action == 2)
             product.STOCK = product.STOCK!! - qty.toInt()
 
-        presenter.saveProduct(product)
+        val status = if(action == 2) EStatusStock.INBOUND.toString() else EStatusStock.MISSING.toString()
 
-        presenter.addStockMovement(StockMovement(qty.toInt(),EStatusStock.INBOUND.toString(),EStatusCode.DONE.toString(),
+        presenter.saveProduct(product, productKey)
+
+        presenter.addStockMovement(StockMovement(qty.toInt(),status,EStatusCode.DONE.toString(),
             prodCode,productKey,0,note,
             dateFormat().format(Date()),dateFormat().format(Date())))
     }

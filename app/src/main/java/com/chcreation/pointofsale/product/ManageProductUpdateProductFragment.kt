@@ -22,15 +22,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
-import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.*
 
-import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.dateFormat
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
 import com.chcreation.pointofsale.product.ManageProductDetailActivity.Companion.prodCode
-import com.chcreation.pointofsale.showError
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
@@ -165,7 +162,8 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
             image = imageUri
 
         presenter.saveProduct(Product(name,price,desc,cost,manageStock,product.STOCK,image,
-            product.PROD_CODE,product.UOM_CODE,categoryItems[positionSpinner],prodCode,product.CREATED_DATE,
+            product.PROD_CODE,product.UOM_CODE,categoryItems[positionSpinner],prodCode,
+            EStatusCode.ACTIVE.toString(),product.CREATED_DATE,
             dateFormat().format(Date()), product.CREATED_BY,mAuth.currentUser!!.uid),productKey)
     }
     private fun uploadImage(){

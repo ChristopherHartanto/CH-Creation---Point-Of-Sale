@@ -21,7 +21,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".product.ManageProductManageStockActivity"></activity>
+        <activity android:name=".user.UserListActivity"></activity>
+        <activity android:name=".customer.CustomerDetailActivity" />
+        <activity android:name=".customer.CustomerEnquiryActivity" />
+        <activity android:name=".product.ManageProductManageStockActivity" />
         <activity android:name=".product.ManageProductStockMovementListActivity" />
         <activity android:name=".product.ManageProductDetailActivity" />
         <activity android:name=".ErrorActivity" />
@@ -44,7 +47,7 @@
         <activity android:name=".login.SignUpActivity" />
         <activity android:name=".login.SignInActivity" />
         <activity android:name=".merchant.MerchantActivity" />
-        <activity android:name=".merchant.NewMerchantActivity" />
+        <activity android:name=".merchant.ManageMerchant" />
         <activity android:name=".login.LoginActivity" />
         <activity android:name=".customer.NewCustomerActivity" />
         <activity android:name=".product.NewProductActivity" />

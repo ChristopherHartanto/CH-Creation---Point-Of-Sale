@@ -7,13 +7,13 @@
     android:orientation="vertical"
     android:padding="10dp"
     android:gravity="center"
-    tools:context=".customer.NewCustomerActivity">
+    tools:context=".customer.CustomerDetailManageCustomerFragment">
 
     <FrameLayout
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_gravity="center"
-        android:id="@+id/layoutCustomerDefaultImage">
+        android:id="@+id/layoutManageCustomerDefaultImage">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="100dp"
@@ -28,14 +28,14 @@
             android:gravity="center"
             android:textStyle="bold"
             android:textColor="@color/colorBlack"
-            android:id="@+id/tvCustomerFirstName"/>
+            android:id="@+id/tvManageCustomerFirstName"/>
     </FrameLayout>
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_gravity="center"
-        android:id="@+id/ivCustomerImage"
+        android:id="@+id/ivManageCustomerImage"
         android:src="@drawable/default_image"/>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/name"
             android:inputType="textEmailAddress"
-            android:id="@+id/etCustomerName"/>
+            android:id="@+id/etManageCustomerName"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/email"
             android:inputType="textEmailAddress"
-            android:id="@+id/etCustomerEmail"/>
+            android:id="@+id/etManageCustomerEmail"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -74,7 +74,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/phone"
             android:inputType="phone"
-            android:id="@+id/etCustomerPhone"/>
+            android:id="@+id/etManageCustomerPhone"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -87,7 +87,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/address"
             android:inputType="text"
-            android:id="@+id/etCustomerAddress"/>
+            android:id="@+id/etManageCustomerAddress"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -100,16 +100,21 @@
             android:layout_height="wrap_content"
             android:hint="@string/note"
             android:inputType="text"
-            android:id="@+id/etCustomerNote"/>
+            android:id="@+id/etManageCustomerNote"/>
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/pbManageCustomer"
+        android:visibility="gone"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/btnCustomerSave"
+        android:id="@+id/btnManageCustomerSave"
         android:text="@string/save"
-        android:textColor="@color/colorWhite"
         android:background="@drawable/button_border_fill"/>
 
 </LinearLayout>

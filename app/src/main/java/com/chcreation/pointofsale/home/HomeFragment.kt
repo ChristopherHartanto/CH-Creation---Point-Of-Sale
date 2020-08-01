@@ -80,7 +80,8 @@ class HomeFragment : Fragment() , MainView {
                 if (tempProductItems[it].MANAGE_STOCK)
                     tempProductItems[it] = Product(tempProductItems[it].NAME,tempProductItems[it].PRICE,tempProductItems[it].DESC,tempProductItems[it].COST, tempProductItems[it].MANAGE_STOCK,
                         tempProductItems[it].STOCK!! - 1,tempProductItems[it].IMAGE,tempProductItems[it].PROD_CODE,tempProductItems[it].UOM_CODE,tempProductItems[it].CAT,
-                        tempProductItems[it].CODE)
+                        tempProductItems[it].CODE,tempProductItems[it].STATUS_CODE,tempProductItems[it].CREATED_DATE,tempProductItems[it].UPDATED_DATE,
+                        tempProductItems[it].CREATED_BY,tempProductItems[it].UPDATED_BY)
 
                 adapter.notifyDataSetChanged()
 
@@ -176,6 +177,12 @@ class HomeFragment : Fragment() , MainView {
         active = true
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        active = false
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
@@ -263,8 +270,11 @@ class HomeFragment : Fragment() , MainView {
 
                     for (data in dataSnapshot.children) {
                         val item = data.getValue(Product::class.java)!!
-                        tempProductItems.add(item)
-                        productKeys.add(data.key!!.toInt())
+
+                        if (item.STATUS_CODE == EStatusCode.ACTIVE.toString()){
+                            tempProductItems.add(item)
+                            productKeys.add(data.key!!.toInt())
+                        }
                     }
                     productItems.addAll(tempProductItems)
                     tmpProductKeys.addAll(productKeys)

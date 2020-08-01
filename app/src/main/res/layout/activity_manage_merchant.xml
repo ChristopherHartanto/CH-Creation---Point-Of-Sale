@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="20sp"
-    tools:context=".merchant.NewMerchantActivity">
+    tools:context=".merchant.ManageMerchant">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"

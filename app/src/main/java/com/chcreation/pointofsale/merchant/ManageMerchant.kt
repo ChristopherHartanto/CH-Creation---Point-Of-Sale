@@ -14,14 +14,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.android.synthetic.main.activity_new_merchant.*
+import kotlinx.android.synthetic.main.activity_manage_merchant.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
-import java.text.SimpleDateFormat
 import java.util.*
 
-class NewMerchantActivity : AppCompatActivity(), MainView {
+class ManageMerchant : AppCompatActivity(), MainView {
 
     private lateinit var sharedPreference: SharedPreferences
     lateinit var editor: SharedPreferences.Editor
@@ -31,7 +30,7 @@ class NewMerchantActivity : AppCompatActivity(), MainView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_new_merchant)
+        setContentView(R.layout.activity_manage_merchant)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference

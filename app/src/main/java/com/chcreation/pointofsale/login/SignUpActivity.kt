@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.merchant.NewMerchantActivity
+import com.chcreation.pointofsale.merchant.ManageMerchant
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
@@ -45,7 +45,7 @@ class SignUpActivity : AppCompatActivity() {
 
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    startActivity<NewMerchantActivity>()
+                    startActivity<ManageMerchant>()
                     finish()
                     Toast.makeText(this, "Successfully registered ", Toast.LENGTH_LONG).show()
                 }else {

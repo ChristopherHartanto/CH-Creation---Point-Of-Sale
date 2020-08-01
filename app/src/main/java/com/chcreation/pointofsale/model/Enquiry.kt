@@ -7,7 +7,7 @@ data class Enquiry(
     var CUST_CODE: String? = "",
     var PROD_KEY: Int? = 0,
     var PROD_CODE: String? = "",
-    var MANAGE_STOCK: Int? = 0,
+    var MANAGE_STOCK: Boolean? = false,
     var STOCK: Int? = 0,
     var STATUS_CODE : String? = "",
     var CREATED_DATE: String? = "",
