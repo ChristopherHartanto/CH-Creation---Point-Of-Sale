@@ -2,6 +2,7 @@ package com.chcreation.pointofsale
 
 enum class ETable{
     USER,
+    USER_LIST,
     PRODUCT,
     MERCHANT,
     AVAILABLE_MERCHANT,
@@ -41,7 +42,9 @@ enum class EMerchant{
     NAME,
     BUSINESS_INFO,
     NO_TELP,
-    CAT
+    CAT,
+    IMAGE,
+    USER_LIST
 }
 
 enum class EAvailableMerchant{
@@ -122,6 +125,20 @@ enum class EPayment{
     STATUS_CODE
 }
 
+enum class EUser{
+    CREATED_DATE,
+    UPDATED_DATE,
+    NAME,
+    EMAIL
+}
+
+enum class EMerchantUserList{
+    CREATED_DATE,
+    UPDATED_DATE,
+    USER_CODE,
+    STATUS_CODE
+}
+
 enum class EMessageResult{
     SUCCESS,
     DELETE_SUCCESS,
@@ -135,7 +152,8 @@ enum class EMessageResult{
     FETCH_TRANS_SUCCESS,
     FETCH_TRANS_LIST_PAYMENT_SUCCESS,
     FETCH_STOCK_MOVEMENT_SUCCESS,
-    FETCH_PEND_PAYMENT_SUCCESS
+    FETCH_PEND_PAYMENT_SUCCESS,
+    FETCH_USER_SUCCESS
 }
 
 enum class EPaymentMethod{
@@ -173,5 +191,6 @@ enum class ESharedPreference{
     MERCHANT_CREDENTIAL,
     USER_GROUP,
     NO_TELP,
-    ADDRESS
+    ADDRESS,
+    NAME
 }

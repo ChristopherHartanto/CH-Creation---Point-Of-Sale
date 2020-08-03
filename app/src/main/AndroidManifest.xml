@@ -47,7 +47,7 @@
         <activity android:name=".login.SignUpActivity" />
         <activity android:name=".login.SignInActivity" />
         <activity android:name=".merchant.MerchantActivity" />
-        <activity android:name=".merchant.ManageMerchant" />
+        <activity android:name=".merchant.ManageMerchantActivity" />
         <activity android:name=".login.LoginActivity" />
         <activity android:name=".customer.NewCustomerActivity" />
         <activity android:name=".product.NewProductActivity" />

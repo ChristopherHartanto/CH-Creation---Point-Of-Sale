@@ -8,6 +8,7 @@ data class Merchant(
     var BUSINESS_INFO: String? = "No Data",
     var ADDRESS: String? = "",
     var NO_TELP: String? = "",
+    var IMAGE: String? = "",
     //var CAT: HashMap<Any,HashMap<Any,Cart>>? = null,
     var CREATED_DATE: String? = "",
     var UPDATED_DATE: String? = "",

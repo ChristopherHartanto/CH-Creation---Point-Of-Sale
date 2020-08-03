@@ -114,6 +114,12 @@ class CheckOutActivity : AppCompatActivity(), MainView {
         }
     }
 
+    override fun onDestroy() {
+        existPayment = false
+
+        super.onDestroy()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if (!existPayment){
             val inflater: MenuInflater = menuInflater

@@ -1,9 +1,7 @@
 package com.chcreation.pointofsale.presenter
 
-import com.chcreation.pointofsale.EAvailableMerchant
-import com.chcreation.pointofsale.EMerchant
-import com.chcreation.pointofsale.EMessageResult
-import com.chcreation.pointofsale.ETable
+import android.content.Context
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.AvailableMerchant
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.view.MainView
@@ -15,7 +13,7 @@ import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MerchantPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference){
+class MerchantPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference, private var context: Context){
 
     var postListener = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
@@ -26,7 +24,23 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
 
     }
 
-    fun retrieveMerchants(){
+    suspend fun retrieveUserName(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_USER_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.USER.toString())
+            .child(auth.currentUser!!.uid)
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    suspend fun retrieveMerchants(){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -39,6 +53,23 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
         }
         database.child(ETable.AVAILABLE_MERCHANT.toString())
             .child(auth.currentUser!!.uid)
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    suspend fun retrieveCurrentMerchant(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_MERCHANT_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.MERCHANT.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
             .addListenerForSingleValueEvent(postListener)
     }
 
@@ -68,18 +99,35 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
             EMerchant.CREATED_BY.toString() to merchant.CREATED_BY,
             EMerchant.CREATED_DATE.toString() to merchant.CREATED_DATE,
             EMerchant.UPDATED_BY.toString() to merchant.UPDATED_BY,
-            EMerchant.UPDATED_DATE.toString() to merchant.CREATED_DATE
+            EMerchant.UPDATED_DATE.toString() to merchant.CREATED_DATE,
+            EMerchant.IMAGE.toString() to merchant.IMAGE
         )
 
+        val valueUser  = hashMapOf(
+            EMerchantUserList.USER_CODE.toString() to auth.currentUser!!.uid,
+            EMerchantUserList.STATUS_CODE.toString() to EStatusCode.ACTIVE.toString(),
+            EMerchantUserList.CREATED_DATE.toString() to dateFormat().format(Date()),
+            EMerchantUserList.UPDATED_DATE.toString() to dateFormat().format(Date())
+        )
         database.child(ETable.MERCHANT.toString())
             .child(auth.currentUser!!.uid)
             .child(merchant.NAME.toString())
-            .setValue(values).addOnFailureListener {
+            .child(ETable.USER_LIST.toString())
+            .setValue(valueUser).addOnFailureListener {
                 view.response(it.message.toString())
             }
             .addOnSuccessListener {
-                createNewMerchantList(availableMerchant)
+                database.child(ETable.MERCHANT.toString())
+                    .child(auth.currentUser!!.uid)
+                    .child(merchant.NAME.toString())
+                    .setValue(values).addOnFailureListener {
+                        view.response(it.message.toString())
+                    }
+                    .addOnSuccessListener {
+                        createNewMerchantList(availableMerchant)
+                    }
             }
+
     }
 
     fun createNewMerchantList(availableMerchant: AvailableMerchant){

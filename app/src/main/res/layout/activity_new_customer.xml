@@ -13,7 +13,8 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_gravity="center"
-        android:id="@+id/layoutCustomerDefaultImage">
+        android:id="@+id/layoutCustomerDefaultImage"
+        android:visibility="gone">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="100dp"

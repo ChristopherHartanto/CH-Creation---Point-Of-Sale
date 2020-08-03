@@ -13,6 +13,29 @@
     android:id="@+id/layoutNavHeader"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:id="@+id/layoutNavHeaderDefaultImage"
+        android:visibility="gone">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@color/colorBlack"/>
+
+        <TextView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:text="P"
+            android:textSize="36sp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="@color/colorWhite"
+            android:id="@+id/tvNavHeaderFirstName"/>
+    </FrameLayout>
+
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageView"
         android:layout_width="wrap_content"
@@ -26,13 +49,12 @@
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         android:text="@string/nav_header_title"
-        android:gravity="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:id="@+id/tvNavHeaderMerchantName"/>
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/nav_header_subtitle" />
 

@@ -154,8 +154,9 @@ class HomeFragment : Fragment() , MainView {
     override fun onStart() {
         super.onStart()
 
-        if (tempProductItems.size == 0)
+        if (tempProductItems.size == 0 || productItems.size == 0)
             presenter.retrieveProducts()
+
         presenter.retrieveCategories()
 
         btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
@@ -292,6 +293,7 @@ class HomeFragment : Fragment() , MainView {
             }
             else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
                 categoryItems.clear()
+                tlHome.removeAllTabs()
                 categoryItems.add("All")
                 if (dataSnapshot.exists()){
                     for (data in dataSnapshot.children) {

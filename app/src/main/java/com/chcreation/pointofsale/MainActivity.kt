@@ -4,6 +4,9 @@ import android.app.Activity
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
+import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -17,22 +20,45 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.home.HomeFragment.Companion.active
+import com.chcreation.pointofsale.merchant.ManageMerchantActivity
+import com.chcreation.pointofsale.model.Merchant
+import com.chcreation.pointofsale.presenter.CustomerPresenter
+import com.chcreation.pointofsale.presenter.Homepresenter
+import com.chcreation.pointofsale.view.MainView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
+import java.util.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainView {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private var doubleBackToExitPressedOnce = false
+
+    private lateinit var presenter: Homepresenter
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var mDatabase : DatabaseReference
+    private lateinit var view : View
+    private lateinit var tvNavHeaderMerchantName : TextView
+    private lateinit var ivNavHeader : ImageView
+    private lateinit var tvNavHeaderFirstName : TextView
+    private lateinit var tvUserName : TextView
+    private lateinit var layoutNavHeaderDefaultImage: FrameLayout
+    private lateinit var layoutNavHeader: LinearLayout
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //supportActionBar!!.elevation = 0.0F
     }
 
     override fun onStart() {
@@ -51,15 +77,30 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_check_out
             ), drawerLayout
         )
+        mAuth = FirebaseAuth.getInstance()
+        mDatabase = FirebaseDatabase.getInstance().reference
+        presenter = Homepresenter(this,mAuth,mDatabase,this)
 
-        var view = navView.getHeaderView(0)
-        val tvNavHeaderMerchantName = view.findViewById<TextView>(R.id.tvNavHeaderMerchantName)
-        val layoutNavHeader = view.findViewById<LinearLayout>(R.id.layoutNavHeader)
+        view = navView.getHeaderView(0)
+        tvNavHeaderMerchantName = view.findViewById<TextView>(R.id.tvNavHeaderMerchantName)
+        tvUserName = view.findViewById<TextView>(R.id.textView)
+        tvNavHeaderFirstName = view.findViewById<TextView>(R.id.tvNavHeaderFirstName)
+        ivNavHeader = view.findViewById<ImageView>(R.id.imageView)
+        layoutNavHeaderDefaultImage = view.findViewById<FrameLayout>(R.id.layoutNavHeaderDefaultImage)
+        layoutNavHeader = view.findViewById<LinearLayout>(R.id.layoutNavHeader)
+
         tvNavHeaderMerchantName.text = getMerchant(this)
+        tvUserName.text = getName(this)
+
+        layoutNavHeader.onClick {
+            startActivity<ManageMerchantActivity>()
+        }
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        if (getMerchant(this) != "")
+            presenter.retrieveMerchant()
     }
 
 
@@ -98,5 +139,30 @@ class MainActivity : AppCompatActivity() {
             R.id.nav_transaction -> findNavController(R.id.nav_host_fragment).navigate(R.id.nav_transaction)
         }
         false
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+        if (response == EMessageResult.FETCH_MERCHANT_SUCCESS.toString()){
+            if (dataSnapshot.exists()){
+                val item = dataSnapshot.getValue(Merchant::class.java)
+                if (item != null) {
+                    if (item.IMAGE != "")
+                    {
+                        layoutNavHeaderDefaultImage.visibility = View.GONE
+                        ivNavHeader.visibility = View.VISIBLE
+                        Glide.with(this).load(item.IMAGE).into(ivNavHeader)
+                    }else{
+                        layoutNavHeaderDefaultImage.visibility = View.VISIBLE
+                        ivNavHeader.visibility = View.GONE
+
+                        tvNavHeaderFirstName.text = item.NAME!!.first().toString().toUpperCase(Locale.getDefault())
+                    }
+
+                }
+            }
+        }
+    }
+
+    override fun response(message: String) {
     }
 }

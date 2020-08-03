@@ -23,6 +23,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_detail_transaction.*
 import kotlinx.android.synthetic.main.fragment_detail_transaction_list_payment.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -61,8 +63,9 @@ class DetailTransactionListPayment : Fragment(), MainView {
 
         rvListPayment.adapter = adapter
         rvListPayment.layoutManager = LinearLayoutManager(ctx)
-
-        presenter.retrieveTransactionListPayments(transCodeItems[transPosition])
+        GlobalScope.launch {
+            presenter.retrieveTransactionListPayments(transCodeItems[transPosition])
+        }
     }
 
     override fun onStart() {

@@ -5,12 +5,10 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import com.chcreation.pointofsale.EMessageResult
-import com.chcreation.pointofsale.MainActivity
-import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.merchant.MerchantActivity
-import com.chcreation.pointofsale.merchant.ManageMerchant
-import com.chcreation.pointofsale.normalClickAnimation
+import com.chcreation.pointofsale.merchant.ManageMerchantActivity
+import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.presenter.MerchantPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.OnCompleteListener
@@ -19,6 +17,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_sign_in.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
 
@@ -37,7 +38,7 @@ class SignInActivity : AppCompatActivity(), MainView {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = MerchantPresenter(this,mAuth,mDatabase)
+        presenter = MerchantPresenter(this,mAuth,mDatabase, this)
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
     }
 
@@ -59,7 +60,10 @@ class SignInActivity : AppCompatActivity(), MainView {
 
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    presenter.retrieveMerchants()
+                    GlobalScope.launch(Dispatchers.Main) {
+                        presenter.retrieveUserName()
+                        presenter.retrieveMerchants()
+                    }
                     Toast.makeText(this, "Login Success ", Toast.LENGTH_LONG).show()
                 }else {
                     Toast.makeText(this, "Error Success, try again later ", Toast.LENGTH_LONG).show()
@@ -83,9 +87,18 @@ class SignInActivity : AppCompatActivity(), MainView {
                     startActivity<MainActivity>()
             }
             else
-                startActivity<ManageMerchant>()
+                startActivity<ManageMerchantActivity>()
 
             finish()
+        }
+        if (response == EMessageResult.FETCH_USER_SUCCESS.toString()){
+            if (dataSnapshot.exists()){
+
+                val item = dataSnapshot.getValue(User::class.java)
+                val editor = sharedPreference.edit()
+                editor.putString(ESharedPreference.NAME.toString(), item?.NAME)
+                editor.apply()
+            }
         }
     }
 

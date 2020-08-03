@@ -46,6 +46,8 @@ import com.google.firebase.database.Transaction
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_receipt.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.io.File
@@ -114,10 +116,16 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         super.onStart()
 
         if (transCode != 0){
-            presenter.retrieveTransactionListPayments(transCode)
+            GlobalScope.launch {
+                presenter.retrieveTransactionListPayments(transCode)
+                presenter.retrieveTransaction(transCode)
+            }
         }
         else{
-            presenter.retrieveTransactionListPayments(transCodeItems[transPosition])
+            GlobalScope.launch {
+                presenter.retrieveTransactionListPayments(transCodeItems[transPosition])
+                presenter.retrieveTransaction(transCodeItems[transPosition])
+            }
         }
     }
 
@@ -305,12 +313,12 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
                     adapterPaymentList.notifyDataSetChanged()
                 }
-                if (transCode != 0){
-                    presenter.retrieveTransaction(transCode)
-                }
-                else{
-                    presenter.retrieveTransaction(transCodeItems[transPosition])
-                }
+//                if (transCode != 0){
+//                    presenter.retrieveTransaction(transCode)
+//                }
+//                else{
+//                    presenter.retrieveTransaction(transCodeItems[transPosition])
+//                }
             }
         }else if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
             if (dataSnapshot.exists()){

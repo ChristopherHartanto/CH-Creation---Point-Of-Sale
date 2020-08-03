@@ -21,6 +21,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_merchant.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
 
@@ -41,10 +43,12 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
-        presenter = MerchantPresenter(this,mAuth,mDatabase)
+        presenter = MerchantPresenter(this,mAuth,mDatabase, this)
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
-        presenter.retrieveMerchants()
+        GlobalScope.launch {
+            presenter.retrieveMerchants()
+        }
     }
 
     override fun onStart() {

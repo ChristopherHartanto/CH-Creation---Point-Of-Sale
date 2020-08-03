@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -21,6 +22,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.size
 import com.chcreation.pointofsale.*
@@ -49,6 +52,7 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.jar.Manifest
 import kotlin.collections.ArrayList
 
 
@@ -60,7 +64,9 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
     private lateinit var storage: StorageReference
     private lateinit var sharedPreference: SharedPreferences
     private var PICK_IMAGE_CAMERA  = 111
+    private var CAMERA_PERMISSION  = 101
     private var PICK_IMAGE_GALLERY = 222
+    private var READ_PERMISION = 202
     private var filePath: Uri? = null
     private var prodCode = ""
     private var merchant = ""
@@ -110,7 +116,8 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
 
         }
 
-        ivProductImage.onClick {
+        ivProductImage.onClick{
+
             selectImage()
         }
 
@@ -143,6 +150,9 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         var stock = 0
         if (etProductStock.text.toString() != "")
             stock = etProductStock.text.toString().toInt()
+
+        if (!swProduct.isChecked)
+            stock = 0
 
         val code = etProductCode.text.toString()
         val uomCode = "Unit"
@@ -236,41 +246,61 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                 dialogInterface, i ->
             when(i){
                 0 -> {
+                    if (ContextCompat.checkSelfPermission(this@NewProductActivity, android.Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED)
+                        ActivityCompat.requestPermissions(this@NewProductActivity,
+                            arrayOf(android.Manifest.permission.CAMERA),CAMERA_PERMISSION
+                        )
+                    else
+                        openCamera()
 
-                    Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-                        // Ensure that there's a camera activity to handle the intent
-                        takePictureIntent.resolveActivity(packageManager)?.also {
-                            // Create the File where the photo should go
-                            val photoFile: File? = try {
-                                createImageFile()
-                            } catch (ex: IOException) {
-                                null
-                            }
-                            // Continue only if the File was successfully created
-                            photoFile?.also {
-                                val photoURI: Uri = FileProvider.getUriForFile(
-                                    this,
-                                    "com.example.android.fileprovider",
-                                    it
-                                )
-                                Log.d("uri: ",photoURI.toString())
-                                filePath = photoURI
-                                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                                startActivityForResult(takePictureIntent, PICK_IMAGE_CAMERA)
-                            }
-                        }
-                    }
                 }
                 1 -> {
-                    intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                    startActivityForResult(
-                        intent,
-                        PICK_IMAGE_GALLERY
-                    )
+                    if (ContextCompat.checkSelfPermission(this@NewProductActivity, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED)
+                        ActivityCompat.requestPermissions(this@NewProductActivity,
+                            arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE),READ_PERMISION
+                        )
+                    else
+                        openGallery()
                 }
             }
         }
 
+    }
+
+    private fun openCamera(){
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            takePictureIntent.resolveActivity(packageManager)?.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        this,
+                        "com.example.android.fileprovider",
+                        it
+                    )
+                    Log.d("uri: ",photoURI.toString())
+                    filePath = photoURI
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, PICK_IMAGE_CAMERA)
+                }
+            }
+        }
+    }
+
+    private fun openGallery(){
+        intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(
+            intent,
+            PICK_IMAGE_GALLERY
+        )
     }
 
     // Override onActivityResult method
@@ -284,9 +314,6 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                         contentResolver,
                         filePath
                     )
-                //val imageBitmap = data.extras?.get("data") as Bitmap
-                //ivProductImage.setImageBitmap(bitmap)
-                //galleryAddPic()
                 ivProductImage.setImageBitmap(rotateImage(bitmap))
             } catch (e: Exception) {
                 filePath = null
@@ -311,13 +338,37 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                 e.printStackTrace()
             }
         }
+
     }
 
-    fun rotateImage(bitmapSource : Bitmap) : Bitmap{
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == CAMERA_PERMISSION){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openCamera()
+            }
+            else
+                toast("Permission Denied")
+        }
+        else if (requestCode == READ_PERMISION){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openGallery()
+            }
+            else
+                toast("Permission Denied")
+        }
+    }
+
+    private fun rotateImage(bitmapSource : Bitmap) : Bitmap{
         val ei = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ExifInterface(File(currentPhotoPath))
         } else {
-            ExifInterface(filePath.toString())
+            ExifInterface(currentPhotoPath)
         };
         val orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
         ExifInterface.ORIENTATION_UNDEFINED);

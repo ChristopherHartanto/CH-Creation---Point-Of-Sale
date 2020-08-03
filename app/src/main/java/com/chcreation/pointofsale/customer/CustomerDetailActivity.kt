@@ -135,6 +135,7 @@ class CustomerDetailActivity : AppCompatActivity(),MainView {
         if (message == EMessageResult.DELETE_SUCCESS.toString()){
             toast("Delete Success")
             finish()
+            CustomerDetailManageCustomerFragment().clearData()
         }
     }
 }

@@ -307,7 +307,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         val ei = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ExifInterface(File(currentPhotoPath))
         } else {
-            ExifInterface(filePath.toString())
+            ExifInterface(currentPhotoPath)
         };
         val orientation = ei.getAttributeInt(
             ExifInterface.TAG_ORIENTATION,

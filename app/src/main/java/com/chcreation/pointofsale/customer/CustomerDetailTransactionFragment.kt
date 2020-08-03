@@ -72,6 +72,7 @@ class CustomerDetailTransactionFragment : Fragment(), MainView {
                     val item = data.value
                     enquiryItems.add(item[0])
                 }
+                enquiryItems.reverse()
                 adapter.notifyDataSetChanged()
                 totalTransaction = enquiryItems.size
                 tvCustomerDetailTransactionTotal.text = "Total Transaction : $totalTransaction"

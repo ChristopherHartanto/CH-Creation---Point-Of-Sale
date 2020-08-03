@@ -48,7 +48,8 @@
         android:gravity="end"
         android:padding="10dp"
         android:textSize="18sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="@color/colorBlack"/>
 
     <TextView
         android:layout_width="match_parent"

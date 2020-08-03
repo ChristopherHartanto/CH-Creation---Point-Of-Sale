@@ -2,6 +2,7 @@ package com.chcreation.pointofsale.customer
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.media.ExifInterface
@@ -16,19 +17,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
-import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.*
 
-import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.customer.CustomerDetailActivity.Companion.custCode
-import com.chcreation.pointofsale.dateFormat
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
 import com.chcreation.pointofsale.product.ManageProductDetailActivity
 import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment
-import com.chcreation.pointofsale.showError
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
@@ -49,6 +50,7 @@ import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.selector
 import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.toast
 import org.jetbrains.anko.yesButton
 import java.io.File
 import java.io.IOException
@@ -65,13 +67,16 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
     private lateinit var storage: StorageReference
     private var manageStock = true
     private var PICK_IMAGE_CAMERA  = 111
+    private var CAMERA_PERMISSION  = 101
     private var PICK_IMAGE_GALLERY = 222
-    private var currentPhotoPath = ""
-    private var filePath:Uri? = null
-    private lateinit var customer : Customer
+    private var READ_PERMISION = 202
 
     companion object{
         var custKey = 0
+        var filePath:Uri? = null
+        var bitmap: Bitmap? = null
+        var currentPhotoPath = ""
+        var customer = Customer()
     }
 
     override fun onCreateView(
@@ -118,12 +123,12 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
     }
 
     private fun uploadImage(){
-        if(ManageProductUpdateProductFragment.filePath != null){
+        if(filePath != null){
             pbManageCustomer.visibility = View.VISIBLE
 
-            val ref = storage.child("product")
+            val ref = storage.child(ETable.CUSTOMER.toString())
                 .child(mAuth.currentUser!!.uid)
-                .child(ManageProductDetailActivity.prodCode)
+                .child(custCode)
 
             val uploadTask = ref.putFile(ManageProductUpdateProductFragment.filePath!!)
 
@@ -180,54 +185,61 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
                 dialogInterface, i ->
             when(i){
                 0 -> {
+                    if (ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED)
+                        ActivityCompat.requestPermissions(requireActivity(),
+                            arrayOf(android.Manifest.permission.CAMERA),CAMERA_PERMISSION
+                        )
+                    else
+                        openCamera()
 
-                    Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-                        // Ensure that there's a camera activity to handle the intent
-                        takePictureIntent.resolveActivity(ctx.packageManager)?.also {
-                            // Create the File where the photo should go
-                            val photoFile: File? = try {
-                                createImageFile()
-                            } catch (ex: IOException) {
-                                null
-                            }
-                            // Continue only if the File was successfully created
-
-                            try {
-                                photoFile?.also {
-                                    val photoURI: Uri = FileProvider.getUriForFile(
-                                        ctx,
-                                        "com.example.android.fileprovider",
-                                        it
-                                    )
-                                    Log.d("uri: ",photoURI.toString())
-                                    filePath = photoURI
-
-                                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                                    startActivityForResult(takePictureIntent, PICK_IMAGE_CAMERA)
-                                }
-                            }catch (e: java.lang.Exception){
-                                showError(ctx,e.message.toString())
-                                e.printStackTrace()
-                            }
-                        }
-                    }
                 }
                 1 -> {
-                    try {
-                        intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                        startActivityForResult(
-                            intent,
-                            PICK_IMAGE_GALLERY
+                    if (ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED)
+                        ActivityCompat.requestPermissions(requireActivity(),
+                            arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE),READ_PERMISION
                         )
-
-                    }catch (e: java.lang.Exception){
-                        showError(ctx,e.message.toString())
-                        e.printStackTrace()
-                    }
+                    else
+                        openGallery()
                 }
             }
         }
 
+    }
+    private fun openCamera(){
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            takePictureIntent.resolveActivity(ctx.packageManager)?.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        ctx,
+                        "com.example.android.fileprovider",
+                        it
+                    )
+                    Log.d("uri: ",photoURI.toString())
+                    filePath = photoURI
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, PICK_IMAGE_CAMERA)
+                }
+            }
+        }
+    }
+
+    private fun openGallery(){
+        var intent = Intent()
+        intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(
+            intent,
+            PICK_IMAGE_GALLERY
+        )
     }
 
     // Override onActivityResult method
@@ -236,7 +248,7 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
 
         if (requestCode == PICK_IMAGE_CAMERA && resultCode == Activity.RESULT_OK) {
             try {
-                val bitmap = MediaStore.Images.Media
+                bitmap = MediaStore.Images.Media
                     .getBitmap(
                         ctx.contentResolver,
                         filePath
@@ -256,7 +268,7 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
             filePath = data.data
             currentPhotoPath = getRealPathFromURI(filePath!!)
             try { // Setting image on image view using Bitmap
-                val bitmap = MediaStore.Images.Media
+                bitmap = MediaStore.Images.Media
                     .getBitmap(
                         ctx.contentResolver,
                         filePath
@@ -270,7 +282,30 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         }
     }
 
-    fun rotateImage(bitmapSource : Bitmap) : Bitmap {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == CAMERA_PERMISSION){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openCamera()
+            }
+            else
+                toast("Permission Denied")
+        }
+        else if (requestCode == READ_PERMISION){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openGallery()
+            }
+            else
+                toast("Permission Denied")
+        }
+    }
+
+    fun rotateImage(bitmapSource : Bitmap?) : Bitmap {
         val ei = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ExifInterface(File(currentPhotoPath))
         } else {
@@ -300,7 +335,8 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
 
         val matrix = Matrix()
         matrix.postRotate(degree)
-        return Bitmap.createBitmap(bitmapSource, 0, 0, bitmapSource.width, bitmapSource.height,
+        return Bitmap.createBitmap(
+            bitmapSource!!, 0, 0, bitmapSource.width, bitmapSource.height,
             matrix, true)
     }
 
@@ -335,16 +371,34 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         etManageCustomerNote.setText(customer.NOTE)
         etManageCustomerPhone.setText(customer.PHONE)
 
-        if (customer.IMAGE == ""){
-            layoutManageCustomerDefaultImage.visibility = View.VISIBLE
-            ivManageCustomerImage.visibility = View.GONE
-            tvManageCustomerFirstName.text = customer.NAME!!.first().toString().toUpperCase(Locale.getDefault())
-        }else{
+        (activity as AppCompatActivity).supportActionBar?.title = customer.NAME.toString()
+
+        if (bitmap != null){
             ivManageCustomerImage.visibility = View.VISIBLE
             layoutManageCustomerDefaultImage.visibility = View.GONE
-
-            Glide.with(ctx).load(customer.IMAGE).into(ivManageCustomerImage)
+            ivManageCustomerImage.setImageBitmap(rotateImage(bitmap!!))
         }
+        else {
+            if (customer.IMAGE == ""){
+                layoutManageCustomerDefaultImage.visibility = View.VISIBLE
+                ivManageCustomerImage.visibility = View.GONE
+                tvManageCustomerFirstName.text = customer.NAME!!.first().toString().toUpperCase(Locale.getDefault())
+            }else{
+                ivManageCustomerImage.visibility = View.VISIBLE
+                layoutManageCustomerDefaultImage.visibility = View.GONE
+
+                Glide.with(ctx).load(customer.IMAGE).into(ivManageCustomerImage)
+            }
+
+        }
+    }
+
+    fun clearData(){
+        filePath = null
+        bitmap = null
+        currentPhotoPath = ""
+        customer = Customer()
+        custKey = 0
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

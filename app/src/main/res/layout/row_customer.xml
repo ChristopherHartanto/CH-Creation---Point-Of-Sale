@@ -12,21 +12,21 @@
         android:layout_margin="5dp"
         android:orientation="horizontal">
         <FrameLayout
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_gravity="center"
             android:id="@+id/layoutRowCustomerDefaultImage">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:src="@color/colorPrimary"/>
 
             <TextView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:text="P"
-                android:textSize="32sp"
+                android:textSize="28sp"
                 android:gravity="center"
                 android:textStyle="bold"
                 android:textColor="@color/colorBlack"
@@ -34,8 +34,8 @@
         </FrameLayout>
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:id="@+id/ivRowCustomerImage"
             android:layout_margin="5dp"
             android:src="@drawable/user"/>

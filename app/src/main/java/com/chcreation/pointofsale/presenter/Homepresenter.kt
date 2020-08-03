@@ -62,6 +62,23 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
             .addListenerForSingleValueEvent(postListener)
     }
 
+    fun retrieveMerchant(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_MERCHANT_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.MERCHANT.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .addListenerForSingleValueEvent(postListener)
+    }
+
     fun dismissListener(){
     }
 }

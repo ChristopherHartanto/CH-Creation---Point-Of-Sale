@@ -43,7 +43,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
             .addListenerForSingleValueEvent(postListener)
     }
 
-    fun retrieveTransaction(transactionCode: Int){
+    suspend fun retrieveTransaction(transactionCode: Int){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -61,7 +61,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
             .addListenerForSingleValueEvent(postListener)
     }
 
-    fun retrieveTransactionListPayments(transactionCode:Int){
+    suspend fun retrieveTransactionListPayments(transactionCode:Int){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -76,6 +76,22 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
             .child(getMerchantCredential(context))
             .child(getMerchant(context))
             .child(transactionCode.toString())
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    suspend fun retrieveCashier(userId: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_USER_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.USER.toString())
+            .child(userId)
             .addListenerForSingleValueEvent(postListener)
     }
 
@@ -107,7 +123,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
                     view.response(it.message.toString())
                 }
                 .addOnSuccessListener {
-                    GlobalScope.launch(Dispatchers.IO) {
+                    GlobalScope.launch(Dispatchers.Main) {
                         updateEnquiry(transactionCode,EStatusCode.CANCEL.toString())
                         updateStockMovement(transactionCode,EStatusCode.CANCEL.toString())
                         cancelPayment(transactionCode)
@@ -119,7 +135,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
         }
     }
 
-    fun cancelPayment(transactionCode: Int){
+    suspend fun cancelPayment(transactionCode: Int){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -153,7 +169,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
             .addListenerForSingleValueEvent(postListener)
     }
 
-    private fun updateEnquiry(transactionCode: Int,statusCode: String){
+    suspend fun updateEnquiry(transactionCode: Int,statusCode: String){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -202,7 +218,7 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
             .addListenerForSingleValueEvent(postListener)
     }
 
-    private fun updateStockMovement(transactionCode: Int,statusCode: String){
+    private suspend fun updateStockMovement(transactionCode: Int, statusCode: String){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)

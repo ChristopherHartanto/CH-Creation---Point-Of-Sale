@@ -12,6 +12,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,6 +25,29 @@ class UserPresenter(private val view: MainView, private val auth: FirebaseAuth, 
         override fun onDataChange(p0: DataSnapshot) {
         }
 
+    }
+
+    fun saveUser(name: String, email: String){
+        try {
+            val values  = hashMapOf(
+                EUser.NAME.toString() to name,
+                EUser.EMAIL.toString() to email,
+                EUser.CREATED_DATE.toString() to dateFormat().format(Date()),
+                EUser.UPDATED_DATE.toString() to dateFormat().format(Date())
+            )
+            database.child(ETable.USER.toString())
+                .child(auth.currentUser!!.uid)
+                .setValue(values).addOnFailureListener {
+                    view.response(it.message.toString())
+                }
+                .addOnSuccessListener {
+                    view.response(EMessageResult.SUCCESS.toString())
+                }
+
+        }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
     }
 
     fun saveCustomer(customer: Customer){

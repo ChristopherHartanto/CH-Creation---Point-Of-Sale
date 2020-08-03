@@ -13,6 +13,12 @@ private lateinit var sharedPreference: SharedPreferences
 
 var RESULT_CLOSE_ALL = 1111
 
+fun getName(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.NAME.toString(),"").toString()
+}
+
 fun getMerchant(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
