@@ -94,7 +94,7 @@ class ManageProductManageStockActivity : AppCompatActivity(), MainView {
         else if (action == 2)
             product.STOCK = product.STOCK!! - qty.toInt()
 
-        val status = if(action == 2) EStatusStock.INBOUND.toString() else EStatusStock.MISSING.toString()
+        val status = if(action == 1) EStatusStock.INBOUND.toString() else EStatusStock.MISSING.toString()
 
         presenter.saveProduct(product, productKey)
 

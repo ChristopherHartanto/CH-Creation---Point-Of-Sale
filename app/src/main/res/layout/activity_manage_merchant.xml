@@ -27,7 +27,37 @@
                 android:textColor="@color/colorBlack"
                 android:layout_marginBottom="30dp"
                 android:gravity="center"
-                android:id="@+id/tvNewMerchant"/>
+                android:id="@+id/tvMerchant"/>
+
+            <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:id="@+id/layoutMerchantDefaultImage">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@color/colorBlack"/>
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:text="P"
+                    android:textSize="36sp"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorWhite"
+                    android:id="@+id/tvMerchantFirstName"/>
+            </FrameLayout>
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:id="@+id/ivMerchantImage"
+                android:src="@drawable/default_image"
+                android:visibility="gone"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
@@ -63,6 +93,7 @@
                 android:layout_height="wrap_content"
                 android:hint="No Telp"
                 android:id="@+id/etMerchantNoTelp"
+                android:inputType="phone"
                 android:layout_marginVertical="20dp"/>
 
             <ProgressBar
@@ -75,7 +106,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/btnNewMerchant"
+                android:id="@+id/btnMerchant"
                 android:background="@drawable/button_border_fill"
                 android:text="Set Up Merchant"/>
 

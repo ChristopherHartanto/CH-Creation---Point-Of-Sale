@@ -19,6 +19,12 @@ fun getName(context: Context) : String{
     return sharedPreference.getString(ESharedPreference.NAME.toString(),"").toString()
 }
 
+fun getEmail(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.EMAIL.toString(),"").toString()
+}
+
 fun getMerchant(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
@@ -80,4 +86,9 @@ fun showError(context: Context,message: String)
 {
     ErrorActivity.errorMessage = message
     context.startActivity<ErrorActivity>()
+}
+
+fun encodeEmail(email:String): String{
+    val index = email.indexOf('.',0)
+    return email.substring(0,index)
 }

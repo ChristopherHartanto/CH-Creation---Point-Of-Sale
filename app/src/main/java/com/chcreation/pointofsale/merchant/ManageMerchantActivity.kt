@@ -1,10 +1,15 @@
 package com.chcreation.pointofsale.merchant
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
@@ -14,7 +19,10 @@ import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.widget.doOnTextChanged
+import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment
 import com.chcreation.pointofsale.model.AvailableMerchant
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.presenter.MerchantPresenter
@@ -24,12 +32,13 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_manage_merchant.*
+import kotlinx.android.synthetic.main.fragment_customer_detail_manage_customer.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.selector
-import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.toast
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -41,17 +50,20 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
     private lateinit var presenter: MerchantPresenter
-    private var merchant = Merchant()
+    private var merchant: Merchant? = null
     private var PICK_IMAGE_CAMERA  = 111
     private var CAMERA_PERMISSION  = 101
     private var PICK_IMAGE_GALLERY = 222
     private var READ_PERMISION = 202
     private var filePath: Uri? = null
     private var currentPhotoPath = ""
+    private var bitmap: Bitmap? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_manage_merchant)
+
+        supportActionBar?.title = "Set Up Merchant"
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -59,17 +71,17 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
         GlobalScope.launch {
-            presenter.retrieveMerchants()
+            presenter.retrieveCurrentMerchant()
         }
     }
 
     override fun onStart() {
         super.onStart()
 
-        btnNewMerchant.onClick {
+        btnMerchant.onClick {
 
-            btnNewMerchant.startAnimation(normalClickAnimation())
-            btnNewMerchant.isEnabled = false
+            btnMerchant.startAnimation(normalClickAnimation())
+            btnMerchant.isEnabled = false
             pbMerchant.visibility = View.VISIBLE
 
             val merchantBusinessInfo = etMerchantBusinessInfo.text.toString()
@@ -82,12 +94,47 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                 toast("Please Fill Merchant Name !")
                 return@onClick
             }
-            if (merchant == Merchant())
-            presenter.createNewMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,"",
-                currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid),
-                AvailableMerchant(merchantName,EUserGroup.MANAGER.toString(),currentDate,currentDate,
-                    mAuth.currentUser!!.uid,EStatusUser.ACTIVE.toString()))
+            if (merchant!!.NAME == ""){
+                alert("Once Create Your Merchant Name Cannot Edit!"){
+                    title = "Note!"
+                    yesButton {
+                        presenter.createNewMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,"",null,null,
+                            currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid),
+                            AvailableMerchant(merchantName,EUserGroup.MANAGER.toString(),currentDate,currentDate,
+                                mAuth.currentUser!!.uid,EStatusUser.ACTIVE.toString()))
+                    }
+                    noButton {
+                        btnMerchant.isEnabled = true
+                        pbMerchant.visibility = View.GONE
+                    }
+                }.show()
+            }
+            else{
+                val name = etMerchantName.text.toString()
+                val businessInfo = etMerchantBusinessInfo.text.toString()
+                val noTel = etMerchantNoTelp.text.toString()
+                val address = etMerchantAddress.text.toString()
+                var image = ""
+
+                if (filePath != null)
+                    image = filePath.toString()
+
+                if (getMerchantUserGroup(this@ManageMerchantActivity) == EUserGroup.WAITER.toString())
+                    toast("Only Manager Can Update Merchant Status")
+                else
+                    presenter.updateMerchant(Merchant(name,businessInfo,address,noTel,image,
+                        merchant!!.USER_LIST,merchant!!.CAT,merchant!!.CREATED_DATE,
+                        dateFormat().format(Date()),merchant!!.CREATED_BY,
+                        mAuth.currentUser!!.uid),name)
+            }
         }
+
+        etMerchantName.doOnTextChanged { text, start, before, count ->
+            if (!text.isNullOrEmpty()) {
+                tvMerchantFirstName.text = text.first().toString().toUpperCase(Locale.getDefault())
+            }
+        }
+
     }
 
     private fun selectImage() { // Defining Implicit Intent to mobile gallery
@@ -172,11 +219,142 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
         )
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == PICK_IMAGE_CAMERA && resultCode == Activity.RESULT_OK) {
+            try {
+                bitmap = MediaStore.Images.Media
+                    .getBitmap(
+                        contentResolver,
+                        filePath
+                    )
+                //val imageBitmap = data.extras?.get("data") as Bitmap
+                //ivProductImage.setImageBitmap(bitmap)
+                //galleryAddPic()
+                ivMerchantImage.setImageBitmap(rotateImage(
+                    bitmap
+                ))
+            } catch (e: Exception) {
+                filePath = null
+                showError(this,e.message.toString())
+                e.printStackTrace()
+            }
+        }
+        else if (requestCode == PICK_IMAGE_GALLERY && resultCode == Activity.RESULT_OK && data != null && data.data != null
+        ) { // Get the Uri of data
+            filePath = data.data
+            currentPhotoPath = getRealPathFromURI(
+                filePath!!)
+            try { // Setting image on image view using Bitmap
+                bitmap = MediaStore.Images.Media
+                    .getBitmap(
+                        contentResolver,
+                        filePath
+                    )
+                //currentPhotoPath = photoURI.toString()
+                ivMerchantImage.setImageBitmap(rotateImage(
+                    bitmap
+                ))
+            } catch (e: IOException) { // Log the exception
+                showError(this,e.message.toString())
+                e.printStackTrace()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == CAMERA_PERMISSION){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openCamera()
+            }
+            else
+                toast("Permission Denied")
+        }
+        else if (requestCode == READ_PERMISION){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openGallery()
+            }
+            else
+                toast("Permission Denied")
+        }
+    }
+
+    fun rotateImage(bitmapSource : Bitmap?) : Bitmap {
+        val ei = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ExifInterface(File(currentPhotoPath))
+        } else {
+            ExifInterface(filePath.toString())
+        };
+        val orientation = ei.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_UNDEFINED);
+
+        var rotatedBitmap = null;
+        var degree = 0F
+        when(orientation) {
+
+            ExifInterface.ORIENTATION_ROTATE_90 -> {
+                degree = 90F
+            }
+            ExifInterface.ORIENTATION_ROTATE_180 -> {
+                degree = 180F
+            }
+            ExifInterface.ORIENTATION_ROTATE_270 -> {
+                degree = 270F
+            }
+            ExifInterface.ORIENTATION_NORMAL -> {
+                degree = 360F
+            }
+        }
+
+        val matrix = Matrix()
+        matrix.postRotate(degree)
+        return Bitmap.createBitmap(
+            bitmapSource!!, 0, 0, bitmapSource.width, bitmapSource.height,
+            matrix, true)
+    }
+
+    fun getRealPathFromURI(uri: Uri): String {
+        @SuppressWarnings("deprecation")
+        val cursor = this.managedQuery(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null);
+        val column_index = cursor
+            .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
+
     private fun fetchData(){
-        etMerchantAddress.setText(merchant.ADDRESS)
-        etMerchantBusinessInfo.setText(merchant.BUSINESS_INFO)
-        etMerchantName.setText(merchant.NAME)
-        etMerchantNoTelp.setText(merchant.NO_TELP)
+        if (merchant!!.NAME != ""){
+
+            tvMerchant.visibility = View.GONE
+            btnMerchant.text = "Save"
+
+            supportActionBar?.title = "Update Merchant"
+
+            etMerchantAddress.setText(merchant!!.ADDRESS)
+            etMerchantBusinessInfo.setText(merchant!!.BUSINESS_INFO)
+            etMerchantName.setText(merchant!!.NAME)
+            etMerchantName.isEnabled = false
+            etMerchantNoTelp.setText(merchant!!.NO_TELP)
+
+            if (merchant!!.IMAGE == ""){
+                layoutMerchantDefaultImage.visibility = View.VISIBLE
+                ivMerchantImage.visibility = View.GONE
+                tvMerchantFirstName.text = merchant!!.NAME!!.first().toString().toUpperCase(Locale.getDefault())
+            }else{
+                layoutMerchantDefaultImage.visibility = View.GONE
+                ivMerchantImage.visibility = View.VISIBLE
+
+                Glide.with(this).load(merchant!!.IMAGE).into(ivMerchantImage)
+            }
+        }
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
@@ -197,6 +375,8 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             editor.putString(ESharedPreference.MERCHANT.toString(),etMerchantName.text.toString())
             editor.putString(ESharedPreference.USER_GROUP.toString(),EUserGroup.MANAGER.toString())
             editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(), mAuth.currentUser?.uid)
+            editor.putString(ESharedPreference.ADDRESS.toString(),etMerchantAddress.text.toString())
+            editor.putString(ESharedPreference.NO_TELP.toString(),etMerchantNoTelp.text.toString())
             editor.apply()
 
             toast("Create Merchant Success")
@@ -204,7 +384,17 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             startActivity<MainActivity>()
             finish()
         }
-        btnNewMerchant.isEnabled = true
+        if (message == EMessageResult.UPDATE.toString())
+        {
+            editor = sharedPreference.edit()
+            editor.putString(ESharedPreference.ADDRESS.toString(),etMerchantAddress.text.toString())
+            editor.putString(ESharedPreference.NO_TELP.toString(),etMerchantNoTelp.text.toString())
+            editor.apply()
+
+            toast("Update Success")
+            finish()
+        }
+        btnMerchant.isEnabled = true
         pbMerchant.visibility = View.GONE
     }
 }

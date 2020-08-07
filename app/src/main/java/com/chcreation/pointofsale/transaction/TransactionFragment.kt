@@ -116,6 +116,9 @@ class TransactionFragment : Fragment(), MainView {
     }
 
     private fun fetchTransByCat(){
+        clearData()
+        fecthCustomer()
+
         if (currentTab == 0){
             customerItems.addAll(tmpCustomerNameItems)
             transCodeItems.addAll(tmpTransCodeItems)
@@ -148,7 +151,31 @@ class TransactionFragment : Fragment(), MainView {
         transItems.reverse()
         customerItems.reverse()
         transCodeItems.reverse()
-        adapter.notifyDataSetChanged()
+        if (transItems.size == transCodeItems.size)
+            adapter.notifyDataSetChanged()
+    }
+
+
+    fun fecthCustomer(){
+        customerItems.clear()
+
+        for(data in tmpTransItems){
+            if (data.CUST_CODE == "")
+                customerItems.add("")
+            else{
+                var check = false
+
+                for (customer in tmpCustomerItems){
+                    if (customer.CODE == data.CUST_CODE){
+                        customerItems.add(customer.NAME.toString())
+                        check = true
+                    }
+                }
+                if (!check)
+                    customerItems.add("")
+            }
+        }
+        tmpCustomerNameItems.addAll(customerItems)
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
@@ -175,33 +202,10 @@ class TransactionFragment : Fragment(), MainView {
                             tmpCustomerItems.add(item)
                         }
                     }
-                    fecthCustomer()
-                    fetchTransByCat()
                 }
             }
+            fetchTransByCat()
         }
-    }
-
-    fun fecthCustomer(){
-        customerItems.clear()
-
-        for(data in tmpTransItems){
-            if (data.CUST_CODE == "")
-                customerItems.add("")
-            else{
-                var check = false
-
-                for (customer in tmpCustomerItems){
-                    if (customer.CODE == data.CUST_CODE){
-                        customerItems.add(customer.NAME.toString())
-                        check = true
-                    }
-                }
-                if (!check)
-                    customerItems.add("")
-            }
-        }
-        tmpCustomerNameItems.addAll(customerItems)
     }
 
     override fun response(message: String) {

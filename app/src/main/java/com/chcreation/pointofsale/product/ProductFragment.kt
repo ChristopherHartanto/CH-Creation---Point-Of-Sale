@@ -66,10 +66,6 @@ class ProductFragment : Fragment(), MainView {
             layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         }
 
-        fbProduct.onClick {
-            ctx.startActivity<NewProductActivity>()
-        }
-
         runnable = Runnable {
             pbProduct.visibility = View.GONE
             srProduct.isRefreshing = false

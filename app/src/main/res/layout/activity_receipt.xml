@@ -47,7 +47,6 @@
                     android:textColor="@color/colorBlack"
                     android:gravity="center"
                     android:textSize="16sp"
-                    android:text="Jalan Brigjen Katamso"
                     android:id="@+id/tvReceiptMerchantAddress"/>
 
                 <TextView
@@ -56,7 +55,6 @@
                     android:textColor="@color/colorBlack"
                     android:gravity="center"
                     android:textSize="16sp"
-                    android:text="081234123412"
                     android:id="@+id/tvReceiptMerchantTel"/>
 
                 <LinearLayout
@@ -76,7 +74,6 @@
                         android:layout_height="wrap_content"
                         android:textColor="@color/colorBlack"
                         android:textSize="16sp"
-                        android:text="Christopher"
                         android:id="@+id/tvReceiptCashier"/>
 
                 </LinearLayout>

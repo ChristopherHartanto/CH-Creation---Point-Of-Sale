@@ -23,19 +23,23 @@ import androidx.appcompat.widget.Toolbar
 import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.home.HomeFragment.Companion.active
 import com.chcreation.pointofsale.merchant.ManageMerchantActivity
+import com.chcreation.pointofsale.merchant.MerchantActivity
 import com.chcreation.pointofsale.model.Merchant
+import com.chcreation.pointofsale.model.UserAcceptance
 import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.presenter.Homepresenter
+import com.chcreation.pointofsale.presenter.MerchantPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.toast
-import org.jetbrains.anko.toast
 import java.util.*
 
 class MainActivity : AppCompatActivity(), MainView {
@@ -44,6 +48,7 @@ class MainActivity : AppCompatActivity(), MainView {
     private var doubleBackToExitPressedOnce = false
 
     private lateinit var presenter: Homepresenter
+    private lateinit var merchantPresenter: MerchantPresenter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
     private lateinit var view : View
@@ -80,6 +85,10 @@ class MainActivity : AppCompatActivity(), MainView {
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = Homepresenter(this,mAuth,mDatabase,this)
+        merchantPresenter = MerchantPresenter(this,mAuth,mDatabase,this)
+        GlobalScope.launch {
+            merchantPresenter.retrieveInvitation(encodeEmail(getEmail(this@MainActivity)))
+        }
 
         view = navView.getHeaderView(0)
         tvNavHeaderMerchantName = view.findViewById<TextView>(R.id.tvNavHeaderMerchantName)
@@ -90,9 +99,10 @@ class MainActivity : AppCompatActivity(), MainView {
         layoutNavHeader = view.findViewById<LinearLayout>(R.id.layoutNavHeader)
 
         tvNavHeaderMerchantName.text = getMerchant(this)
-        tvUserName.text = getName(this)
+        tvUserName.text = "${getName(this)} (${getMerchantUserGroup(this)})"
 
         layoutNavHeader.onClick {
+            layoutNavHeader.startAnimation(normalClickAnimation())
             startActivity<ManageMerchantActivity>()
         }
 
@@ -161,8 +171,29 @@ class MainActivity : AppCompatActivity(), MainView {
                 }
             }
         }
+        if (response == EMessageResult.FETCH_INVITATION_SUCCESS.toString())
+        {
+            if (dataSnapshot.exists())
+            {
+                val item = dataSnapshot.getValue(UserAcceptance::class.java)
+                alert ("You're Invite as ${item!!.USER_GROUP} in ${item.NAME}"){
+                    title = "Accept"
+                    yesButton {
+                        merchantPresenter.acceptInvitation(encodeEmail(getEmail(this@MainActivity)),item)
+                    }
+                    noButton {
+                        GlobalScope.launch {
+                            merchantPresenter.removeInvitation(encodeEmail(getEmail(this@MainActivity)))
+                        }
+                    }
+                }.show()
+            }
+        }
     }
 
     override fun response(message: String) {
+        if (message == EMessageResult.SUCCESS.toString()){ // for invitation
+            toast("Accept Success")
+        }
     }
 }

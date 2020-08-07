@@ -27,6 +27,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.size
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.model.Cat
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.ProductPresenter
@@ -41,8 +42,11 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_merchant.*
 import kotlinx.android.synthetic.main.activity_new_product.*
+import kotlinx.android.synthetic.main.fragment_home.*
 import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.selector
@@ -437,9 +441,13 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
             categoryItems.add("")
             categoryItems.add("Create Category")
 
-            if (dataSnapshot.exists()){
-                for (data in dataSnapshot.children) {
-                    val item = data.key
+            if (dataSnapshot.exists()  && dataSnapshot.value != ""){
+                val gson = Gson()
+                val arrayCartType = object : TypeToken<MutableList<Cat>>() {}.type
+                val items : MutableList<Cat> = gson.fromJson(dataSnapshot.value.toString(),arrayCartType)
+
+                for (data in items) {
+                    val item = data.CAT
                     if (item != "")
                         categoryItems.add(item.toString())
                 }

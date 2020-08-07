@@ -10,9 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.FragmentStatePagerAdapter
-import com.chcreation.pointofsale.EMessageResult
-import com.chcreation.pointofsale.EProduct
-import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CheckOutActivity
 import com.chcreation.pointofsale.checkout.SelectCustomerActivity
 import com.chcreation.pointofsale.presenter.ProductPresenter
@@ -31,6 +29,8 @@ import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_detail_transaction.*
 import kotlinx.android.synthetic.main.activity_manage_product_detail.*
 import org.jetbrains.anko.*
+import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.ctx
 
 class ManageProductDetailActivity : AppCompatActivity(),MainView {
 
@@ -99,15 +99,19 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
         // Handle item selection
         return when (item.itemId) {
             R.id.action_delete -> {
-                alert ("Are Sure Want to Delete?"){
-                    title = "Delete"
-                    yesButton {
-                        presenter.deleteProduct(prodCode)
-                    }
-                    noButton {
+                if (getMerchantUserGroup(this) == EUserGroup.WAITER.toString())
+                    toast("Only Manager Can Delete")
+                else{
+                    alert ("Are Sure Want to Delete?"){
+                        title = "Delete"
+                        yesButton {
+                            presenter.deleteProduct(prodCode)
+                        }
+                        noButton {
 
-                    }
-                }.show()
+                        }
+                    }.show()
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)

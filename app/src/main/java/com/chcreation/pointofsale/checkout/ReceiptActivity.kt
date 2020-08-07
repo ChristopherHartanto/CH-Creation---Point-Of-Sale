@@ -33,6 +33,7 @@ import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Payment
+import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.presenter.TransactionPresenter
 import com.chcreation.pointofsale.transaction.TransactionFragment
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transCodeItems
@@ -64,7 +65,8 @@ class ReceiptActivity : AppCompatActivity(), MainView {
     private lateinit var mDatabase : DatabaseReference
     private lateinit var presenter : TransactionPresenter
     private var paymentLists : MutableList<Payment> = mutableListOf()
-    private lateinit var boughtList: com.chcreation.pointofsale.model.Transaction
+    private var boughtList =  com.chcreation.pointofsale.model.Transaction()
+    private lateinit var user: User
     private var receiptCode = 0
     private var screenShotPath : Uri? = null
 
@@ -130,6 +132,9 @@ class ReceiptActivity : AppCompatActivity(), MainView {
     }
 
     private fun fetchData(){
+        GlobalScope.launch {
+            presenter.retrieveCashier(boughtList.CREATED_BY.toString())
+        }
         val gson = Gson()
         val arrayCartType = object : TypeToken<MutableList<Cart>>() {}.type
         val purchasedItems : MutableList<Cart> = gson.fromJson(boughtList.DETAIL,arrayCartType)
@@ -326,6 +331,12 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 receiptCode = dataSnapshot.key!!.toInt()
                 this.boughtList = item!!
                 fetchData()
+            }
+        }else if (response == EMessageResult.FETCH_USER_SUCCESS.toString()){
+            if (dataSnapshot.exists()){
+                val item = dataSnapshot.getValue(User::class.java)
+                user = item!!
+                tvReceiptCashier.text = user.NAME
             }
         }
     }

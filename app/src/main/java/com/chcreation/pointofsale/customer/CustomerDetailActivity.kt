@@ -10,15 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.FragmentStatePagerAdapter
-import com.chcreation.pointofsale.ECustomer
-import com.chcreation.pointofsale.EMessageResult
-import com.chcreation.pointofsale.EProduct
-import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.Companion.bitmap
+import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.Companion.currentPhotoPath
 import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.Companion.custKey
+import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.Companion.filePath
 import com.chcreation.pointofsale.presenter.CustomerPresenter
-import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.bitmap
-import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.currentPhotoPath
-import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.filePath
 import com.chcreation.pointofsale.transaction.DetailTransactionActivity
 import com.chcreation.pointofsale.transaction.DetailTransactionListPayment
 import com.chcreation.pointofsale.transaction.DetailTransactionListProductFragment
@@ -80,6 +77,7 @@ class CustomerDetailActivity : AppCompatActivity(),MainView {
             alert ("Are you want to Discard Edit?"){
                 title = "Discard"
                 yesButton {
+                    CustomerDetailManageCustomerFragment().clearData()
                     super.onBackPressed()
                 }
                 noButton {  }
@@ -99,15 +97,20 @@ class CustomerDetailActivity : AppCompatActivity(),MainView {
         // Handle item selection
         return when (item.itemId) {
             R.id.action_delete -> {
-                alert ("Are Sure Want to Delete?"){
-                    title = "Delete"
-                    yesButton {
-                        presenter.deleteCustomer(custKey)
-                    }
-                    noButton {
+                if (getMerchantUserGroup(this) == EUserGroup.WAITER.toString())
+                    toast("Only Manager Can Delete")
+                else{
 
-                    }
-                }.show()
+                    alert ("Are Sure Want to Delete?"){
+                        title = "Delete"
+                        yesButton {
+                            presenter.deleteCustomer(custKey)
+                        }
+                        noButton {
+
+                        }
+                    }.show()
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)

@@ -147,21 +147,13 @@ class ProductPresenter(private val view: MainView,
             }
     }
 
-    fun saveNewCategory(newCategory: String){
-        val timeStamp: String = dateFormat().format(Date())
-
-        val values  = hashMapOf(
-            EMerchant.CREATED_DATE.toString() to timeStamp,
-            EMerchant.UPDATED_DATE.toString() to timeStamp,
-            EMerchant.CAT.toString() to newCategory
-        )
+    fun saveNewCategory(categoryItems: String){
 
         database.child(ETable.MERCHANT.toString())
             .child(getMerchantCredential(context))
             .child(getMerchant(context))
             .child(EMerchant.CAT.toString())
-            .child(newCategory)
-            .setValue(values).addOnFailureListener {
+            .setValue(categoryItems).addOnFailureListener {
                 view.response(it.message.toString())
             }
             .addOnSuccessListener {
@@ -325,6 +317,7 @@ class ProductPresenter(private val view: MainView,
                     }
                 }
                 val values  = hashMapOf(
+                    EStock_Movement.NOTE.toString() to stockMovement.NOTE,
                     EStock_Movement.PROD_CODE.toString() to stockMovement.PROD_CODE,
                     EStock_Movement.PROD_KEY.toString() to stockMovement.PROD_KEY,
                     EStock_Movement.STATUS.toString() to stockMovement.STATUS,

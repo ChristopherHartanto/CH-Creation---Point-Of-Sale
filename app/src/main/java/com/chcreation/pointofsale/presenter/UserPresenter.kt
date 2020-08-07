@@ -4,6 +4,7 @@ import android.content.Context
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.model.UserAcceptance
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -118,6 +119,58 @@ class UserPresenter(private val view: MainView, private val auth: FirebaseAuth, 
             .child(getMerchantCredential(context))
             .child(getMerchant(context))
             .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun retrieveUserLists(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_USER_LIST_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.MERCHANT.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .child(EMerchant.USER_LIST.toString())
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun retrieveUser(userId: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_USER_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.USER.toString())
+            .child(userId)
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun inviteUser(userAcceptance: UserAcceptance, email: String){
+        val values  = hashMapOf(
+            EUserAcceptance.NAME.toString() to userAcceptance.NAME,
+            EUserAcceptance.USER_GROUP.toString() to userAcceptance.USER_GROUP,
+            EUserAcceptance.CREATED_DATE.toString() to userAcceptance.CREATED_DATE,
+            EUserAcceptance.CREDENTIAL.toString() to userAcceptance.CREDENTIAL
+        )
+
+        database.child(ETable.USER_ACCEPTANCE.toString())
+            .child(email)
+            .setValue(values).addOnFailureListener {
+                view.response(it.message.toString())
+            }
+            .addOnSuccessListener {
+                view.response(EMessageResult.CREATE_INVITATION_SUCCESS.toString())
+            }
     }
 
     private fun generateCustomerCode() : String{

@@ -20,6 +20,7 @@ import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_sign_up.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.toast
 
 class SignUpActivity : AppCompatActivity(), MainView {
 
@@ -53,7 +54,9 @@ class SignUpActivity : AppCompatActivity(), MainView {
         val name = etSignUpName.text.toString()
         val password = etSignUpPassword.text.toString()
 
-        if (email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
+        if (password.length < 6)
+            toast("Password Minimum 6 Length !!")
+        else if (email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
 
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->
                 if (task.isSuccessful) {

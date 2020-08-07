@@ -11,7 +11,8 @@ enum class ETable{
     TRANSACTION,
     PAYMENT,
     ENQUIRY,
-    STOCK_MOVEMENT
+    STOCK_MOVEMENT,
+    USER_ACCEPTANCE
 }
 
 enum class EProduct{
@@ -44,7 +45,8 @@ enum class EMerchant{
     NO_TELP,
     CAT,
     IMAGE,
-    USER_LIST
+    USER_LIST,
+    ADDRESS
 }
 
 enum class EAvailableMerchant{
@@ -67,6 +69,7 @@ enum class ECustomer{
     ADDRESS,
     NOTE,
     CODE,
+    IMAGE,
     STATUS_CODE
 }
 
@@ -110,7 +113,8 @@ enum class EStock_Movement{
     PROD_CODE,
     PROD_KEY,
     STATUS,
-    STATUS_CODE
+    STATUS_CODE,
+    NOTE
 }
 
 enum class EPayment{
@@ -132,6 +136,14 @@ enum class EUser{
     EMAIL
 }
 
+enum class EUserAcceptance{
+    CREATED_DATE,
+    EMAIL,
+    CREDENTIAL,
+    NAME,
+    USER_GROUP
+}
+
 enum class EMerchantUserList{
     CREATED_DATE,
     UPDATED_DATE,
@@ -141,6 +153,7 @@ enum class EMerchantUserList{
 
 enum class EMessageResult{
     SUCCESS,
+    UPDATE,
     DELETE_SUCCESS,
     FAILURE,
     FETCH_PROD_SUCCESS,
@@ -153,7 +166,10 @@ enum class EMessageResult{
     FETCH_TRANS_LIST_PAYMENT_SUCCESS,
     FETCH_STOCK_MOVEMENT_SUCCESS,
     FETCH_PEND_PAYMENT_SUCCESS,
-    FETCH_USER_SUCCESS
+    FETCH_USER_SUCCESS,
+    FETCH_USER_LIST_SUCCESS,
+    CREATE_INVITATION_SUCCESS,
+    FETCH_INVITATION_SUCCESS
 }
 
 enum class EPaymentMethod{
@@ -178,7 +194,8 @@ enum class EStatusUser{
 enum class EStatusStock{
     INBOUND,
     OUTBOUND,
-    MISSING
+    MISSING,
+    CANCEL
 }
 
 enum class EUserGroup{
@@ -192,5 +209,6 @@ enum class ESharedPreference{
     USER_GROUP,
     NO_TELP,
     ADDRESS,
-    NAME
+    NAME,
+    EMAIL
 }

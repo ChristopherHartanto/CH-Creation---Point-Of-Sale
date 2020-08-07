@@ -16,6 +16,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_manage_product_stock_movement_list.*
+import org.jetbrains.anko.support.v4.ctx
 
 class ManageProductStockMovementListActivity : AppCompatActivity(), MainView {
 
@@ -40,7 +41,10 @@ class ManageProductStockMovementListActivity : AppCompatActivity(), MainView {
         }
 
         rvManageProductStockMovementList.adapter = adapter
-        rvManageProductStockMovementList.layoutManager = LinearLayoutManager(this)
+        val linearLayoutManager = LinearLayoutManager(this)
+        linearLayoutManager.reverseLayout = true
+        linearLayoutManager.stackFromEnd = true
+        rvManageProductStockMovementList.layoutManager = linearLayoutManager
     }
 
     override fun onStart() {

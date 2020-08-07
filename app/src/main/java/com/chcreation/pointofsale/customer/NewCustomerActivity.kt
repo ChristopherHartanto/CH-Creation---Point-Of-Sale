@@ -14,6 +14,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.widget.ArrayAdapter
 import androidx.core.content.FileProvider
+import androidx.core.widget.doOnTextChanged
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.presenter.CustomerPresenter
@@ -78,6 +79,17 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
             }
 
             presenter.saveCustomer(Customer(name,email,"","",phone,address,note))
+        }
+
+        etCustomerName.doOnTextChanged { text, start, before, count ->
+            if (text.isNullOrEmpty()){
+                tvCustomerFirstName.text = text!!.first().toString().toUpperCase(Locale.getDefault())
+            }
+
+        }
+
+        layoutCustomerDefaultImage.onClick {
+            toast("You Can Add Picture After Save this Data")
         }
     }
 

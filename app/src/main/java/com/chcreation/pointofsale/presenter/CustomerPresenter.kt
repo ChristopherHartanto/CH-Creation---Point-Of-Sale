@@ -37,7 +37,8 @@ class CustomerPresenter(private val view: MainView,
             ECustomer.ADDRESS.toString() to customer.ADDRESS,
             ECustomer.CREATED_DATE.toString() to customer.CREATED_DATE,
             ECustomer.UPDATED_DATE.toString() to customer.UPDATED_DATE,
-            ECustomer.CODE.toString() to customer.CODE
+            ECustomer.CODE.toString() to customer.CODE,
+            ECustomer.IMAGE.toString() to customer.IMAGE
         )
         database.child(ETable.CUSTOMER.toString())
             .child(getMerchantCredential(context))

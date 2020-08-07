@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CartActivity
 import com.chcreation.pointofsale.model.Cart
+import com.chcreation.pointofsale.model.Cat
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.view.MainView
@@ -24,6 +25,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_manage_product.*
 import org.jetbrains.anko.*
@@ -107,6 +109,10 @@ class ManageProductFragment : Fragment() , MainView {
             }
 
         })
+
+        fbManageProduct.onClick {
+            startActivity<NewProductActivity>()
+        }
 
         srManageProduct.onRefresh {
             presenter.retrieveProducts()
@@ -197,12 +203,18 @@ class ManageProductFragment : Fragment() , MainView {
             }
             else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
                 categoryItems.clear()
+                tlManageProduct.removeAllTabs()
                 categoryItems.add("All")
-                if (dataSnapshot.exists()){
-                    for (data in dataSnapshot.children) {
-                        tlManageProduct.addTab(tlManageProduct.newTab().setText(data.key))
-                        categoryItems.add(data.key.toString())
+                if (dataSnapshot.exists() && dataSnapshot.value != ""){
+                    val gson = Gson()
+                    val arrayCartType = object : TypeToken<MutableList<Cat>>() {}.type
+                    val items : MutableList<Cat> = gson.fromJson(dataSnapshot.value.toString(),arrayCartType)
+
+                    for (data in items) {
+                        tlManageProduct.addTab(tlManageProduct.newTab().setText(data.CAT))
+                        categoryItems.add(data.CAT.toString())
                     }
+
                     if (categoryItems.size > 4)
                         tlManageProduct.tabMode = TabLayout.MODE_SCROLLABLE
                 }

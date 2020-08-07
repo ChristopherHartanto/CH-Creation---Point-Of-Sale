@@ -42,6 +42,10 @@ class StockMovementListRecyclerView(private val context: Context, private val it
                 image.imageResource = R.drawable.outbound
                 desc.text = "${item.QTY} Qty"
             }
+            else if (item.STATUS == EStatusStock.MISSING.toString() || item.STATUS == EStatusStock.CANCEL.toString()){
+                image.imageResource = R.drawable.error
+                desc.text = "${item.QTY} Qty"
+            }
             date.text = parseDateFormat(item.UPDATED_DATE.toString())
         }
     }

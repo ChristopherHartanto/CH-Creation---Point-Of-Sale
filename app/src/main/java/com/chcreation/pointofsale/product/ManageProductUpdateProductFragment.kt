@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.model.Cat
 
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
@@ -38,8 +39,12 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_new_product.*
+import kotlinx.android.synthetic.main.fragment_manage_product.*
 import kotlinx.android.synthetic.main.fragment_manage_product_update_product.*
+import kotlinx.android.synthetic.main.fragment_manage_product_update_product.pbManageProduct
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -121,26 +126,30 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         super.onStart()
 
         btnManageProductSave.onClick {
-            alert ("Are You Sure want to Update?"){
-                title = "Update"
-                yesButton {
-                    if (positionSpinner == 0 || positionSpinner == 1)
-                        toast("Please Select Category")
-                    else if (etManageProductName.text.toString() == "")
-                        toast("Name Must be Fill !!")
-                    else{
-                        pbManageProduct.visibility = View.VISIBLE
+            if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString())
+                toast("Only Manager Can Update Product")
+            else{
+                alert ("Are You Sure want to Update?"){
+                    title = "Update"
+                    yesButton {
+                        if (positionSpinner == 0 || positionSpinner == 1)
+                            toast("Please Select Category")
+                        else if (etManageProductName.text.toString() == "")
+                            toast("Name Must be Fill !!")
+                        else{
+                            pbManageProduct.visibility = View.VISIBLE
 
-                        if (filePath == null)
-                            updateProduct(null)
-                        else
-                            uploadImage()
+                            if (filePath == null)
+                                updateProduct(null)
+                            else
+                                uploadImage()
+                        }
                     }
-                }
-                noButton {
+                    noButton {
 
-                }
-            }.show()
+                    }
+                }.show()
+            }
         }
     }
 
@@ -352,6 +361,12 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         etManageProductDescription.setText(product.DESC.toString())
         etManageProductName.setText(product.NAME.toString())
         etManageProductPrice.setText(product.PRICE.toString())
+        etManageProductCreatedDate.setText(parseDateFormat(product.CREATED_DATE.toString()))
+        etManageProductUpdatedDate.setText(parseDateFormat(product.UPDATED_DATE.toString()))
+
+        etManageProductCreatedDate.isEnabled = false
+        etManageProductUpdatedDate.isEnabled = false
+
         (activity as AppCompatActivity).supportActionBar?.title = product.NAME.toString()
 
         if (bitmap != null)
@@ -365,6 +380,10 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         }
 
         swManageProduct.isChecked = product.MANAGE_STOCK
+
+        if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString()){
+            etManageProductCost.setText("------------")
+        }
     }
 
 
@@ -389,9 +408,13 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
             categoryItems.add("")
             categoryItems.add("Create Category")
 
-            if (dataSnapshot.exists()){
-                for (data in dataSnapshot.children) {
-                    val item = data.key
+            if (dataSnapshot.exists() && dataSnapshot.value != ""){
+                val gson = Gson()
+                val arrayCartType = object : TypeToken<MutableList<Cat>>() {}.type
+                val items : MutableList<Cat> = gson.fromJson(dataSnapshot.value.toString(),arrayCartType)
+
+                for (data in items) {
+                    val item = data.CAT
                     if (item != "")
                         categoryItems.add(item.toString())
                 }
@@ -415,6 +438,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
     override fun response(message: String) {
         if (message == EMessageResult.SUCCESS.toString()){
             clearData()
+            presenter.retrieveProductByProdCode(prodCode)
             toast("Update Success")
             if (swManageProduct.isChecked)
                 product.MANAGE_STOCK = true

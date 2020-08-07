@@ -13,8 +13,7 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_gravity="center"
-        android:id="@+id/layoutCustomerDefaultImage"
-        android:visibility="gone">
+        android:id="@+id/layoutCustomerDefaultImage">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="100dp"
@@ -37,7 +36,8 @@
         android:layout_height="100dp"
         android:layout_gravity="center"
         android:id="@+id/ivCustomerImage"
-        android:src="@drawable/default_image"/>
+        android:src="@drawable/default_image"
+        android:visibility="gone"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"

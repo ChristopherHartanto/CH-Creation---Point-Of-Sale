@@ -98,19 +98,23 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         presenter.retrieveCustomerByCustCode(custCode)
 
         btnManageCustomerSave.onClick {
-            alert ("Are You Sure Want to Update?"){
+            if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString())
+                toast("Only Manager Can Update Customer")
+            else{
+                alert ("Are You Sure Want to Update?"){
 
-                title = "Update"
-                yesButton {
-                    if (filePath == null)
-                        updateCustomer(null)
-                    else
-                       uploadImage()
-                }
-                noButton {
+                    title = "Update"
+                    yesButton {
+                        if (filePath == null)
+                            updateCustomer(null)
+                        else
+                            uploadImage()
+                    }
+                    noButton {
 
-                }
-            }.show()
+                    }
+                }.show()
+            }
         }
 
         layoutManageCustomerDefaultImage.onClick {
@@ -130,11 +134,13 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
                 .child(mAuth.currentUser!!.uid)
                 .child(custCode)
 
-            val uploadTask = ref.putFile(ManageProductUpdateProductFragment.filePath!!)
+            val uploadTask = ref.putFile(filePath!!)
 
             val urlTask = uploadTask.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>> { task ->
                 if (!task.isSuccessful) {
                     task.exception?.let {
+                        toast(it.message.toString())
+                        pbManageCustomer.visibility = View.GONE
                         throw it
                     }
                 }
@@ -355,12 +361,14 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         val name = etManageCustomerName.text.toString()
         val note = etManageCustomerNote.text.toString()
         val phone = etManageCustomerPhone.text.toString()
-
+        var image = customer.IMAGE
+        if (imageUri != "")
+            image = imageUri
         if (name == "")
             toast("Please Fill Customer Name !!")
         else{
             presenter.saveCustomer(Customer(name,email, customer.CREATED_DATE, customer.UPDATED_DATE,phone,
-                address,note,customer.CODE,customer.IMAGE),custKey)
+                address,note,customer.CODE,image),custKey)
         }
     }
 
@@ -417,6 +425,8 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
     override fun response(message: String) {
        if (message == EMessageResult.SUCCESS.toString()){
            toast("Success Update")
+           pbManageCustomer.visibility = View.GONE
+           clearData()
        }
     }
 }

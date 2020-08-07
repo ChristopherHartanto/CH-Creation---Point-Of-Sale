@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CartActivity
 import com.chcreation.pointofsale.model.Cart
+import com.chcreation.pointofsale.model.Cat
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.view.MainView
@@ -22,6 +23,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_home.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -294,11 +296,16 @@ class HomeFragment : Fragment() , MainView {
             else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
                 categoryItems.clear()
                 tlHome.removeAllTabs()
+                tlHome.addTab(tlHome.newTab().setText("All"))
                 categoryItems.add("All")
-                if (dataSnapshot.exists()){
-                    for (data in dataSnapshot.children) {
-                        tlHome.addTab(tlHome.newTab().setText(data.key))
-                        categoryItems.add(data.key.toString())
+                if (dataSnapshot.exists()  && dataSnapshot.value != ""){
+                    val gson = Gson()
+                    val arrayCartType = object : TypeToken<MutableList<Cat>>() {}.type
+                    val items : MutableList<Cat> = gson.fromJson(dataSnapshot.value.toString(),arrayCartType)
+
+                    for (data in items) {
+                        tlHome.addTab(tlHome.newTab().setText(data.CAT))
+                        categoryItems.add(data.CAT.toString())
                     }
                     if (categoryItems.size > 4)
                         tlHome.tabMode = TabLayout.MODE_SCROLLABLE

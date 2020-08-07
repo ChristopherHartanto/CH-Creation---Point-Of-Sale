@@ -1,17 +1,33 @@
 package com.chcreation.pointofsale.model
 
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 data class Merchant(
-    var NAME: String? = "No Data",
-    var BUSINESS_INFO: String? = "No Data",
+    var NAME: String? = "",
+    var BUSINESS_INFO: String? = "",
     var ADDRESS: String? = "",
     var NO_TELP: String? = "",
     var IMAGE: String? = "",
-    //var CAT: HashMap<Any,HashMap<Any,Cart>>? = null,
+    var USER_LIST: String? = "",
+    var CAT: String? = "",
     var CREATED_DATE: String? = "",
     var UPDATED_DATE: String? = "",
     var CREATED_BY: String? = "",
     var UPDATED_BY: String? = ""
+)
+
+data class Cat(
+    var CAT: String? = "",
+    var CREATED_DATE: String? = "",
+    var UPDATED_DATE: String? = ""
+)
+
+data class UserList(
+    var USER_CODE: String? = "",
+    var USER_GROUP: String? = "",
+    var STATUS_CODE: String? = "",
+    var CREATED_DATE: String? = "",
+    var UPDATED_DATE: String? = ""
 )
