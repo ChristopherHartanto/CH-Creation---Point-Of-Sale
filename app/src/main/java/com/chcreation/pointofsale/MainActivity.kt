@@ -173,20 +173,22 @@ class MainActivity : AppCompatActivity(), MainView {
         }
         if (response == EMessageResult.FETCH_INVITATION_SUCCESS.toString())
         {
-            if (dataSnapshot.exists())
+            if (dataSnapshot.exists() && dataSnapshot.value != null)
             {
                 val item = dataSnapshot.getValue(UserAcceptance::class.java)
-                alert ("You're Invite as ${item!!.USER_GROUP} in ${item.NAME}"){
-                    title = "Accept"
-                    yesButton {
-                        merchantPresenter.acceptInvitation(encodeEmail(getEmail(this@MainActivity)),item)
-                    }
-                    noButton {
-                        GlobalScope.launch {
-                            merchantPresenter.removeInvitation(encodeEmail(getEmail(this@MainActivity)))
+                if (item!!.NAME != ""){
+                    alert ("You're Invite as ${item!!.USER_GROUP} in ${item.NAME}"){
+                        title = "Accept"
+                        yesButton {
+                            merchantPresenter.acceptInvitation(encodeEmail(getEmail(this@MainActivity)),item)
                         }
-                    }
-                }.show()
+                        noButton {
+                            GlobalScope.launch {
+                                merchantPresenter.removeInvitation(encodeEmail(getEmail(this@MainActivity)))
+                            }
+                        }
+                    }.show()
+                }
             }
         }
     }

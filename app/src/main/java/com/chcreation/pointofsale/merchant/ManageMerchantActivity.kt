@@ -81,8 +81,6 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
         btnMerchant.onClick {
 
             btnMerchant.startAnimation(normalClickAnimation())
-            btnMerchant.isEnabled = false
-            pbMerchant.visibility = View.VISIBLE
 
             val merchantBusinessInfo = etMerchantBusinessInfo.text.toString()
             val merchantNoTelp = etMerchantNoTelp.text.toString()
@@ -98,14 +96,14 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                 alert("Once Create Your Merchant Name Cannot Edit!"){
                     title = "Note!"
                     yesButton {
+                        btnMerchant.isEnabled = false
+                        pbMerchant.visibility = View.VISIBLE
                         presenter.createNewMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,"",null,null,
                             currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid),
                             AvailableMerchant(merchantName,EUserGroup.MANAGER.toString(),currentDate,currentDate,
                                 mAuth.currentUser!!.uid,EStatusUser.ACTIVE.toString()))
                     }
                     noButton {
-                        btnMerchant.isEnabled = true
-                        pbMerchant.visibility = View.GONE
                     }
                 }.show()
             }
@@ -121,11 +119,14 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
 
                 if (getMerchantUserGroup(this@ManageMerchantActivity) == EUserGroup.WAITER.toString())
                     toast("Only Manager Can Update Merchant Status")
-                else
+                else{
+                    btnMerchant.isEnabled = false
+                    pbMerchant.visibility = View.VISIBLE
                     presenter.updateMerchant(Merchant(name,businessInfo,address,noTel,image,
                         merchant!!.USER_LIST,merchant!!.CAT,merchant!!.CREATED_DATE,
                         dateFormat().format(Date()),merchant!!.CREATED_BY,
                         mAuth.currentUser!!.uid),name)
+                }
             }
         }
 

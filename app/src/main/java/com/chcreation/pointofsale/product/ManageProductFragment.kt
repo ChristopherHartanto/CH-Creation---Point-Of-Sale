@@ -204,6 +204,7 @@ class ManageProductFragment : Fragment() , MainView {
             else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
                 categoryItems.clear()
                 tlManageProduct.removeAllTabs()
+                tlManageProduct.addTab(tlManageProduct.newTab().setText("All"))
                 categoryItems.add("All")
                 if (dataSnapshot.exists() && dataSnapshot.value != ""){
                     val gson = Gson()

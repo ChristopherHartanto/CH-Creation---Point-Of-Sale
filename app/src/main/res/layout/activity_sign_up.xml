@@ -49,6 +49,13 @@
                 android:inputType="textPassword"
                 android:id="@+id/etSignUpPassword"/>
 
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/pbSignUp"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone"/>
+
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -44,7 +44,7 @@
                 android:layout_weight="1"
                 android:gravity="center_vertical"
                 android:layout_marginHorizontal="5dp"
-                android:textSize="20sp"
+                android:textSize="21sp"
                 android:textColor="@color/colorBlack"
                 android:id="@+id/tvRowUserListName"/>
             <TextView
@@ -54,7 +54,6 @@
                 android:gravity="center_vertical"
                 android:layout_marginHorizontal="5dp"
                 android:textSize="16sp"
-                android:textColor="@color/colorBlack"
                 android:id="@+id/tvRowUserListGroup"/>
         </LinearLayout>
 

@@ -34,19 +34,19 @@ class StockMovementListRecyclerView(private val context: Context, private val it
         private val date = view.findViewById<TextView>(R.id.tvRowStockMovementListDate)
 
         fun bindItem(item: StockMovement, listener: (position: Int) -> Unit, position: Int, context: Context) {
-            if (item.STATUS == EStatusStock.INBOUND.toString()){
+            if (item.STATUS == EStatusStock.INBOUND.toString() && item.STATUS_CODE != EStatusStock.CANCEL.toString()){
                 image.imageResource = R.drawable.inbound
                 desc.text = "${item.QTY} Qty"
             }
-            else if (item.STATUS == EStatusStock.OUTBOUND.toString()){
+            else if (item.STATUS == EStatusStock.OUTBOUND.toString() && item.STATUS_CODE != EStatusStock.CANCEL.toString()){
                 image.imageResource = R.drawable.outbound
                 desc.text = "${item.QTY} Qty"
             }
-            else if (item.STATUS == EStatusStock.MISSING.toString() || item.STATUS == EStatusStock.CANCEL.toString()){
+            else if (item.STATUS == EStatusStock.MISSING.toString() || item.STATUS_CODE == EStatusStock.CANCEL.toString()){
                 image.imageResource = R.drawable.error
                 desc.text = "${item.QTY} Qty"
             }
-            date.text = parseDateFormat(item.UPDATED_DATE.toString())
+            date.text = parseDateFormat(item.CREATED_DATE.toString())
         }
     }
 }

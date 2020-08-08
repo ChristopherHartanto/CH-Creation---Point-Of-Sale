@@ -151,14 +151,14 @@ class TransactionFragment : Fragment(), MainView {
         transItems.reverse()
         customerItems.reverse()
         transCodeItems.reverse()
-        if (transItems.size == transCodeItems.size)
+        if (transItems.size == transCodeItems.size && transItems.size == customerItems.size)
             adapter.notifyDataSetChanged()
     }
 
 
     fun fecthCustomer(){
         customerItems.clear()
-
+        tmpCustomerNameItems.clear()
         for(data in tmpTransItems){
             if (data.CUST_CODE == "")
                 customerItems.add("")
@@ -176,6 +176,7 @@ class TransactionFragment : Fragment(), MainView {
             }
         }
         tmpCustomerNameItems.addAll(customerItems)
+        customerItems.clear()
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

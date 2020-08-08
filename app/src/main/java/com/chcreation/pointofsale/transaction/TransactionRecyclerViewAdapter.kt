@@ -48,7 +48,7 @@ class TransactionRecyclerViewAdapter(private val context: Context, private val i
 
         fun bindItem(item: Transaction, transCode: Int, custName: String, listener: (position: Int) -> Unit, position: Int) {
             code.text = receiptFormat(transCode)
-            if (custName.isNullOrEmpty())
+            if (custName != "")
                 customer.text = custName
             date.text = parseTimeFormat(item.UPDATED_DATE.toString())
             totalPrice.text = indonesiaCurrencyFormat().format(item.TOTAL_PRICE!! - item.DISCOUNT!! + item.TAX!!)

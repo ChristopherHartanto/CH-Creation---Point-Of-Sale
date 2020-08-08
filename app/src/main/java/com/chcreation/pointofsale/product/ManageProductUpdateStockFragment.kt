@@ -5,14 +5,17 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.chcreation.pointofsale.EUserGroup
 
 import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.getMerchantUserGroup
 import com.chcreation.pointofsale.normalClickAnimation
 import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.product
 import kotlinx.android.synthetic.main.fragment_manage_product_update_stock.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * A simple [Fragment] subclass.
@@ -51,7 +54,10 @@ class ManageProductUpdateStockFragment : Fragment() {
         btnManageProductManageStock.onClick {
             btnManageProductManageStock.startAnimation(normalClickAnimation())
 
-            ctx.startActivity<ManageProductManageStockActivity>()
+            if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString())
+                toast("Only Manager Can Update Stock")
+            else
+                ctx.startActivity<ManageProductManageStockActivity>()
         }
     }
 

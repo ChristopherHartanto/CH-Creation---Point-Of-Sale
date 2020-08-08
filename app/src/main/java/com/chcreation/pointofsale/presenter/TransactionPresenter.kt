@@ -229,21 +229,22 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
                     for (data in p0.children){
 
                         val currentDate: String = dateFormat().format(Date())
-                        database.child(ETable.ENQUIRY.toString())
+                        database.child(ETable.STOCK_MOVEMENT.toString())
                             .child(getMerchantCredential(context))
                             .child(getMerchant(context))
                             .child(data.key.toString())
                             .child(EStock_Movement.STATUS_CODE.toString())
                             .setValue(statusCode).addOnFailureListener {
                                 view.response(it.message.toString())
-                            }
-                        database.child(ETable.STOCK_MOVEMENT.toString())
-                            .child(getMerchantCredential(context))
-                            .child(getMerchant(context))
-                            .child(data.key.toString())
-                            .child(EStock_Movement.UPDATED_DATE.toString())
-                            .setValue(currentDate).addOnFailureListener {
-                                view.response(it.message.toString())
+                            }.addOnSuccessListener {
+                                database.child(ETable.STOCK_MOVEMENT.toString())
+                                    .child(getMerchantCredential(context))
+                                    .child(getMerchant(context))
+                                    .child(data.key.toString())
+                                    .child(EStock_Movement.UPDATED_DATE.toString())
+                                    .setValue(currentDate).addOnFailureListener {
+                                        view.response(it.message.toString())
+                                    }
                             }
                     }
                 }

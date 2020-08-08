@@ -13,6 +13,19 @@ private lateinit var sharedPreference: SharedPreferences
 
 var RESULT_CLOSE_ALL = 1111
 
+fun removeAllSharedPreference(context: Context){
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+    val editor = sharedPreference.edit()
+    editor.putString(ESharedPreference.NAME.toString(),"")
+    editor.putString(ESharedPreference.EMAIL.toString(),"")
+    editor.putString(ESharedPreference.MERCHANT.toString(),"")
+    editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(),"")
+    editor.putString(ESharedPreference.NO_TELP.toString(),"")
+    editor.putString(ESharedPreference.USER_GROUP.toString(),"")
+    editor.putString(ESharedPreference.ADDRESS.toString(),"")
+    editor.apply()
+}
+
 fun getName(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
@@ -89,6 +102,6 @@ fun showError(context: Context,message: String)
 }
 
 fun encodeEmail(email:String): String{
-    val index = email.indexOf('.',0)
+    val index = if (email == "") 0 else email.indexOf('.',0)
     return email.substring(0,index)
 }

@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.*
 
-import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.login.LoginActivity
 import com.chcreation.pointofsale.model.Cat
 import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.model.UserList
@@ -22,10 +22,12 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_user_list.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.jetbrains.anko.noButton
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.onRefresh
-import org.jetbrains.anko.support.v4.startActivity
+import org.jetbrains.anko.support.v4.*
+import org.jetbrains.anko.yesButton
 
 class UserListFragment : Fragment(), MainView{
 
@@ -60,32 +62,58 @@ class UserListFragment : Fragment(), MainView{
         }
 
         fbUserList.onClick {
-            startActivity<AddUserActivity>()
+            if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString())
+                toast("Only Manager Can Invite User")
+            else{
+                if (userGroups.size > 8)
+                    toast("Maximum User 8, Need Contact Administrator to Continue Proceed !!")
+                else if (userGroups.size > 0)
+                    startActivity<AddUserActivity>()
+            }
         }
 
+        btnLogOut.onClick {
+            btnLogOut.startAnimation(normalClickAnimation())
+            alert ("Are You Want to Log Out?"){
+                title = "Log Out"
+                yesButton {
+                    mAuth.signOut()
+                    removeAllSharedPreference(ctx)
+                    startActivity<LoginActivity>()
+                    requireActivity().finish()
+                }
+                noButton {
+
+                }
+            }.show()
+        }
     }
 
     override fun onStart() {
         super.onStart()
 
-        presenter.retrieveUserLists()
         rvUserList.adapter = adapter
         rvUserList.layoutManager = LinearLayoutManager(ctx)
+
+        presenter.retrieveUserLists()
     }
 
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()){
-            if(dataSnapshot.exists() && dataSnapshot.value != null){
+            if(dataSnapshot.exists() && dataSnapshot.value != null && dataSnapshot.value != ""){
                 userGroups.clear()
                 userNames.clear()
                 val gson = Gson()
                 val arrayUserListType = object : TypeToken<MutableList<UserList>>() {}.type
                 val items : MutableList<UserList> = gson.fromJson(dataSnapshot.value.toString(),arrayUserListType)
 
+                items.sortBy { it.USER_GROUP }
                 userGroups.addAll(items)
-                for (data in userGroups){
-                    presenter.retrieveUser(data.USER_CODE.toString())
+                GlobalScope.launch {
+                    for (data in userGroups){
+                        presenter.retrieveUser(data.USER_CODE.toString())
+                    }
                 }
             }
         }
@@ -94,11 +122,11 @@ class UserListFragment : Fragment(), MainView{
                 val item = dataSnapshot.getValue(User::class.java)
                 userNames.add(item!!.NAME.toString())
             }
-            if (userGroups.size == userNames.size){
-                adapter.notifyDataSetChanged()
-                pbUserList.visibility = View.GONE
-                srUserList.isRefreshing = false
-            }
+        }
+        if (userGroups.size == userNames.size){
+            adapter.notifyDataSetChanged()
+            pbUserList.visibility = View.GONE
+            srUserList.isRefreshing = false
         }
     }
 

@@ -60,6 +60,11 @@ class SignInActivity : AppCompatActivity(), MainView {
         }
     }
 
+    override fun onBackPressed() {
+       startActivity<LoginActivity>()
+        finish()
+    }
+
     private fun login () {
 
         email = etSignInEmail.text.toString()
@@ -92,7 +97,7 @@ class SignInActivity : AppCompatActivity(), MainView {
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_INVITATION_SUCCESS.toString())
         {
-            if (dataSnapshot.exists())
+            if (dataSnapshot.exists() && dataSnapshot.value != null)
             {
                 val item = dataSnapshot.getValue(UserAcceptance::class.java)
                 alert ("You're Invite as ${item!!.USER_GROUP} in ${item.NAME}"){

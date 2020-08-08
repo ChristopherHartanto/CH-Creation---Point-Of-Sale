@@ -139,7 +139,7 @@ class UserPresenter(private val view: MainView, private val auth: FirebaseAuth, 
             .addListenerForSingleValueEvent(postListener)
     }
 
-    fun retrieveUser(userId: String){
+    suspend fun retrieveUser(userId: String){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)

@@ -82,8 +82,8 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
         }
 
         etCustomerName.doOnTextChanged { text, start, before, count ->
-            if (text.isNullOrEmpty()){
-                tvCustomerFirstName.text = text!!.first().toString().toUpperCase(Locale.getDefault())
+            if (!text.isNullOrEmpty()){
+                tvCustomerFirstName.text = text.first().toString().toUpperCase(Locale.getDefault())
             }
 
         }

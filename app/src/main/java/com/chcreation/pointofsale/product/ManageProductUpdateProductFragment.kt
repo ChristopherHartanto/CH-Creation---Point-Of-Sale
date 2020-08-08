@@ -382,7 +382,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         swManageProduct.isChecked = product.MANAGE_STOCK
 
         if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString()){
-            etManageProductCost.setText("------------")
+            etManageProductCost.hint = "------------"
         }
     }
 

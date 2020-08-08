@@ -4,11 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.ESharedPreference
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.merchant.ManageMerchantActivity
+import com.chcreation.pointofsale.normalClickAnimation
 import com.chcreation.pointofsale.presenter.MerchantPresenter
 import com.chcreation.pointofsale.presenter.UserPresenter
 import com.chcreation.pointofsale.view.MainView
@@ -44,8 +46,15 @@ class SignUpActivity : AppCompatActivity(), MainView {
         super.onStart()
 
         btnSignUp.onClick {
+            btnSignUp.startAnimation(normalClickAnimation())
+            btnSignUp.isEnabled = false
             registerUser()
         }
+    }
+
+    override fun onBackPressed() {
+        startActivity<LoginActivity>()
+        finish()
     }
 
     private fun registerUser () {
@@ -57,7 +66,7 @@ class SignUpActivity : AppCompatActivity(), MainView {
         if (password.length < 6)
             toast("Password Minimum 6 Length !!")
         else if (email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
-
+            pbSignUp.visibility = View.VISIBLE
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val editor = sharedPreference.edit()
@@ -65,6 +74,8 @@ class SignUpActivity : AppCompatActivity(), MainView {
                     editor.apply()
                     presenter.saveUser(name,email)
                 }else {
+                    btnSignUp.isEnabled = true
+                    pbSignUp.visibility = View.GONE
                     Toast.makeText(this, "Error registering, try again later ", Toast.LENGTH_LONG).show()
                 }
             })
@@ -72,6 +83,8 @@ class SignUpActivity : AppCompatActivity(), MainView {
             etSignUpEmail.setText("")
             etSignUpPassword.setText("")
             Toast.makeText(this,"Please fill up the Credentials", Toast.LENGTH_LONG).show()
+            btnSignUp.isEnabled = true
+            pbSignUp.visibility = View.GONE
         }
     }
 
@@ -81,6 +94,9 @@ class SignUpActivity : AppCompatActivity(), MainView {
 
     override fun response(message: String) {
         if (message == EMessageResult.SUCCESS.toString()){
+            btnSignUp.isEnabled = true
+            pbSignUp.visibility = View.GONE
+
             startActivity<ManageMerchantActivity>()
             finish()
             Toast.makeText(this, "Successfully registered ", Toast.LENGTH_LONG).show()
