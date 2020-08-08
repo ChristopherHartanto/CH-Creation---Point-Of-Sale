@@ -80,6 +80,7 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
     }
 
     fun dismissListener(){
+        database.removeEventListener(postListener)
     }
 }
 

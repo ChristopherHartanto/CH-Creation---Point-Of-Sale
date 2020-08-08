@@ -17,6 +17,10 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.DiscountActivity
+import com.chcreation.pointofsale.checkout.NoteActivity
+import com.chcreation.pointofsale.checkout.PostCheckOutActivity
+import com.chcreation.pointofsale.home.HomeFragment
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
@@ -27,9 +31,8 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_product_detail.*
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.toast
 import java.io.File
 import java.io.FileOutputStream
 
@@ -63,6 +66,19 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
 
             getBitmapFromView(layoutProductDetail,this@ProductDetailActivity){
 
+            }
+        }
+
+        ivProductDetailMoreOptions.onClick {
+            val options = mutableListOf("Installment Plan")
+
+
+            selector("More Options",options) { dialogInterface, i ->
+                when(i) {
+                    0 ->{
+                        startActivity(intentFor<InstallmentPlanActivity>("price" to product.PRICE))
+                    }
+                }
             }
         }
     }

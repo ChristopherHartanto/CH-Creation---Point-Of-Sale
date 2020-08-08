@@ -7,10 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.EStatusCode
 
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.customer.CustomerDetailActivity.Companion.custCode
+import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.chcreation.pointofsale.model.Enquiry
+import com.chcreation.pointofsale.model.Transaction
 import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
@@ -20,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.fragment_customer_detail_transaction.*
 import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.textColorResource
 
 /**
  * A simple [Fragment] subclass.
@@ -32,6 +36,7 @@ class CustomerDetailTransactionFragment : Fragment(), MainView {
     private lateinit var mDatabase : DatabaseReference
     private var enquiryItems: MutableList<Enquiry> = mutableListOf()
     private var totalTransaction = 0
+    private var totalGrossEarning = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,8 +69,8 @@ class CustomerDetailTransactionFragment : Fragment(), MainView {
                 var tmpItems = mutableListOf<Enquiry>()
                 for (data in dataSnapshot.children){
                     val item = data.getValue(Enquiry::class.java)
-
                     tmpItems.add(item!!)
+                    presenter.retrieveTransaction(item.TRANS_KEY.toString())
                 }
                 var itemGroupByReceipt = tmpItems.groupBy { it.TRANS_KEY }
                 for (data in itemGroupByReceipt){
@@ -75,7 +80,23 @@ class CustomerDetailTransactionFragment : Fragment(), MainView {
                 enquiryItems.reverse()
                 adapter.notifyDataSetChanged()
                 totalTransaction = enquiryItems.size
-                tvCustomerDetailTransactionTotal.text = "Total Transaction : $totalTransaction"
+                tvCustomerDetailTransactionTotal.text = totalTransaction.toString()
+            }
+        }
+        if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
+            if (dataSnapshot.exists()){
+                val transItem = dataSnapshot.getValue(Transaction::class.java)
+
+                if (transItem != null) {
+                    if (transItem.STATUS_CODE != EStatusCode.CANCEL.toString())
+                        totalGrossEarning += transItem.TOTAL_PRICE!!
+
+                    if (transItem.STATUS_CODE == EStatusCode.PENDING.toString())
+                        tvCustomerDetailTransactionTotalGrossEarning.textColorResource = R.color.colorPrimary
+
+                    tvCustomerDetailTransactionTotalGrossEarning.text = indonesiaCurrencyFormat().format(totalGrossEarning)
+                }
+
             }
         }
     }

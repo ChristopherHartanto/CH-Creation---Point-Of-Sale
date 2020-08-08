@@ -182,7 +182,7 @@ class HomeFragment : Fragment() , MainView {
 
     override fun onPause() {
         super.onPause()
-
+        presenter.dismissListener()
         active = false
     }
 

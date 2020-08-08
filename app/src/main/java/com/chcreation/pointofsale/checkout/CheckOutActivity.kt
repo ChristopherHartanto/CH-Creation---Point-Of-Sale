@@ -225,7 +225,13 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                         return@yesButton
                     }
                     noButton {
+                        pbCheckOut.visibility = View.VISIBLE
+                        tvCheckOutProcessTitle.visibility = View.VISIBLE
+                        layoutCheckOutContent.alpha = 0.3F
 
+                        presenter.savePendingPayment(transCodeItems[transPosition],
+                            Payment("", totalReceived,paymentMethod, note, mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
+                            totalOutStanding,transItems[transPosition])
                     }
                 }.show()
             }

@@ -12,6 +12,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -134,6 +135,7 @@ class CustomerPresenter(private val view: MainView,
         database.child(ETable.CUSTOMER.toString())
             .child(getMerchantCredential(context))
             .child(getMerchant(context))
+            .orderByValue()
             .addListenerForSingleValueEvent(postListener)
     }
 
@@ -173,6 +175,29 @@ class CustomerPresenter(private val view: MainView,
             .orderByChild(E_Enquiry.CUST_CODE.toString())
             .equalTo(custCode)
             .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun retrieveTransaction(transKey: String){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    view.loadData(p0, EMessageResult.FETCH_TRANS_SUCCESS.toString())
+                }
+
+            }
+            database.child(ETable.TRANSACTION.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
+                .child(transKey)
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e:Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
     }
 
     private fun generateCustomerCode() : String{

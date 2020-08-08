@@ -21,7 +21,9 @@
         android:roundIcon="@drawable/icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".user.AddUserActivity"></activity>
+        <activity android:name=".analytic.AnalyticActivity"></activity>
+        <activity android:name=".product.InstallmentPlanActivity" />
+        <activity android:name=".user.AddUserActivity" />
         <activity android:name=".user.UserDetailActivity" />
         <activity android:name=".user.UserListActivity" />
         <activity android:name=".customer.CustomerDetailActivity" />

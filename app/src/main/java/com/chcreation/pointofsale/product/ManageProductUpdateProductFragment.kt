@@ -180,7 +180,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
             layoutManageProduct.alpha = 0.3F
             pbManageProduct.visibility = View.VISIBLE
 
-            val ref = storage.child("product")
+            val ref = storage.child(ETable.PRODUCT.toString())
                 .child(mAuth.currentUser!!.uid)
                 .child(prodCode)
 

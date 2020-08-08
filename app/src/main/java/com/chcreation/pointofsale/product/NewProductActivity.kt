@@ -184,7 +184,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
             layoutProduct.alpha = 0.3F
             pbProduct.visibility = View.VISIBLE
 
-            val ref = storage.child("product")
+            val ref = storage.child(ETable.PRODUCT.toString())
                 .child(mAuth.currentUser!!.uid)
                 .child(prodCode)
 

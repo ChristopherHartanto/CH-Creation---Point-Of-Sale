@@ -98,6 +98,8 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         presenter.retrieveCustomerByCustCode(custCode)
 
         btnManageCustomerSave.onClick {
+            btnManageCustomerSave.isEnabled = false
+
             if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString())
                 toast("Only Manager Can Update Customer")
             else{
@@ -115,6 +117,8 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
                     }
                 }.show()
             }
+
+            btnManageCustomerSave.isEnabled = true
         }
 
         layoutManageCustomerDefaultImage.onClick {
