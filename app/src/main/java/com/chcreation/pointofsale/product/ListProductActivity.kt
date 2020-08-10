@@ -3,6 +3,7 @@ package com.chcreation.pointofsale.product
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.chcreation.pointofsale.EMessageResult
@@ -53,7 +54,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
             startActivity(intentFor<ProductDetailActivity>("prodCode" to tempProductItems[it].PROD_CODE))
         }
 
-        rvListProduct.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        rvListProduct.layoutManager = GridLayoutManager(this,2)
         rvListProduct.adapter = adapter
     }
 

@@ -25,12 +25,13 @@
             android:title="@string/transaction" />
 
         <item
+            android:id="@+id/nav_analytics"
+            android:title="Analytic" />
+
+        <item
             android:id="@+id/nav_user_list"
             android:title="User List" />
 
-        <item
-            android:id="@+id/nav_analytics"
-            android:title="Analytic" />
 
 <!--        <item-->
 <!--            android:id="@+id/nav_setting"-->

@@ -48,8 +48,8 @@ class ProductRecyclerViewAdapter(private val context: Context, private val items
                 Glide.with(context).load(item.IMAGE).into(image)
             else
                 image.imageResource = R.drawable.default_image
-            val size = calculateSizeOfView(context)
-            itemView.layoutParams = ViewGroup.LayoutParams(size,size)
+//            val size = calculateSizeOfView(context)
+//            itemView.layoutParams = ViewGroup.LayoutParams(size,size)
 
 
 

@@ -7,6 +7,8 @@ import android.view.animation.Animation
 import org.jetbrains.anko.startActivity
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 private lateinit var sharedPreference: SharedPreferences
@@ -71,6 +73,27 @@ fun getMerchantNoTel(context: Context) : String{
 fun normalClickAnimation() : AlphaAnimation = AlphaAnimation(3F,0.6F)
 
 fun dateFormat() : SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
+fun getYear(convertDate: String): Int {
+    val date = dateFormat().parse(convertDate)
+    val calendar = Calendar.getInstance()
+    calendar.time = date
+    return calendar.get(Calendar.YEAR) * 100
+}
+
+fun getMonth(convertDate: String): Int {
+    val date = dateFormat().parse(convertDate)
+    val calendar = Calendar.getInstance()
+    calendar.time = date
+    return calendar.get(Calendar.MONTH)
+}
+
+fun getDateOfMonth(convertDate: String): Int {
+    val date = dateFormat().parse(convertDate)
+    val calendar = Calendar.getInstance()
+    calendar.time = date
+    return calendar.get(Calendar.DAY_OF_MONTH)
+}
 
 fun parseDateFormat(date: String) : String {
     var currentFormat = dateFormat().parse(date)

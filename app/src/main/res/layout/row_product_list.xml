@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ImageView
+
+<androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="150dp"
-    android:id="@+id/ivRowProductList"/>
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:elevation="5dp">
+    <ImageView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_margin="5dp"
+        android:id="@+id/ivRowProductList"/>
+</androidx.cardview.widget.CardView>
+

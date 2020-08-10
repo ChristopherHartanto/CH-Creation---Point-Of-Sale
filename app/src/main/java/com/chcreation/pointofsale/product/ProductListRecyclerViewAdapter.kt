@@ -41,8 +41,8 @@ class ProductListRecyclerViewAdapter(private val context: Context, private val i
             itemView.onClick {
                 listener(position)
             }
-            val size = calculateSizeOfView(context)
-            itemView.layoutParams = ViewGroup.LayoutParams(size,size)
+//            val size = calculateSizeOfView(context)
+//            itemView.layoutParams = ViewGroup.LayoutParams(size,size)
 
         }
         private fun calculateSizeOfView(context: Context): Int {
