@@ -116,7 +116,7 @@ class AnalyticFragment : Fragment(), MainView {
 
         val dataPemasukan: MutableList<BarEntry> = ArrayList()
         val dataPengeluaran: MutableList<BarEntry> = ArrayList()
-
+//
         for (date in 1..30){
             var profit = 0F
             var gross = 0F
@@ -155,38 +155,31 @@ class AnalyticFragment : Fragment(), MainView {
         // Ini berfungsi untuk menghilankan koma, dan tanda ribuah pada tahun
         // Diubah menjadi integer, kemudian dijadikan String
 // Ini berfungsi untuk menghilankan koma, dan tanda ribuah pada tahun
-        xAxis.valueFormatter = object : IAxisValueFormatter{
-            override fun getFormattedValue(value: Float, axis: AxisBase?): String {
-                return value.toInt().toString()
-            }
-
-        }
+        xAxis.valueFormatter =
+            IAxisValueFormatter { value, axis -> value.toInt().toString() }
 
         //Menghilangkan sumbu Y yang ada di sebelah kanan
         //Menghilangkan sumbu Y yang ada di sebelah kanan
-        chartAnalytic.getAxisRight().setEnabled(false)
+        chartAnalytic.axisRight.isEnabled = false
 
         // Menghilankan deskripsi pada Chart
         // Menghilankan deskripsi pada Chart
-        chartAnalytic.getDescription().setEnabled(false)
+        chartAnalytic.description.isEnabled = false
 
         // Set data ke Chart
         // Tambahkan invalidate setiap kali mengubah data chart
         // Set data ke Chart
 // Tambahkan invalidate setiap kali mengubah data chart
-        chartAnalytic.setData(barData)
-        chartAnalytic.getBarData().setBarWidth(barWidth)
-        chartAnalytic.getXAxis().setAxisMinimum(1F)
-//        chartAnalytic.getXAxis().setAxisMaximum(
-//            tahunAwal + chartAnalytic.getBarData().getGroupWidth(
-//                groupSpace,
-//                barSpace
-//            ) * 4
-//        )
-        chartAnalytic.getXAxis().setAxisMaximum(30F
-        )
-        chartAnalytic.groupBars(tahunAwal, groupSpace, barSpace)
-        chartAnalytic.setDragEnabled(true)
+        chartAnalytic.data = barData
+        chartAnalytic.barData.barWidth = barWidth
+        chartAnalytic.xAxis.axisMinimum = 1F
+        chartAnalytic.xAxis.axisMaximum = 1F + chartAnalytic.barData.getGroupWidth(
+            groupSpace,
+            barSpace
+        ) * 30F
+        //chartAnalytic.xAxis.axisMaximum = 30F
+        chartAnalytic.groupBars(1F, groupSpace, barSpace)
+        chartAnalytic.isDragEnabled = true
         chartAnalytic.invalidate()
     }
 

@@ -15,6 +15,7 @@ import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalQty
 import com.chcreation.pointofsale.indonesiaCurrencyFormat
+import com.chcreation.pointofsale.normalClickAnimation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -45,11 +46,12 @@ class CartActivity : AppCompatActivity() {
 
         tvCartTotal.text = "Total: ${indonesiaCurrencyFormat().format(totalPrice)}"
         btnCart.onClick {
+            btnCart.startAnimation(normalClickAnimation())
             startActivity<CheckOutActivity>()
         }
 
         ivCartMoreOptions.onClick {
-
+            ivCartMoreOptions.startAnimation(normalClickAnimation())
             val options = mutableListOf("Add Note","Add Discount","Add Tax", "Delete Cart")
 
 

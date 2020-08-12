@@ -21,7 +21,6 @@ class AnalyticFilterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_analytic_filter)
 
-
         etAnalyticFilterStartDate.onClick {
 
             val dpd = DatePickerDialog(this@AnalyticFilterActivity, DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->

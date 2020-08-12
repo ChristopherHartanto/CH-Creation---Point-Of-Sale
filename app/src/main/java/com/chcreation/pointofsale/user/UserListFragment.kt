@@ -14,6 +14,7 @@ import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.model.UserList
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.UserPresenter
+import com.chcreation.pointofsale.user.UserDetailActivity.Companion.user
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -54,7 +55,8 @@ class UserListFragment : Fragment(), MainView{
         presenter = UserPresenter(this,mAuth,mDatabase,ctx)
 
         adapter = UserListRecyclerViewAdapter(ctx,userNames,userGroups){
-
+            user = userGroups[it]
+            startActivity<UserDetailActivity>()
         }
 
         srUserList.onRefresh {
@@ -109,7 +111,12 @@ class UserListFragment : Fragment(), MainView{
                 val items : MutableList<UserList> = gson.fromJson(dataSnapshot.value.toString(),arrayUserListType)
 
                 items.sortBy { it.USER_GROUP }
-                userGroups.addAll(items)
+
+                for (data in items){
+                    if (data.STATUS_CODE == EStatusCode.ACTIVE.toString()){
+                        userGroups.add(data)
+                    }
+                }
                 GlobalScope.launch {
                     for (data in userGroups){
                         presenter.retrieveUser(data.USER_CODE.toString())

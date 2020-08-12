@@ -108,6 +108,8 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         spProduct.setSelection(0)
 
         btnProductSave.onClick {
+            btnProductSave.isEnabled = false
+            btnProductSave.startAnimation(normalClickAnimation())
 
             if (positionSpinner == 0)
                 toast("Please Select Category")
@@ -117,7 +119,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                 else
                     uploadImage()
             }
-
+            btnProductSave.isEnabled = true
         }
 
         ivProductImage.onClick{

@@ -25,6 +25,8 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.*
@@ -42,6 +44,7 @@ class HomeFragment : Fragment() , MainView {
     private var tmpProductKeys: ArrayList<Int> = arrayListOf()
     private var currentCat = 0
     private var searchFilter = ""
+    private var isEnabled = true
 
     companion object{
         var tempProductItems : ArrayList<Product> = arrayListOf()
@@ -145,7 +148,10 @@ class HomeFragment : Fragment() , MainView {
         }
 
         srHome.onRefresh {
-            presenter.retrieveProducts()
+            GlobalScope.launch {
+                presenter.retrieveProducts()
+                srHome.isRefreshing = false
+            }
         }
 
         pbHome.visibility = View.VISIBLE
@@ -156,10 +162,17 @@ class HomeFragment : Fragment() , MainView {
     override fun onStart() {
         super.onStart()
 
-        if (tempProductItems.size == 0 || productItems.size == 0)
-            presenter.retrieveProducts()
+        GlobalScope.launch {
+            if (tempProductItems.size == 0 || productItems.size == 0)
+                presenter.retrieveProducts()
 
-        presenter.retrieveCategories()
+            presenter.retrieveCategories()
+
+            svHomeSearch.visibility = View.VISIBLE
+            pbHome.visibility = View.GONE
+            srHome.visibility = View.VISIBLE
+            srHome.isRefreshing = false
+        }
 
         btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
 
@@ -183,6 +196,7 @@ class HomeFragment : Fragment() , MainView {
     override fun onPause() {
         super.onPause()
         presenter.dismissListener()
+        isEnabled = false
         active = false
     }
 
@@ -264,7 +278,7 @@ class HomeFragment : Fragment() , MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (context != null){
+        if (context != null && isEnabled){
             if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
                 if (dataSnapshot.exists()){
                     productKeys.clear()
@@ -283,14 +297,8 @@ class HomeFragment : Fragment() , MainView {
                     tmpProductKeys.addAll(productKeys)
 
                     adapter.notifyDataSetChanged()
-                    if (context != null)
-                        srHome.isRefreshing = false
 
                     fetchProductByCat()
-                }
-                else{
-                    if (context != null)
-                        srHome.isRefreshing = false
                 }
             }
             else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
@@ -310,9 +318,6 @@ class HomeFragment : Fragment() , MainView {
                     if (categoryItems.size > 4)
                         tlHome.tabMode = TabLayout.MODE_SCROLLABLE
                 }
-                svHomeSearch.visibility = View.VISIBLE
-                pbHome.visibility = View.GONE
-                srHome.visibility = View.VISIBLE
             }
         }
 

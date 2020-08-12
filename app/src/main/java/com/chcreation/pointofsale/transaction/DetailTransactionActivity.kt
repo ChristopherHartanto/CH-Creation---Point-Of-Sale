@@ -55,6 +55,7 @@ class DetailTransactionActivity : AppCompatActivity(), MainView {
         presenter = TransactionPresenter(this,mAuth,mDatabase,this)
 
         btnDetailTransactionCancel.onClick {
+            btnDetailTransactionCancel.startAnimation(normalClickAnimation())
             alert ("Are You Sure Want to Cancel?"){
                 title = "Cancel Transaction"
                 yesButton {

@@ -87,6 +87,8 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         rvReceiptPaymentList.layoutManager = LinearLayoutManager(this)
 
         tvReceiptMerchantName.text = getMerchant(this).toUpperCase(Locale.ENGLISH)
+        if (getMerchant(this).length >= 18)
+            tvReceiptMerchantName.textSize = 20F
         tvReceiptMerchantAddress.text = getMerchantAddress(this)
         tvReceiptMerchantTel.text = getMerchantNoTel(this)
 
@@ -265,6 +267,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 toast(e.message.toString())
                 e.printStackTrace()
             }
+            pbReceipt.visibility = View.GONE
         }
     }
 

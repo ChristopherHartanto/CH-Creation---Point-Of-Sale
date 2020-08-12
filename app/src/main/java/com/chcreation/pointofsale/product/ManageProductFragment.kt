@@ -28,6 +28,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_manage_product.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.*
@@ -115,7 +117,9 @@ class ManageProductFragment : Fragment() , MainView {
         }
 
         srManageProduct.onRefresh {
-            presenter.retrieveProducts()
+            GlobalScope.launch {
+                presenter.retrieveProducts()
+            }
         }
 
         pbManageProduct.visibility = View.VISIBLE
@@ -126,9 +130,11 @@ class ManageProductFragment : Fragment() , MainView {
     override fun onStart() {
         super.onStart()
 
-        if (tempProductItems.size == 0)
-            presenter.retrieveProducts()
-        presenter.retrieveCategories()
+        GlobalScope.launch {
+            if (tempProductItems.size == 0)
+                presenter.retrieveProducts()
+            presenter.retrieveCategories()
+        }
 
         currentCat = 0
     }

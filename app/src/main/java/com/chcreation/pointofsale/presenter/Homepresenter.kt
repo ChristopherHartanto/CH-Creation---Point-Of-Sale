@@ -24,59 +24,73 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
 
     }
 
-    fun retrieveProducts(){
-        postListener = object : ValueEventListener {
-            override fun onCancelled(p0: DatabaseError) {
-                database.removeEventListener(this)
+    suspend fun retrieveProducts(){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    view.loadData(p0, EMessageResult.FETCH_PROD_SUCCESS.toString())
+                }
+
             }
 
-            override fun onDataChange(p0: DataSnapshot) {
-                view.loadData(p0, EMessageResult.FETCH_PROD_SUCCESS.toString())
-            }
-
+            database.child(ETable.PRODUCT.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
+                .orderByChild(EProduct.NAME.toString())
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
         }
-
-        database.child(ETable.PRODUCT.toString())
-            .child(getMerchantCredential(context))
-            .child(getMerchant(context))
-            .orderByChild(EProduct.NAME.toString())
-            .addListenerForSingleValueEvent(postListener)
-
     }
 
-    fun retrieveCategories(){
-        postListener = object : ValueEventListener {
-            override fun onCancelled(p0: DatabaseError) {
-                database.removeEventListener(this)
-            }
+    suspend fun retrieveCategories(){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
 
-            override fun onDataChange(p0: DataSnapshot) {
-                view.loadData(p0, EMessageResult.FETCH_CATEGORY_SUCCESS.toString())
-            }
+                override fun onDataChange(p0: DataSnapshot) {
+                    view.loadData(p0, EMessageResult.FETCH_CATEGORY_SUCCESS.toString())
+                }
 
+            }
+            database.child(ETable.MERCHANT.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
+                .child(EMerchant.CAT.toString())
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
         }
-        database.child(ETable.MERCHANT.toString())
-            .child(getMerchantCredential(context))
-            .child(getMerchant(context))
-            .child(EMerchant.CAT.toString())
-            .addListenerForSingleValueEvent(postListener)
     }
 
     fun retrieveMerchant(){
-        postListener = object : ValueEventListener {
-            override fun onCancelled(p0: DatabaseError) {
-                database.removeEventListener(this)
-            }
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
 
-            override fun onDataChange(p0: DataSnapshot) {
-                view.loadData(p0, EMessageResult.FETCH_MERCHANT_SUCCESS.toString())
-            }
+                override fun onDataChange(p0: DataSnapshot) {
+                    view.loadData(p0, EMessageResult.FETCH_MERCHANT_SUCCESS.toString())
+                }
 
+            }
+            database.child(ETable.MERCHANT.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
         }
-        database.child(ETable.MERCHANT.toString())
-            .child(getMerchantCredential(context))
-            .child(getMerchant(context))
-            .addListenerForSingleValueEvent(postListener)
     }
 
     fun dismissListener(){

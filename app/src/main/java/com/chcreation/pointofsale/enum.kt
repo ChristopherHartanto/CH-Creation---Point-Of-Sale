@@ -133,7 +133,17 @@ enum class EUser{
     CREATED_DATE,
     UPDATED_DATE,
     NAME,
-    EMAIL
+    EMAIL,
+    CODE
+}
+
+enum class EUserList{
+    CREATED_DATE,
+    UPDATED_DATE,
+    NAME,
+    USER_GROUP,
+    USER_CODE,
+    STATUS_CODE
 }
 
 enum class EUserAcceptance{

@@ -47,6 +47,7 @@ class UserListRecyclerViewAdapter(private val context: Context,
             group.text = userGroup.USER_GROUP
 
             itemView.onClick {
+                itemView.startAnimation(normalClickAnimation())
                 listener(position)
             }
         }

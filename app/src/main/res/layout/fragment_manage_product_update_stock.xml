@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:textSize="20sp"
+        android:textSize="24sp"
         android:textColor="@color/colorBlack"
         android:gravity="bottom |center"
         android:text="Current Stock" />
@@ -24,8 +24,7 @@
         android:textStyle="bold"
         android:textColor="@color/colorBlack"
         android:gravity="center"
-        android:id="@+id/tvManageProductStockMovementStock"
-        android:text="100" />
+        android:id="@+id/tvManageProductStockMovementStock"/>
 
     <Button
         android:layout_width="match_parent"

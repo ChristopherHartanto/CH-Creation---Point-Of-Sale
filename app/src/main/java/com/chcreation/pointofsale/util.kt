@@ -70,7 +70,7 @@ fun getMerchantNoTel(context: Context) : String{
     return sharedPreference.getString(ESharedPreference.NO_TELP.toString(),"").toString()
 }
 
-fun normalClickAnimation() : AlphaAnimation = AlphaAnimation(3F,0.6F)
+fun normalClickAnimation() : AlphaAnimation = AlphaAnimation(10F,0.5F)
 
 fun dateFormat() : SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 

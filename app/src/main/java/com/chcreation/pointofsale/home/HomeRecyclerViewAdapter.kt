@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.normalClickAnimation
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -71,6 +72,7 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
                 stock.textColorResource = R.color.colorBlack
 
             itemView.onClick {
+                itemView.startAnimation(normalClickAnimation())
                 listener(position)
             }
         }

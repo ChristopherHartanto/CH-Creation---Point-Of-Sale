@@ -89,6 +89,7 @@ class TransactionRecyclerViewAdapter(private val context: Context, private val i
             }
 
             itemView.onClick {
+                itemView.startAnimation(normalClickAnimation())
                 listener(position)
             }
         }

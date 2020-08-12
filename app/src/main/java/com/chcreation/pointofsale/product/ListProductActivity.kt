@@ -19,6 +19,8 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_list_product.*
 import kotlinx.android.synthetic.main.activity_new_product.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
 import org.jetbrains.anko.toast
@@ -61,7 +63,9 @@ class ListProductActivity : AppCompatActivity(), MainView {
     override fun onStart() {
         super.onStart()
 
-        presenter.retrieveCategories()
+        GlobalScope.launch {
+            presenter.retrieveCategories()
+        }
     }
 
     private fun fetchProductByCat(){
@@ -101,8 +105,9 @@ class ListProductActivity : AppCompatActivity(), MainView {
                 for (data in dataSnapshot.children) {
                     categoryItems.add(data.key.toString())
                 }
-
-                presenter.retrieveProducts()
+                GlobalScope.launch {
+                    presenter.retrieveProducts()
+                }
             }
         }
     }
