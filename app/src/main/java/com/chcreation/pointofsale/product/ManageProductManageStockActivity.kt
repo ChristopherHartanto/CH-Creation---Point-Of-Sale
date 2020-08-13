@@ -100,7 +100,8 @@ class ManageProductManageStockActivity : AppCompatActivity(), MainView {
 
         presenter.addStockMovement(StockMovement(qty.toInt(),status,EStatusCode.DONE.toString(),
             prodCode,productKey,0,note,
-            dateFormat().format(Date()),dateFormat().format(Date())))
+            dateFormat().format(Date()),dateFormat().format(Date()), mAuth.currentUser?.uid
+        ))
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

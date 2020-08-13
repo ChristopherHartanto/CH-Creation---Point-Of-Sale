@@ -18,14 +18,15 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.textColorResource
 
 class DetailTransactionListPaymentRecyclerViewAdapter(private val context: Context, private val items: MutableList<Payment>,
-                                     private val listener: (position: Int) -> Unit)
+                                                      private val nameItems: MutableList<String>,
+                                                private val listener: (position: Int) -> Unit)
     : RecyclerView.Adapter<DetailTransactionListPaymentRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_payment_list, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(items[position],listener, position)
+        holder.bindItem(items[position],nameItems[position],listener, position)
     }
 
     override fun getItemCount(): Int = items.size
@@ -35,11 +36,12 @@ class DetailTransactionListPaymentRecyclerViewAdapter(private val context: Conte
         private val note = view.findViewById<TextView>(R.id.tvRowListPaymentNote)
         private val date = view.findViewById<TextView>(R.id.tvRowListPaymentDate)
         private val totalPriceReceived = view.findViewById<TextView>(R.id.tvRowListPaymentTotalReceived)
+        private val createdBy = view.findViewById<TextView>(R.id.tvRowListPaymentCreatedBy)
         private val paymentMethod = view.findViewById<ImageView>(R.id.ivRowListPayment)
 
-        fun bindItem(item: Payment, listener: (position: Int) -> Unit, position: Int) {
-            note.text = item.NOTE
-            date.text = item.CREATED_DATE
+        fun bindItem(item: Payment,name:String, listener: (position: Int) -> Unit, position: Int) {
+            createdBy.text = "C : ${name}"
+            date.text = parseDateFormatFull(item.CREATED_DATE.toString())
 
             totalPriceReceived.text = indonesiaCurrencyFormat().format(item.TOTAL_RECEIVED)
 
@@ -49,9 +51,9 @@ class DetailTransactionListPaymentRecyclerViewAdapter(private val context: Conte
                 paymentMethod.imageResource = R.drawable.card
 
             if (item.NOTE == "")
-                note.visibility = View.GONE
+                note.text = "N : ${item.PAYMENT_METHOD}"
             else
-                note.visibility = View.VISIBLE
+                note.text = "N : ${item.NOTE}"
 
             itemView.onClick {
                 listener(position)

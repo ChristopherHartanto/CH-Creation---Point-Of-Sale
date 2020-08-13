@@ -3,10 +3,7 @@ package com.chcreation.pointofsale.presenter
 import android.content.Context
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CheckOutActivity
-import com.chcreation.pointofsale.model.Cart
-import com.chcreation.pointofsale.model.Product
-import com.chcreation.pointofsale.model.StockMovement
-import com.chcreation.pointofsale.model.Transaction
+import com.chcreation.pointofsale.model.*
 import com.chcreation.pointofsale.product.NewCategory
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
@@ -245,7 +242,7 @@ class ProductPresenter(private val view: MainView,
 
     }
 
-    fun retrieveStockMovement(prodCode: String){
+    suspend fun retrieveStockMovement(prodCode: String){
         try {
             postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -291,7 +288,8 @@ class ProductPresenter(private val view: MainView,
                         EStock_Movement.QTY.toString() to product.STOCK,
                         EStock_Movement.STATUS_CODE.toString() to EStatusCode.DONE,
                         EStock_Movement.CREATED_DATE.toString() to product.CREATED_DATE,
-                        EStock_Movement.UPDATED_DATE.toString() to product.UPDATED_DATE
+                        EStock_Movement.UPDATED_DATE.toString() to product.UPDATED_DATE,
+                        EStock_Movement.UPDATED_BY.toString() to product.UPDATED_BY
                     )
 
                     database.child(ETable.STOCK_MOVEMENT.toString())
@@ -343,7 +341,8 @@ class ProductPresenter(private val view: MainView,
                         EStock_Movement.QTY.toString() to stockMovement.QTY,
                         EStock_Movement.STATUS_CODE.toString() to stockMovement.STATUS_CODE,
                         EStock_Movement.CREATED_DATE.toString() to stockMovement.CREATED_DATE,
-                        EStock_Movement.UPDATED_DATE.toString() to stockMovement.UPDATED_DATE
+                        EStock_Movement.UPDATED_DATE.toString() to stockMovement.UPDATED_DATE,
+                        EStock_Movement.UPDATED_BY.toString() to stockMovement.UPDATED_BY
                     )
 
                     database.child(ETable.STOCK_MOVEMENT.toString())
@@ -372,6 +371,51 @@ class ProductPresenter(private val view: MainView,
         }
     }
 
+    fun getUserName(userCode : String, callBack:(userName:String) -> Unit){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        val item = p0.getValue(User::class.java)
+
+                        if (item != null) {
+                            callBack(item.NAME.toString())
+                        }
+                    }
+
+                }
+
+            }
+            database.child(ETable.USER.toString())
+                .child(userCode)
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e:java.lang.Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun retrieveUserLists(){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_USER_LIST_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.MERCHANT.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchant(context))
+            .child(EMerchant.USER_LIST.toString())
+            .addListenerForSingleValueEvent(postListener)
+    }
 
     private fun generateProdCode() : String{
         return database.push().key.toString()

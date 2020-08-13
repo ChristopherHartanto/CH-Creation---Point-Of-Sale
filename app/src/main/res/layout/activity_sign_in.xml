@@ -28,7 +28,7 @@
                 android:text="Sign In"
                 android:gravity="center"
                 android:textColor="@color/colorBlack"
-                android:textSize="32sp"
+                android:textSize="24sp"
                 android:layout_marginBottom="30sp"/>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -66,6 +66,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/btnSignIn"
+                android:textColor="@color/colorWhite"
                 android:background="@drawable/button_border_fill"
                 android:text="Login"/>
 

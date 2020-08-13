@@ -108,6 +108,7 @@ enum class E_Enquiry{
 enum class EStock_Movement{
     CREATED_DATE,
     UPDATED_DATE,
+    UPDATED_BY,
     TRANS_KEY,
     QTY,
     PROD_CODE,

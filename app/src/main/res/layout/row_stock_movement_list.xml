@@ -8,7 +8,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="70dp"
         android:layout_margin="5dp"
         android:orientation="horizontal">
 
@@ -20,25 +20,49 @@
             android:src="@drawable/inbound"
             android:id="@+id/ivRowStockMovementList"/>
 
-        <TextView
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:textColor="@color/colorBlack"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginHorizontal="5dp"
-            android:gravity="center_vertical"
-            android:id="@+id/tvRowStockMovementListDesc"/>
+            android:layout_weight="3"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorBlack"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginHorizontal="5dp"
+                android:gravity="center_vertical"
+                android:id="@+id/tvRowStockMovementListDesc"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorBlack"
+                android:textSize="16sp"
+                android:layout_marginHorizontal="5dp"
+                android:gravity="center_vertical"
+                android:id="@+id/tvRowStockMovementListNote"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorBlack"
+                android:textSize="16sp"
+                android:layout_marginHorizontal="5dp"
+                android:gravity="center_vertical"
+                android:id="@+id/tvRowStockMovementListUpdatedBy"/>
+
+        </LinearLayout>
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:textColor="@color/colorBlack"
-            android:textSize="16sp"
             android:layout_marginHorizontal="5dp"
-            android:gravity="end |center_vertical"
+            android:gravity="end|center_vertical"
             android:id="@+id/tvRowStockMovementListDate"/>
 
     </LinearLayout>

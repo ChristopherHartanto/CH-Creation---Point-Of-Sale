@@ -1,6 +1,7 @@
 package com.chcreation.pointofsale.user
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,8 @@ import com.chcreation.pointofsale.model.UserList
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.UserPresenter
 import com.chcreation.pointofsale.user.UserDetailActivity.Companion.user
+import com.chcreation.pointofsale.user.UserDetailActivity.Companion.userName
+import com.chcreation.pointofsale.user.UserDetailActivity.Companion.size
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -54,8 +57,13 @@ class UserListFragment : Fragment(), MainView{
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = UserPresenter(this,mAuth,mDatabase,ctx)
 
-        adapter = UserListRecyclerViewAdapter(ctx,userNames,userGroups){
-            user = userGroups[it]
+        adapter = UserListRecyclerViewAdapter(ctx,userNames,userGroups){ rvIt ->
+            user = userGroups[rvIt]
+            userName = userNames[rvIt]
+            for (data in userGroups){
+                if (data.USER_GROUP == EUserGroup.MANAGER.toString())
+                    size++
+            }
             startActivity<UserDetailActivity>()
         }
 

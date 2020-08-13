@@ -204,7 +204,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
             tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalPaid - totalPayment)
         }
         tvReceiptTransCode.text = "Receipt: ${receiptFormat(receiptCode)}"
-        tvReceiptDate.text = boughtList.UPDATED_DATE.toString()
+        tvReceiptDate.text = parseDateFormatFull(boughtList.UPDATED_DATE.toString())
     }
 
     @Throws(IOException::class)

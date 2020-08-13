@@ -9,5 +9,6 @@ data class StockMovement(
     var TRANS_KEY: Int? = 0,
     var NOTE: String? = "",
     var CREATED_DATE: String? = "",
-    var UPDATED_DATE: String? = ""
+    var UPDATED_DATE: String? = "",
+    var UPDATED_BY: String? = ""
 )

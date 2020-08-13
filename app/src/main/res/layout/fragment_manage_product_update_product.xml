@@ -181,6 +181,16 @@
                         android:id="@+id/etManageProductUpdatedDate"
                         android:hint="Updated Date"/>
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/etManageProductPostedBy"
+                        android:hint="Posted By"/>
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -201,6 +211,7 @@
                 android:layout_gravity="bottom"
                 android:id="@+id/btnManageProductSave"
                 android:background="@drawable/button_border_fill"
+                android:textColor="@color/colorWhite"
                 android:text="save"/>
         </LinearLayout>
 

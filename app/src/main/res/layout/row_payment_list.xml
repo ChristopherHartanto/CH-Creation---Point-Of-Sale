@@ -2,7 +2,7 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="55dp"
+    android:layout_height="70dp"
     android:layout_margin="5dp"
     android:elevation="10dp">
 
@@ -28,18 +28,23 @@
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
+                android:textStyle="bold"
                 android:textColor="@color/colorBlack"
                 android:id="@+id/tvRowListPaymentTotalReceived"/>
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:layout_weight="1"
                 android:id="@+id/tvRowListPaymentNote"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:id="@+id/tvRowListPaymentCreatedBy"/>
         </LinearLayout>
 
         <TextView

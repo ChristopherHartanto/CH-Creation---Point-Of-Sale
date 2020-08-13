@@ -6,50 +6,55 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:gravity="center"
     tools:context=".login.LoginActivity">
 
-    <TextView
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:text="P.O.S"
-        android:textSize="52sp"
-        android:textColor="@color/colorBlack"
-        android:layout_marginBottom="30dp"
-        android:gravity="bottom |center_horizontal"
-        android:layout_weight="5"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:layout_weight="3">
-
-        <Button
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:elevation="10dp"
+        app:cardCornerRadius="5dp">
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/btnLoginSignIn"
-            android:background="@drawable/button_border"
+            android:orientation="vertical"
             android:layout_margin="10dp"
-            android:text="Login"/>
+            android:gravity="center">
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/btnLoginSignUp"
-            android:background="@drawable/button_border"
-            android:layout_margin="10dp"
-            android:text="Create Account"/>
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_marginVertical="20sp"
+                android:src="@drawable/icon"/>
 
-    </LinearLayout>
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/btnLoginSignIn"
+                android:background="@drawable/button_border"
+                android:layout_margin="10dp"
+                android:text="Login"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/btnLoginSignUp"
+                android:background="@drawable/button_border"
+                android:layout_margin="10dp"
+                android:text="Create Account"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:gravity="bottom |center"
+        android:layout_height="wrap_content"
+        android:gravity="center"
         android:id="@+id/tvLoginVersion"
-        android:layout_weight="2"
         android:textColor="@color/colorBlack"
-        android:textSize="16sp"
-        android:padding="5dp"/>
+        android:textSize="14sp"
+        android:layout_marginTop="5dp"/>
+
+
 
 </LinearLayout>

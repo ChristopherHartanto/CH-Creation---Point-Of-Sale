@@ -8,10 +8,8 @@ import android.view.Gravity
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import com.chcreation.pointofsale.EMessageResult
-import com.chcreation.pointofsale.ESharedPreference
-import com.chcreation.pointofsale.MainActivity
-import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.login.LoginActivity
 import com.chcreation.pointofsale.model.AvailableMerchant
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.presenter.MerchantPresenter
@@ -23,8 +21,11 @@ import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_merchant.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.noButton
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.yesButton
 
 class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelectedListener {
 
@@ -40,6 +41,8 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_merchant)
+
+        supportActionBar?.hide()
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -59,16 +62,30 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
         }
     }
 
+    override fun onBackPressed() {
+        alert("Are You Want to Log Out?"){
+            title = "Log Out"
+            yesButton {
+                startActivity<LoginActivity>()
+                finish()
+            }
+            noButton {
+
+            }
+        }.show()
+    }
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_AVAIL_MERCHANT_SUCCESS.toString()){
             if (dataSnapshot.exists()){
                 merchantItems.clear()
                 for (data in dataSnapshot.children) {
                     val item = data.getValue(AvailableMerchant::class.java)
-                    merchantItems.add(item!!)
+                    if (item!!.STATUS == EStatusCode.ACTIVE.toString())
+                        merchantItems.add(item)
                 }
                 for (data in merchantItems){
-                    merchantNameItems.add(data.NAME.toString())
+                    merchantNameItems.add("${data.NAME} / ${data.USER_GROUP}")
                 }
 
                 val spAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,merchantNameItems)

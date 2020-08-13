@@ -51,6 +51,14 @@
 
     </LinearLayout>
 
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/pbuserDetail"
+        android:layout_marginBottom="10dp"
+        android:visibility="gone"/>
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -59,7 +67,7 @@
         android:layout_margin="5dp"
         android:background="@drawable/button_border_fill"
         android:textColor="@color/colorWhite"
-        android:text="Add User"/>
+        android:text="Modify User"/>
 
     <Button
         android:layout_width="match_parent"
@@ -69,5 +77,5 @@
         android:layout_margin="5dp"
         android:background="@drawable/button_danger"
         android:textColor="@color/colorWhite"
-        android:text="Add User"/>
+        android:text="Remove"/>
 </LinearLayout>

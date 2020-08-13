@@ -17,6 +17,7 @@ class NoteActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_note)
 
+        etNote.setText(note)
         etNote.doOnTextChanged { text, start, before, count ->
             note = text.toString()
         }

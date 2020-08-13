@@ -361,11 +361,16 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         etManageProductDescription.setText(product.DESC.toString())
         etManageProductName.setText(product.NAME.toString())
         etManageProductPrice.setText(product.PRICE.toString())
-        etManageProductCreatedDate.setText(parseDateFormat(product.CREATED_DATE.toString()))
-        etManageProductUpdatedDate.setText(parseDateFormat(product.UPDATED_DATE.toString()))
+        etManageProductCreatedDate.setText(parseDateFormatFull(product.CREATED_DATE.toString()))
+        etManageProductUpdatedDate.setText(parseDateFormatFull(product.UPDATED_DATE.toString()))
 
         etManageProductCreatedDate.isEnabled = false
         etManageProductUpdatedDate.isEnabled = false
+        etManageProductPostedBy.isEnabled = false
+
+        presenter.getUserName(product.CREATED_BY.toString()){
+            etManageProductPostedBy.setText(it)
+        }
 
         (activity as AppCompatActivity).supportActionBar?.title = product.NAME.toString()
 

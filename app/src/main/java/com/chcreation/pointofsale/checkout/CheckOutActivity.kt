@@ -90,8 +90,15 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             etCheckOutAmountReceived.setText("")
         }
 
-        if (existPayment)
+        btnCheckOutAddNote.onClick {
+            btnCheckOutAddNote.startAnimation(normalClickAnimation())
+            startActivity<NoteActivity>()
+        }
+
+        if (existPayment){
+            btnCheckOutAddNote.visibility = View.VISIBLE
             existCheckOutSetUp()
+        }
         else
             newCheckOutSetUp()
 
@@ -215,46 +222,23 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             val gson = Gson()
             val orderDetail = gson.toJson(cartItems)
 
-            if (!existCheckOutNote && note == ""){
-                alert ("Need Additional Note?"){
-                    title = "Note"
+            alert ("Continue to Check Out?"){
+                title = "Confirmation"
 
-                    yesButton {
-                        startActivity<NoteActivity>()
-                        existCheckOutNote = true
-                        return@yesButton
-                    }
-                    noButton {
-                        pbCheckOut.visibility = View.VISIBLE
-                        tvCheckOutProcessTitle.visibility = View.VISIBLE
-                        layoutCheckOutContent.alpha = 0.3F
+                yesButton {
+                    pbCheckOut.visibility = View.VISIBLE
+                    tvCheckOutProcessTitle.visibility = View.VISIBLE
+                    layoutCheckOutContent.alpha = 0.3F
 
-                        presenter.savePendingPayment(transCodeItems[transPosition],
-                            Payment("", totalReceived,paymentMethod, note, mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
-                            totalOutStanding,transItems[transPosition])
-                    }
-                }.show()
-            }
-            if (existCheckOutNote){
-                alert ("Continue to Check Out?"){
-                    title = "Confirmation"
+                    presenter.savePendingPayment(transCodeItems[transPosition],
+                        Payment("", totalReceived,paymentMethod, note, mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
+                        totalOutStanding,transItems[transPosition])
 
+                }
 
-                    yesButton {
-                        pbCheckOut.visibility = View.VISIBLE
-                        tvCheckOutProcessTitle.visibility = View.VISIBLE
-                        layoutCheckOutContent.alpha = 0.3F
-
-                        presenter.savePendingPayment(transCodeItems[transPosition],
-                            Payment("", totalReceived,paymentMethod, note, mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
-                            totalOutStanding,transItems[transPosition])
-
-                    }
-
-                    noButton {
-                    }
-                }.show()
-            }
+                noButton {
+                }
+            }.show()
 
         }
     }

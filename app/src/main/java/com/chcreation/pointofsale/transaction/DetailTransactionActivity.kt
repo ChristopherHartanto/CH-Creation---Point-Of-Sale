@@ -106,7 +106,7 @@ class DetailTransactionActivity : AppCompatActivity(), MainView {
             transItems[transPosition].STATUS_CODE != EStatusCode.CANCEL.toString()){
             tvDetailTransactionStatus.text = "Pending : ${indonesiaCurrencyFormat().format(transItems[transPosition].TOTAL_OUTSTANDING)}"
             ivDetailTransactionStatus.imageResource = R.drawable.pending
-            btnDetailTransactionReceipt.visibility = View.GONE
+            //btnDetailTransactionReceipt.visibility = View.GONE
         }else if (transItems[transPosition].STATUS_CODE == EStatusCode.CANCEL.toString()){
             tvDetailTransactionStatus.text = "Status : Cancel"
             btnDetailTransactionConfirmPayment.visibility = View.GONE
@@ -114,7 +114,7 @@ class DetailTransactionActivity : AppCompatActivity(), MainView {
             ivDetailTransactionStatus.imageResource = R.drawable.error
         }
 
-        tvDetailTransactionDate.text = transItems[transPosition].CREATED_DATE.toString()
+        tvDetailTransactionDate.text = parseDateFormatFull(transItems[transPosition].CREATED_DATE.toString())
         tvDetailTransactionCode.text = receiptFormat(transCodeItems[transPosition].toInt())
         tvDetailTransactionDiscount.text = indonesiaCurrencyFormat().format(transItems[transPosition].DISCOUNT)
         tvDetailTransactionTax.text = indonesiaCurrencyFormat().format(transItems[transPosition].TAX)

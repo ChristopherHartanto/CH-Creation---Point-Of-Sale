@@ -161,7 +161,8 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                             EStock_Movement.QTY.toString() to cartItems[index].Qty,
                             EStock_Movement.STATUS_CODE.toString() to transaction.STATUS_CODE,
                             EStock_Movement.CREATED_DATE.toString() to transaction.CREATED_DATE,
-                            EStock_Movement.UPDATED_DATE.toString() to transaction.UPDATED_DATE
+                            EStock_Movement.UPDATED_DATE.toString() to transaction.UPDATED_DATE,
+                            EStock_Movement.UPDATED_BY.toString() to transaction.UPDATED_BY
                         )
 
                         database.child(ETable.STOCK_MOVEMENT.toString())

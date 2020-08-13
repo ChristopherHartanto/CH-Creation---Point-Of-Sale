@@ -11,6 +11,7 @@ import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CartRecyclerViewAdapter
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Payment
+import com.chcreation.pointofsale.model.UserList
 import com.chcreation.pointofsale.presenter.TransactionPresenter
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transCodeItems
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transPosition
@@ -41,6 +42,9 @@ class DetailTransactionListPayment : Fragment(), MainView {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
     private var itemListPayments : MutableList<Payment> = mutableListOf()
+    private var nameItems : MutableList<String> = mutableListOf()
+    private var userNames: MutableList<String> = mutableListOf() // user list
+    private var userList : MutableList<UserList> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,13 +61,14 @@ class DetailTransactionListPayment : Fragment(), MainView {
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = TransactionPresenter(this,mAuth,mDatabase,ctx)
 
-        adapter = DetailTransactionListPaymentRecyclerViewAdapter(ctx,itemListPayments){
+        adapter = DetailTransactionListPaymentRecyclerViewAdapter(ctx,itemListPayments,nameItems){
 
         }
 
         rvListPayment.adapter = adapter
         rvListPayment.layoutManager = LinearLayoutManager(ctx)
         GlobalScope.launch {
+            presenter.retrieveUserLists()
             presenter.retrieveTransactionListPayments(transCodeItems[transPosition])
         }
     }
@@ -77,11 +82,39 @@ class DetailTransactionListPayment : Fragment(), MainView {
         if (response == EMessageResult.FETCH_TRANS_LIST_PAYMENT_SUCCESS.toString()){
             if (dataSnapshot.exists()){
                 itemListPayments.clear()
+                nameItems.clear()
                 for (data in dataSnapshot.children){
                     val item = data.getValue(Payment::class.java)
                     itemListPayments.add(item!!)
+
+                    for ((index,check) in userList.withIndex()){
+                        if (check.USER_CODE == item.USER_CODE){
+                            nameItems.add(userNames[index])
+                            break
+                        }
+                    }
                 }
-                adapter.notifyDataSetChanged()
+                if (itemListPayments.size == nameItems.size)
+                    adapter.notifyDataSetChanged()
+
+            }
+        }
+        if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()){
+            if(dataSnapshot.exists() && dataSnapshot.value != null && dataSnapshot.value != ""){
+                userNames.clear()
+                val gson = Gson()
+                val arrayUserListType = object : TypeToken<MutableList<UserList>>() {}.type
+                userList = gson.fromJson(dataSnapshot.value.toString(),arrayUserListType)
+
+                userList.sortBy { it.USER_GROUP }
+
+                GlobalScope.launch {
+                    for (data in userList){
+                        presenter.getUserName(data.USER_CODE.toString()){
+                            userNames.add(it)
+                        }
+                    }
+                }
             }
         }
     }

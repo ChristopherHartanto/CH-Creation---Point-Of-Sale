@@ -96,8 +96,15 @@ fun getDateOfMonth(convertDate: String): Int {
 }
 
 fun parseDateFormat(date: String) : String {
-    var currentFormat = dateFormat().parse(date)
-    var newFormat = SimpleDateFormat("dd MMM yyyy").format(currentFormat).toString()
+    val currentFormat = dateFormat().parse(date)
+    val newFormat = SimpleDateFormat("dd MMM yyyy").format(currentFormat).toString()
+
+    return newFormat
+}
+
+fun parseDateFormatFull(date: String) : String {
+    val currentFormat = dateFormat().parse(date)
+    val newFormat = SimpleDateFormat("dd MMM yyyy HH:mm:ss").format(currentFormat).toString()
 
     return newFormat
 }

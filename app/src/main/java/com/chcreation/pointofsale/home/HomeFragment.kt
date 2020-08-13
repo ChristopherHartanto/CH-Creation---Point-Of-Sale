@@ -161,7 +161,7 @@ class HomeFragment : Fragment() , MainView {
 
     override fun onStart() {
         super.onStart()
-
+        isEnabled = true
         GlobalScope.launch {
             if (tempProductItems.size == 0 || productItems.size == 0)
                 presenter.retrieveProducts()

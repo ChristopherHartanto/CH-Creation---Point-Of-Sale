@@ -20,7 +20,7 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        pbSplash.visibility = View.VISIBLE
+        //pbSplash.visibility = View.VISIBLE
 
         supportActionBar!!.hide()
         mAuth = FirebaseAuth.getInstance()
