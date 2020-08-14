@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.MainActivity.Companion.userList
+import com.chcreation.pointofsale.MainActivity.Companion.userListName
 
 import com.chcreation.pointofsale.checkout.CartRecyclerViewAdapter
 import com.chcreation.pointofsale.model.Cart
@@ -43,8 +45,8 @@ class DetailTransactionListPayment : Fragment(), MainView {
     private lateinit var mDatabase : DatabaseReference
     private var itemListPayments : MutableList<Payment> = mutableListOf()
     private var nameItems : MutableList<String> = mutableListOf()
-    private var userNames: MutableList<String> = mutableListOf() // user list
-    private var userList : MutableList<UserList> = mutableListOf()
+//    private var userNames: MutableList<String> = mutableListOf() // user list
+//    private var userList : MutableList<UserList> = mutableListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,14 +63,14 @@ class DetailTransactionListPayment : Fragment(), MainView {
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = TransactionPresenter(this,mAuth,mDatabase,ctx)
 
-        adapter = DetailTransactionListPaymentRecyclerViewAdapter(ctx,itemListPayments,nameItems){
+        adapter = DetailTransactionListPaymentRecyclerViewAdapter(ctx,itemListPayments){
 
         }
 
         rvListPayment.adapter = adapter
         rvListPayment.layoutManager = LinearLayoutManager(ctx)
         GlobalScope.launch {
-            presenter.retrieveUserLists()
+            //presenter.retrieveUserLists()
             presenter.retrieveTransactionListPayments(transCodeItems[transPosition])
         }
     }
@@ -87,36 +89,40 @@ class DetailTransactionListPayment : Fragment(), MainView {
                     val item = data.getValue(Payment::class.java)
                     itemListPayments.add(item!!)
 
-                    for ((index,check) in userList.withIndex()){
-                        if (check.USER_CODE == item.USER_CODE){
-                            nameItems.add(userNames[index])
-                            break
-                        }
-                    }
+//                    if (item.USER_CODE.toString() == "")
+//                        nameItems.add("")
+//                    else{
+//                        for ((index,check) in userList.withIndex()){
+//                            if (check.USER_CODE == item.USER_CODE){
+//                                nameItems.add(userListName[index])
+//                                break
+//                            }
+//                        }
+//                    }
                 }
-                if (itemListPayments.size == nameItems.size)
-                    adapter.notifyDataSetChanged()
+                itemListPayments.reverse()
+                adapter.notifyDataSetChanged()
 
             }
         }
-        if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()){
-            if(dataSnapshot.exists() && dataSnapshot.value != null && dataSnapshot.value != ""){
-                userNames.clear()
-                val gson = Gson()
-                val arrayUserListType = object : TypeToken<MutableList<UserList>>() {}.type
-                userList = gson.fromJson(dataSnapshot.value.toString(),arrayUserListType)
-
-                userList.sortBy { it.USER_GROUP }
-
-                GlobalScope.launch {
-                    for (data in userList){
-                        presenter.getUserName(data.USER_CODE.toString()){
-                            userNames.add(it)
-                        }
-                    }
-                }
-            }
-        }
+//        if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()){
+//            if(dataSnapshot.exists() && dataSnapshot.value != null && dataSnapshot.value != ""){
+//                userNames.clear()
+//                val gson = Gson()
+//                val arrayUserListType = object : TypeToken<MutableList<UserList>>() {}.type
+//                userList = gson.fromJson(dataSnapshot.value.toString(),arrayUserListType)
+//
+//                userList.sortBy { it.USER_GROUP }
+//
+//                GlobalScope.launch {
+//                    for (data in userList){
+//                        presenter.getUserName(data.USER_CODE.toString()){
+//                            userNames.add(it)
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     override fun response(message: String) {

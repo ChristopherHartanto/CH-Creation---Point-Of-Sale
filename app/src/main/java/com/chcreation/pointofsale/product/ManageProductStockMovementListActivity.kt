@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.EStatusCode
+import com.chcreation.pointofsale.MainActivity.Companion.userList
+import com.chcreation.pointofsale.MainActivity.Companion.userListName
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.model.StockMovement
 import com.chcreation.pointofsale.model.User
@@ -33,8 +35,8 @@ class ManageProductStockMovementListActivity : AppCompatActivity(), MainView {
     private lateinit var adapter: StockMovementListRecyclerView
     private var stockMovementItems: MutableList<StockMovement> = mutableListOf()
     private var nameItems: MutableList<String> = mutableListOf()
-    private var userNames: MutableList<String> = mutableListOf() // user list
-    private var userList : MutableList<UserList> = mutableListOf()
+//    private var userNames: MutableList<String> = mutableListOf() // user list
+//    private var userList : MutableList<UserList> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,14 +48,14 @@ class ManageProductStockMovementListActivity : AppCompatActivity(), MainView {
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = ProductPresenter(this,mAuth,mDatabase,this)
 
-        adapter = StockMovementListRecyclerView(this,stockMovementItems,nameItems){
+        adapter = StockMovementListRecyclerView(this,stockMovementItems){
 
         }
 
         rvManageProductStockMovementList.adapter = adapter
         val linearLayoutManager = LinearLayoutManager(this)
-//        linearLayoutManager.reverseLayout = true
-//        linearLayoutManager.stackFromEnd = true
+        linearLayoutManager.reverseLayout = true
+        linearLayoutManager.stackFromEnd = true
         rvManageProductStockMovementList.layoutManager = linearLayoutManager
     }
 
@@ -61,7 +63,7 @@ class ManageProductStockMovementListActivity : AppCompatActivity(), MainView {
         super.onStart()
 
         GlobalScope.launch{
-            presenter.retrieveUserLists()
+            //presenter.retrieveUserLists()
 
             presenter.retrieveStockMovement(prodCode)
         }
@@ -79,36 +81,40 @@ class ManageProductStockMovementListActivity : AppCompatActivity(), MainView {
                     if (item != null) {
                         stockMovementItems.add(item)
 
-                        for ((index,check) in userList.withIndex()){
-                            if (check.USER_CODE == item.UPDATED_BY){
-                                nameItems.add(userNames[index])
-                                break
-                            }
-                        }
+//                        if (item.UPDATED_BY.toString() == "")
+//                            nameItems.add("")
+//                        else{
+//                            for ((index,check) in userList.withIndex()){
+//                                if (check.USER_CODE == item.UPDATED_BY){
+//                                    nameItems.add(userListName[index])
+//                                    break
+//                                }
+//                            }
+//                        }
                     }
                 }
                 adapter.notifyDataSetChanged()
 
             }
         }
-        if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()){
-            if(dataSnapshot.exists() && dataSnapshot.value != null && dataSnapshot.value != ""){
-                userNames.clear()
-                val gson = Gson()
-                val arrayUserListType = object : TypeToken<MutableList<UserList>>() {}.type
-                userList = gson.fromJson(dataSnapshot.value.toString(),arrayUserListType)
-
-                userList.sortBy { it.USER_GROUP }
-
-                GlobalScope.launch {
-                    for (data in userList){
-                        presenter.getUserName(data.USER_CODE.toString()){
-                            userNames.add(it)
-                        }
-                    }
-                }
-            }
-        }
+//        if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()){
+//            if(dataSnapshot.exists() && dataSnapshot.value != null && dataSnapshot.value != ""){
+//                userNames.clear()
+//                val gson = Gson()
+//                val arrayUserListType = object : TypeToken<MutableList<UserList>>() {}.type
+//                userList = gson.fromJson(dataSnapshot.value.toString(),arrayUserListType)
+//
+//                userList.sortBy { it.USER_GROUP }
+//
+//                GlobalScope.launch {
+//                    for (data in userList){
+//                        presenter.getUserName(data.USER_CODE.toString()){
+//                            userNames.add(it)
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     override fun response(message: String) {

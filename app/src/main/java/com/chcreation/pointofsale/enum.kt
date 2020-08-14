@@ -12,9 +12,16 @@ enum class ETable{
     PAYMENT,
     ENQUIRY,
     STOCK_MOVEMENT,
-    USER_ACCEPTANCE
+    USER_ACCEPTANCE,
+    ABOUT
 }
 
+enum class EAbout{
+    TEXT1,
+    TEXT2,
+    TEXT3,
+    IMAGE
+}
 enum class EProduct{
     NAME,
     DESC,
@@ -217,6 +224,7 @@ enum class EUserGroup{
 enum class ESharedPreference{
     MERCHANT,
     MERCHANT_CREDENTIAL,
+    MERCHANT_IMAGE,
     USER_GROUP,
     NO_TELP,
     ADDRESS,

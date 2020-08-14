@@ -93,7 +93,8 @@ class ManageProductFragment : Fragment() , MainView {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 currentCat = tab!!.position
 
-                fetchProductByCat()
+                if (categoryItems.size > 0)
+                    fetchProductByCat()
             }
 
         })
@@ -102,7 +103,8 @@ class ManageProductFragment : Fragment() , MainView {
 
             override fun onQueryTextChange(newText: String): Boolean {
                 searchFilter = newText
-                fetchProductByCat()
+                if (categoryItems.size > 0)
+                    fetchProductByCat()
                 return false
             }
 
@@ -158,7 +160,10 @@ class ManageProductFragment : Fragment() , MainView {
         tmpProductKeys.clear()
         if (searchFilter != ""){
             for ((index, data) in productItems.withIndex()) {
-                if (data.NAME.toString().toLowerCase().contains(searchFilter.toLowerCase()) || data.CAT.toString().contains(searchFilter)){
+                if (data.NAME.toString().toLowerCase().contains(searchFilter.toLowerCase())
+                    && (data.CAT.toString() == categoryItems[currentCat]
+                    || currentCat == 0)
+                ){
                     tempProductItems.add(productItems[index])
                     tmpProductKeys.add(productKeys[index])
                 }
@@ -199,8 +204,8 @@ class ManageProductFragment : Fragment() , MainView {
                     adapter.notifyDataSetChanged()
                     if (context != null)
                         srManageProduct.isRefreshing = false
-
-                    fetchProductByCat()
+                    if (categoryItems.size > 0)
+                        fetchProductByCat()
                 }
                 else{
                     if (context != null)

@@ -18,7 +18,6 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.textColorResource
 
 class DetailTransactionListPaymentRecyclerViewAdapter(private val context: Context, private val items: MutableList<Payment>,
-                                                      private val nameItems: MutableList<String>,
                                                 private val listener: (position: Int) -> Unit)
     : RecyclerView.Adapter<DetailTransactionListPaymentRecyclerViewAdapter.ViewHolder>() {
 
@@ -26,7 +25,7 @@ class DetailTransactionListPaymentRecyclerViewAdapter(private val context: Conte
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_payment_list, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(items[position],nameItems[position],listener, position)
+        holder.bindItem(items[position],listener, position)
     }
 
     override fun getItemCount(): Int = items.size
@@ -36,11 +35,11 @@ class DetailTransactionListPaymentRecyclerViewAdapter(private val context: Conte
         private val note = view.findViewById<TextView>(R.id.tvRowListPaymentNote)
         private val date = view.findViewById<TextView>(R.id.tvRowListPaymentDate)
         private val totalPriceReceived = view.findViewById<TextView>(R.id.tvRowListPaymentTotalReceived)
-        private val createdBy = view.findViewById<TextView>(R.id.tvRowListPaymentCreatedBy)
+        //private val createdBy = view.findViewById<TextView>(R.id.tvRowListPaymentCreatedBy)
         private val paymentMethod = view.findViewById<ImageView>(R.id.ivRowListPayment)
 
-        fun bindItem(item: Payment,name:String, listener: (position: Int) -> Unit, position: Int) {
-            createdBy.text = "C : ${name}"
+        fun bindItem(item: Payment, listener: (position: Int) -> Unit, position: Int) {
+            //createdBy.text = "C : ${name}"
             date.text = parseDateFormatFull(item.CREATED_DATE.toString())
 
             totalPriceReceived.text = indonesiaCurrencyFormat().format(item.TOTAL_RECEIVED)

@@ -32,7 +32,9 @@
             android:id="@+id/nav_user_list"
             android:title="User List" />
 
-
+        <item
+            android:id="@+id/nav_about"
+            android:title="About Creator" />
 <!--        <item-->
 <!--            android:id="@+id/nav_setting"-->
 <!--            android:title="Settings" />-->

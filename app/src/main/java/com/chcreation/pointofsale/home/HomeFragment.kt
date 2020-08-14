@@ -30,6 +30,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 class HomeFragment : Fragment() , MainView {
 
@@ -114,8 +116,8 @@ class HomeFragment : Fragment() , MainView {
 
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 currentCat = tab!!.position
-
-                fetchProductByCat()
+                if (categoryItems.size > 0)
+                    fetchProductByCat()
             }
 
         })
@@ -124,7 +126,8 @@ class HomeFragment : Fragment() , MainView {
 
             override fun onQueryTextChange(newText: String): Boolean {
                 searchFilter = newText
-                fetchProductByCat()
+                if (categoryItems.size > 0)
+                    fetchProductByCat()
                 return false
             }
 
@@ -258,7 +261,11 @@ class HomeFragment : Fragment() , MainView {
         tmpProductKeys.clear()
         if (searchFilter != ""){
             for ((index, data) in productItems.withIndex()) {
-                if (data.NAME.toString().toLowerCase().contains(searchFilter.toLowerCase()) || data.CAT.toString().contains(searchFilter)){
+                if (data.NAME.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
+                    //|| data.CAT.toString().contains(searchFilter)
+                    && (data.CAT.toString() == categoryItems[currentCat]
+                    || currentCat == 0)
+                ){
                     tempProductItems.add(productItems[index])
                     tmpProductKeys.add(productKeys[index])
                 }
@@ -297,8 +304,8 @@ class HomeFragment : Fragment() , MainView {
                     tmpProductKeys.addAll(productKeys)
 
                     adapter.notifyDataSetChanged()
-
-                    fetchProductByCat()
+                    if (categoryItems.size > 0)
+                        fetchProductByCat()
                 }
             }
             else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){

@@ -26,6 +26,7 @@ import com.chcreation.pointofsale.merchant.ManageMerchantActivity
 import com.chcreation.pointofsale.merchant.MerchantActivity
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.model.UserAcceptance
+import com.chcreation.pointofsale.model.UserList
 import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.MerchantPresenter
@@ -35,6 +36,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
@@ -59,10 +62,16 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var layoutNavHeaderDefaultImage: FrameLayout
     private lateinit var layoutNavHeader: LinearLayout
 
+    companion object{
+        var userList : MutableList<UserList> = mutableListOf()
+        var userListName : MutableList<String> = mutableListOf()
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
 
     }
 
@@ -87,6 +96,7 @@ class MainActivity : AppCompatActivity(), MainView {
         presenter = Homepresenter(this,mAuth,mDatabase,this)
         merchantPresenter = MerchantPresenter(this,mAuth,mDatabase,this)
         GlobalScope.launch {
+            //presenter.retrieveUserLists()
             merchantPresenter.retrieveInvitation(encodeEmail(getEmail(this@MainActivity)))
         }
 
@@ -191,6 +201,23 @@ class MainActivity : AppCompatActivity(), MainView {
                 }
             }
         }
+//        if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()){
+//            if(dataSnapshot.exists() && dataSnapshot.value != null && dataSnapshot.value != ""){
+//                userListName.clear()
+//                userList.clear()
+//                val gson = Gson()
+//                val arrayUserListType = object : TypeToken<MutableList<UserList>>() {}.type
+//                userList = gson.fromJson(dataSnapshot.value.toString(),arrayUserListType)
+//
+//                GlobalScope.launch {
+//                    for ((index,data) in userList.withIndex()){
+//                        presenter.getUserName(data.USER_CODE.toString()){
+//                            userListName.add(it)
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     override fun response(message: String) {

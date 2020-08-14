@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.widget.doOnTextChanged
 import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.normalClickAnimation
 import kotlinx.android.synthetic.main.activity_note.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
@@ -23,6 +24,7 @@ class NoteActivity : AppCompatActivity() {
         }
 
         btnNoteSave.onClick {
+            btnNoteSave.startAnimation(normalClickAnimation())
             finish()
         }
     }

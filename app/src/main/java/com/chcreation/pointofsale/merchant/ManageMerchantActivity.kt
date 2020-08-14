@@ -64,6 +64,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
     private var PICK_IMAGE_GALLERY = 222
     private var READ_PERMISION = 202
     private var filePath: Uri? = null
+    private var downloadUri: Uri? = null
     private var currentPhotoPath = ""
     private var bitmap: Bitmap? = null
 
@@ -137,7 +138,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                 return@Continuation ref.downloadUrl
             }).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    val downloadUri = task.result
+                    downloadUri = task.result
                     saveMerchant(downloadUri.toString())
                 } else {
                     toast("Failed to Save Image")
@@ -443,9 +444,12 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
         }
         if (message == EMessageResult.UPDATE.toString())
         {
+            val image = if (downloadUri.toString() == "" || downloadUri == null) merchant!!.IMAGE else downloadUri.toString()
+
             editor = sharedPreference.edit()
             editor.putString(ESharedPreference.ADDRESS.toString(),etMerchantAddress.text.toString())
             editor.putString(ESharedPreference.NO_TELP.toString(),etMerchantNoTelp.text.toString())
+            editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(),image)
             editor.apply()
 
             toast("Update Success")

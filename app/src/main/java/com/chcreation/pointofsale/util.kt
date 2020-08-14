@@ -52,6 +52,12 @@ fun getMerchantCredential(context: Context) : String{
     return sharedPreference.getString(ESharedPreference.MERCHANT_CREDENTIAL.toString(),"").toString()
 }
 
+fun getMerchantImage(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.MERCHANT_IMAGE.toString(),"").toString()
+}
+
 fun getMerchantUserGroup(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
