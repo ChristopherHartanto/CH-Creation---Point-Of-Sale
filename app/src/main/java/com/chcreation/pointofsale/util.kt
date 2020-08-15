@@ -84,7 +84,7 @@ fun getYear(convertDate: String): Int {
     val date = dateFormat().parse(convertDate)
     val calendar = Calendar.getInstance()
     calendar.time = date
-    return calendar.get(Calendar.YEAR) * 100
+    return calendar.get(Calendar.YEAR)
 }
 
 fun getMonth(convertDate: String): Int {
@@ -92,6 +92,16 @@ fun getMonth(convertDate: String): Int {
     val calendar = Calendar.getInstance()
     calendar.time = date
     return calendar.get(Calendar.MONTH)
+}
+
+fun getCurrentMonth(): Int {
+    val calendar = Calendar.getInstance()
+    return calendar.get(Calendar.MONTH)
+}
+
+fun getCurrentYear(): Int {
+    val calendar = Calendar.getInstance()
+    return calendar.get(Calendar.YEAR)
 }
 
 fun getDateOfMonth(convertDate: String): Int {
@@ -129,7 +139,17 @@ fun indonesiaCurrencyFormat() : NumberFormat{  //  ex : indoCurrencyFormat().for
     return  format
 }
 
-fun receiptFormat(number: Int) : String = "#"+String.format("%05d",number)
+fun receiptFormat(number: Int) : String {
+    var value = ""
+    if (number < 10000)
+        value = "#"+String.format("%05d",number)
+    else if (number < 100000)
+        value = "#"+String.format("%06d",number)
+    else
+        value = "#"+String.format("%07d",number)
+
+    return value
+}
 
 fun showError(context: Context,message: String)
 {

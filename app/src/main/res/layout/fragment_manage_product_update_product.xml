@@ -188,8 +188,8 @@
                     <EditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/etManageProductPostedBy"
-                        android:hint="Posted By"/>
+                        android:id="@+id/etManageProductUpdatedBy"
+                        android:hint="Updated By"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>

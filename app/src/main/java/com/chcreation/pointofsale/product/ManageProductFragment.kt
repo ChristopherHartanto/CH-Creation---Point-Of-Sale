@@ -33,6 +33,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 class ManageProductFragment : Fragment() , MainView {
 
@@ -160,9 +162,23 @@ class ManageProductFragment : Fragment() , MainView {
         tmpProductKeys.clear()
         if (searchFilter != ""){
             for ((index, data) in productItems.withIndex()) {
-                if (data.NAME.toString().toLowerCase().contains(searchFilter.toLowerCase())
+                if (data.NAME.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
                     && (data.CAT.toString() == categoryItems[currentCat]
                     || currentCat == 0)
+                ){
+                    tempProductItems.add(productItems[index])
+                    tmpProductKeys.add(productKeys[index])
+                }
+                else if (data.PRICE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
+                    && (data.CAT.toString() == categoryItems[currentCat]
+                            || currentCat == 0)
+                ){
+                    tempProductItems.add(productItems[index])
+                    tmpProductKeys.add(productKeys[index])
+                }
+                else if (data.PROD_CODE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
+                    && (data.CAT.toString() == categoryItems[currentCat]
+                            || currentCat == 0)
                 ){
                     tempProductItems.add(productItems[index])
                     tmpProductKeys.add(productKeys[index])
@@ -183,7 +199,7 @@ class ManageProductFragment : Fragment() , MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (context != null){
+        if (context != null  && isVisible && isResumed){
             if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
                 if (dataSnapshot.exists()){
                     productKeys.clear()

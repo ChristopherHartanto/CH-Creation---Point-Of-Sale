@@ -41,6 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:id="@+id/btnAddUser"
+        android:textColor="@color/colorWhite"
         android:background="@drawable/button_border_fill"
         android:text="Add User"/>
 

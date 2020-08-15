@@ -366,10 +366,10 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
 
         etManageProductCreatedDate.isEnabled = false
         etManageProductUpdatedDate.isEnabled = false
-        etManageProductPostedBy.isEnabled = false
+        etManageProductUpdatedBy.isEnabled = false
 
-        presenter.getUserName(product.CREATED_BY.toString()){
-            etManageProductPostedBy.setText(it)
+        presenter.getUserName(product.UPDATED_BY.toString()){
+            etManageProductUpdatedBy.setText(it)
         }
 
         (activity as AppCompatActivity).supportActionBar?.title = product.NAME.toString()

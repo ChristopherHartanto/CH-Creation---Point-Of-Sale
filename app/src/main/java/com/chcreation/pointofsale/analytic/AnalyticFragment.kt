@@ -1,11 +1,13 @@
 package com.chcreation.pointofsale.analytic
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.analytic.AnalyticFilterActivity.Companion.monthItems
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.model.Transaction
@@ -47,18 +49,18 @@ class AnalyticFragment : Fragment(), MainView {
     private var transactions : MutableList<Transaction> = mutableListOf()
     private var boughtProducts : MutableList<Product> = mutableListOf()
     private var totalProfit = 0
-    private var totalPrice = 0
-    private var totalCost = 0
-    private var totalPending = 0
+    private var totalGross = 0
+    private var todayProfit = 0
+    private var todayGross = 0
 
     companion object{
-        var startDate = 0
-        var startMonth = 0
-        var startYear = 0
-
-        var endDate = 0
-        var endMonth = 0
-        var endYear = 0
+        var month = 99
+        var monthName = ""
+        var year = 99
+        var isDiscount = false
+        var isTax = false
+        var userCode = ""
+        var userName = ""
     }
 
     override fun onCreateView(
@@ -84,6 +86,16 @@ class AnalyticFragment : Fragment(), MainView {
     override fun onStart() {
         super.onStart()
 
+        if (month != 99 && year != 99){
+            tvAnalyticFilterDate.text = "${monthName} - ${year}"
+        }else{
+            tvAnalyticFilterDate.text = "${monthItems[getCurrentMonth()]} - ${getCurrentYear()}"
+        }
+        if (userName != "")
+            tvAnalyticFilterName.text = userName
+        else
+            tvAnalyticFilterName.text = "All"
+
         initData()
         srAnalytic.onRefresh {
             initData()
@@ -94,10 +106,10 @@ class AnalyticFragment : Fragment(), MainView {
     private fun initData(){
         if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString()){
             hideProgressBar()
-            tvAnalyticTotalGross.text = "---Invisible---"
-            tvAnalyticTotalProfit.text = "---Invisible---"
-            tvAnalyticTodayIncome.text = "---Invisible---"
-            tvAnalyticMostPurchasedProduct.text = "---Invisible---"
+            tvAnalyticTotalGross.text = "---Un Available for Waiter---"
+            tvAnalyticTotalProfit.text = "---Un Available for Waiter---"
+            tvAnalyticTodayIncome.text = "---Un Available for Waiter---"
+            tvAnalyticMostPurchasedProduct.text = "---Un Available for Waiter---"
         }else{
             clearData()
             GlobalScope.launch {
@@ -112,34 +124,101 @@ class AnalyticFragment : Fragment(), MainView {
         val groupSpace = 0.08f
         val barSpace = 0.02f
         val barWidth = 0.45f
-        val tahunAwal = 2016f
 
-        val dataPemasukan: MutableList<BarEntry> = ArrayList()
-        val dataPengeluaran: MutableList<BarEntry> = ArrayList()
-//
-        for (date in 1..30){
-            var profit = 0F
-            var gross = 0F
+        val profitList: MutableList<BarEntry> = ArrayList()
+        val grossList: MutableList<BarEntry> = ArrayList()
+
+        var firstProfitWeek = 0F
+        var secondProfitWeek = 0F
+        var thirdProfitWeek = 0F
+        var forthProfitWeek = 0F
+
+        var firstGrossWeek = 0F
+        var secondGrossWeek = 0F
+        var thirdGrossWeek = 0F
+        var forthGrossWeek = 0F
+
+        for (date in 1..31){
             for (data in transactions){
-                if (getDateOfMonth(data.CREATED_DATE.toString()) == date)
-                    profit += data.TOTAL_PRICE!!.toFloat()
+
+                var profit = 0F
+                var gross = 0F
+                if (((getMonth(data.CREATED_DATE.toString()) == getCurrentMonth() && month == 99) || (getMonth(data.CREATED_DATE.toString()) == month-1))
+                    && getDateOfMonth(data.CREATED_DATE.toString()) == date
+                    && ((getYear(data.CREATED_DATE.toString()) == getCurrentYear() && year == 99) || (getYear(data.CREATED_DATE.toString()) == year))
+                    && (data.CREATED_BY.toString() == userCode || userCode == "")){
+                    val gson = Gson()
+                    val arrayCartType = object : TypeToken<MutableList<Cart>>() {}.type
+                    val cartItems : MutableList<Cart> = gson.fromJson(data.DETAIL,arrayCartType)
+
+                    for (cart in cartItems){
+                        val product = products.filter { it.PROD_CODE == cart.PROD_CODE }
+                        if (!product.isNullOrEmpty()){
+//                            boughtProducts.add(product[0])
+//                            totalPrice += product[0].PRICE!! * cart.Qty!!
+//                            totalCost += product[0].COST!! * cart.Qty!!
+
+                            profit += (product[0].PRICE!! * cart.Qty!!) - (product[0].COST!! * cart.Qty!!)
+                            gross += (product[0].PRICE!! * cart.Qty!!)
+                        }
+                    }
+
+                    // total pending
+                    profit -= data.TOTAL_OUTSTANDING!!
+                    gross -= data.TOTAL_OUTSTANDING!!
+
+                    // filter
+                    if (isDiscount){
+                        profit -= data.DISCOUNT!!
+                        gross -= data.DISCOUNT!!
+                    }
+                    if (isTax){
+                        profit += data.TAX!!
+                        gross += data.TAX!!
+                    }
+
+                    // by week
+                    if (date in 1..7){
+                        firstProfitWeek += profit
+                        firstGrossWeek += gross
+                    }
+                    if (date in 8..14){
+                        secondProfitWeek += profit
+                        secondGrossWeek += gross
+                    }
+                    if (date in 15..21){
+                        thirdProfitWeek += profit
+                        thirdGrossWeek += gross
+                    }
+                    if (date > 22){
+                        forthGrossWeek += gross
+                        forthProfitWeek += profit
+                    }
+                }
             }
-            dataPemasukan.add(BarEntry(date.toFloat(), profit))
-            dataPengeluaran.add(BarEntry(date.toFloat(), profit))
         }
 
+        profitList.add(BarEntry(1F, firstProfitWeek))
+        profitList.add(BarEntry(2F, secondProfitWeek))
+        profitList.add(BarEntry(3F, thirdProfitWeek))
+        profitList.add(BarEntry(4F, forthProfitWeek))
+
+        grossList.add(BarEntry(1F, firstGrossWeek))
+        grossList.add(BarEntry(2F, secondGrossWeek))
+        grossList.add(BarEntry(3F, thirdGrossWeek))
+        grossList.add(BarEntry(4F, forthGrossWeek))
+
         // Pengaturan atribut bar, seperti warna dan lain-lain
         // Pengaturan atribut bar, seperti warna dan lain-lain
-        val dataSet1 = BarDataSet(dataPemasukan, "Profit")
+        val dataSet1 = BarDataSet(profitList, "Profit")
         dataSet1.color = ColorTemplate.JOYFUL_COLORS[3]
 
-        val dataSet2 = BarDataSet(dataPengeluaran, "Gross")
+        val dataSet2 = BarDataSet(grossList, "Gross")
         dataSet2.color = ColorTemplate.JOYFUL_COLORS[1]
 
-
         // Membuat Bar data yang akan di set ke Chart
         // Membuat Bar data yang akan di set ke Chart
-        val barData = BarData(dataSet1, dataSet2)
+        val barData = BarData(dataSet1,dataSet2)
 
         // Pengaturan sumbu X
         // Pengaturan sumbu X
@@ -176,7 +255,7 @@ class AnalyticFragment : Fragment(), MainView {
         chartAnalytic.xAxis.axisMaximum = 1F + chartAnalytic.barData.getGroupWidth(
             groupSpace,
             barSpace
-        ) * 30F
+        ) * 4F
         //chartAnalytic.xAxis.axisMaximum = 30F
         chartAnalytic.groupBars(1F, groupSpace, barSpace)
         chartAnalytic.isDragEnabled = true
@@ -198,13 +277,12 @@ class AnalyticFragment : Fragment(), MainView {
     override fun onDestroy() {
         super.onDestroy()
 
-        startDate = 0
-        startMonth = 0
-        startYear = 0
-
-        endDate = 0
-        endMonth = 0
-        endYear = 0
+        month = 99
+        year = 99
+        isDiscount = false
+        isTax = false
+        userCode = ""
+        userName = ""
     }
 
     private fun clearData(){
@@ -212,9 +290,9 @@ class AnalyticFragment : Fragment(), MainView {
         transactions.clear()
         boughtProducts.clear()
         totalProfit = 0
-        totalPrice = 0
-        totalCost = 0
-        totalPending = 0
+        totalGross = 0
+        todayGross = 0
+        todayProfit = 0
     }
 
 
@@ -232,36 +310,64 @@ class AnalyticFragment : Fragment(), MainView {
 
             transactionDate = parseDateFormat(data.CREATED_DATE.toString())
 
-            if (((getYear(data.CREATED_DATE.toString()) >= startYear && getMonth(data.CREATED_DATE.toString()) >= startMonth && getDateOfMonth(data.CREATED_DATE.toString()) >= startDate)
-                        || startYear == 0 || startMonth == 0 || startDate == 0)
-                    &&
-                ((getYear(data.CREATED_DATE.toString()) <= endYear && getMonth(data.CREATED_DATE.toString()) >= endMonth && getDateOfMonth(data.CREATED_DATE.toString()) >= endDate)
-                        || endYear == 0 || endMonth == 0 || endDate == 0 )
-            ){
-                for (cart in cartItems){
-                    val product = products.filter { it.PROD_CODE == cart.PROD_CODE }
-                    if (!product.isNullOrEmpty()){
-                        boughtProducts.add(product[0])
-                        totalPrice += product[0].PRICE!! * cart.Qty!!
-                        totalCost += product[0].COST!! * cart.Qty!!
+            // total
+            for (cart in cartItems){
+                val product = products.filter { it.PROD_CODE == cart.PROD_CODE }
+                if (!product.isNullOrEmpty()){
+                    boughtProducts.add(product[0])
+                    totalProfit += product[0].PRICE!! * cart.Qty!! - (product[0].COST!! * cart.Qty!!)
+                    totalGross += product[0].PRICE!! * cart.Qty!!
 
-                        if (todayDate == transactionDate){
-                            todayPrice += product[0].PRICE!! * cart.Qty!!
-                            todayCost += product[0].COST!! * cart.Qty!!
-                        }
-                    }
-                }
-                if (data.TOTAL_OUTSTANDING!! > 0){
-                    totalPending += data.TOTAL_OUTSTANDING!!
-                    if (todayDate == transactionDate)
-                        todayPending += data.TOTAL_OUTSTANDING!!
                 }
             }
+            totalProfit -= data.TOTAL_OUTSTANDING!!
+            totalGross -= data.TOTAL_OUTSTANDING!!
+
+            if (isDiscount){
+                totalProfit -= data.DISCOUNT!!
+                totalGross -= data.DISCOUNT!!
+            }
+            if (isTax){
+                totalProfit += data.TAX!!
+                totalGross += data.TAX!!
+            }
+
+
+            // today
+            for (cart in cartItems){
+                val product = products.filter { it.PROD_CODE == cart.PROD_CODE }
+                if (!product.isNullOrEmpty()){
+                    if (todayDate == transactionDate){
+                        todayProfit += product[0].PRICE!! * cart.Qty!! - (product[0].COST!! * cart.Qty!!)
+                        todayGross += product[0].PRICE!! * cart.Qty!!
+
+                    }
+                }
+            }
+            if (data.TOTAL_OUTSTANDING!! > 0){
+                if (todayDate == transactionDate){
+                    todayProfit -= data.TOTAL_OUTSTANDING!!
+                    todayGross -= data.TOTAL_OUTSTANDING!!
+                }
+            }
+            if (isDiscount){
+                if (todayDate == transactionDate){
+                    todayProfit -= data.DISCOUNT!!
+                    todayGross -= data.DISCOUNT!!
+                }
+            }
+            if (isTax){
+                if (todayDate == transactionDate){
+                    todayProfit += data.TAX!!
+                    todayGross += data.TAX!!
+                }
+            }
+
         }
         hideProgressBar()
-        tvAnalyticTotalGross.text = indonesiaCurrencyFormat().format(totalPrice)
-        tvAnalyticTotalProfit.text = indonesiaCurrencyFormat().format(totalPrice-totalCost-totalPending)
-        tvAnalyticTodayIncome.text = indonesiaCurrencyFormat().format(todayPrice)
+        tvAnalyticTotalGross.text = indonesiaCurrencyFormat().format(totalGross)
+        tvAnalyticTotalProfit.text = indonesiaCurrencyFormat().format(totalProfit)
+        tvAnalyticTodayIncome.text = indonesiaCurrencyFormat().format(todayGross)
 
         val sortBoughtProducts = boughtProducts.sortedBy { it.PROD_CODE }
         var mostBoughtProduct = ""

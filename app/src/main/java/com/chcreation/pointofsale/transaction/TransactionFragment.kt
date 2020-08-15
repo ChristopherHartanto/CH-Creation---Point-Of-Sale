@@ -4,23 +4,33 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.chcreation.pointofsale.EMessageResult
-import com.chcreation.pointofsale.EStatusCode
-import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.getMerchant
+import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.analytic.AnalyticFragment
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.model.Transaction
+import com.chcreation.pointofsale.model.User
+import com.chcreation.pointofsale.model.UserList
 import com.chcreation.pointofsale.presenter.TransactionPresenter
+import com.chcreation.pointofsale.presenter.UserPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kotlinx.android.synthetic.main.activity_analytic_filter.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_transaction.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.onRefresh
 import org.jetbrains.anko.support.v4.startActivity
@@ -35,7 +45,22 @@ class TransactionFragment : Fragment(), MainView {
     private var tmpCustomerNameItems: MutableList<String> = mutableListOf()
     private var tmpTransItems: MutableList<Transaction> = mutableListOf()
     private var tmpTransCodeItems: MutableList<Int> = mutableListOf()
+    private var userCodes: MutableList<String> = mutableListOf()
+    private var userNames: MutableList<String> = mutableListOf()
+    private lateinit var spMonthAdapter: ArrayAdapter<EMonth>
+    private lateinit var spYearAdapter: ArrayAdapter<String>
+    private lateinit var spUserAdapter: ArrayAdapter<String>
+    private var yearItems = mutableListOf<String>("All","2020","2021","2022","2023","2024","2025")
+    private var monthItems = mutableListOf<EMonth>(
+        EMonth.All,EMonth.January,EMonth.February,EMonth.March,EMonth.April,EMonth.May,EMonth.June,
+        EMonth.July,EMonth.August,EMonth.September,EMonth.October,EMonth.November,EMonth.December
+    )
     private var currentTab = 0
+    private var month = 99
+    private var monthName = ""
+    private var year = 99
+    private var userCode = ""
+    private var userName = ""
 
    companion object{
        var transPosition = 0
@@ -82,15 +107,113 @@ class TransactionFragment : Fragment(), MainView {
 
         })
 
-        srTransaction.onRefresh {
-            clearData()
+        spMonthAdapter = ArrayAdapter(ctx, android.R.layout.simple_spinner_item,monthItems)
+        spMonthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spTransactionMonth.adapter = spMonthAdapter
+        if (month != 99)
+            spTransactionMonth.setSelection(month)
+
+        spTransactionMonth.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                month = monthItems[position].value
+                monthName = monthItems[position].toString()
+            }
+
+        }
+
+        spYearAdapter = ArrayAdapter(ctx, android.R.layout.simple_spinner_item,yearItems)
+        spYearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spTransactionYear.adapter = spYearAdapter
+        if (year != 99)
+            spTransactionYear.setSelection(yearItems.indexOf(getCurrentYear().toString()))
+        else
+            spTransactionYear.setSelection(yearItems.indexOf(year.toString()))
+        spTransactionYear.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                if (position == 0)
+                    year = 99
+                else
+                    year = yearItems[position].toInt()
+            }
+
+        }
+
+        spUserAdapter = ArrayAdapter(ctx, android.R.layout.simple_spinner_item,userNames)
+        spUserAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spTransactionUser.adapter = spUserAdapter
+
+        spTransactionUser.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                if (userCodes.size > 0 && userNames.size > 0){
+                    userCode = userCodes[position]
+                    userName = userNames[position]
+                }
+            }
+
+        }
+
+        tvTransactionOpenPopupFilter.onClick {
+            cvTransactionPopUpFilter.visibility = if (cvTransactionPopUpFilter.isVisible) View.GONE else View.VISIBLE
+            tvTransactionOpenPopupFilter.text = if (cvTransactionPopUpFilter.isVisible) "Close" else "Filter"
+        }
+
+        btnTransactionApplyFilter.onClick {
+            btnTransactionApplyFilter.startAnimation(normalClickAnimation())
+            cvTransactionPopUpFilter.visibility = View.GONE
+
+            tvTransactionFilterDate.text = "${monthName} - ${if (year == 99) "All" else year}"
+            tvTransactionFilterName.text = userName
+
+            tvTransactionOpenPopupFilter.text = "Filter"
+
             fetchTransByCat()
+        }
+
+        srTransaction.onRefresh {
+            fetchTransByCat()
+            GlobalScope.launch {
+                presenter.retrieveUserLists()
+            }
             srTransaction.isRefreshing = false
         }
     }
 
     override fun onStart() {
         super.onStart()
+
+        month = 99
+        year = 99
+        userCode = ""
+        userName = ""
+        tvTransactionFilterDate.text = "All - All"
+        tvTransactionFilterName.text = "All"
 
         clearData()
         adapter = TransactionRecyclerViewAdapter(ctx, transItems, customerItems, transCodeItems){
@@ -104,8 +227,10 @@ class TransactionFragment : Fragment(), MainView {
 //        linearLayoutManager.stackFromEnd = true
 
         rvTransaction.layoutManager = linearLayoutManager
-
-        presenter.retrieveTransactions()
+        GlobalScope.launch {
+            presenter.retrieveTransactions()
+            presenter.retrieveUserLists()
+        }
     }
 
     private fun clearData(){
@@ -113,33 +238,36 @@ class TransactionFragment : Fragment(), MainView {
         transCodeItems.clear()
         customerItems.clear()
         transItems.clear()
+
     }
 
     private fun fetchTransByCat(){
         clearData()
         fecthCustomer()
 
-        if (currentTab == 0){
-            customerItems.addAll(tmpCustomerNameItems)
-            transCodeItems.addAll(tmpTransCodeItems)
-            transItems.addAll(tmpTransItems)
-        }
-        else{
-            for ((index,data) in tmpTransItems.withIndex()){
-                if (currentTab == 1){
-                    if (data.TOTAL_OUTSTANDING!! > 0 && data.STATUS_CODE != EStatusCode.CANCEL.toString()){
+        for ((index,data) in tmpTransItems.withIndex()){
+            if ((month == 99 || (getMonth(data.CREATED_DATE.toString()) == month-1))
+                && ( year == 99 || (getYear(data.CREATED_DATE.toString()) == year))
+                && ((data.CREATED_BY.toString() == userCode) || userCode == "")) {
+                if (currentTab == 0){
+                    transItems.add(data)
+                    customerItems.add(tmpCustomerNameItems[index])
+                    transCodeItems.add(tmpTransCodeItems[index])
+                }
+                if (currentTab == 1) {
+                    if (data.TOTAL_OUTSTANDING!! > 0 && data.STATUS_CODE != EStatusCode.CANCEL.toString()) {
                         transItems.add(data)
                         customerItems.add(tmpCustomerNameItems[index])
                         transCodeItems.add(tmpTransCodeItems[index])
                     }
-                }else if (currentTab == 2){
-                    if (data.STATUS_CODE == EStatusCode.DONE.toString()){
+                } else if (currentTab == 2) {
+                    if (data.STATUS_CODE == EStatusCode.DONE.toString()) {
                         transItems.add(data)
                         customerItems.add(tmpCustomerNameItems[index])
                         transCodeItems.add(tmpTransCodeItems[index])
                     }
-                }else if (currentTab == 3){
-                    if (data.STATUS_CODE == EStatusCode.CANCEL.toString()){
+                } else if (currentTab == 3) {
+                    if (data.STATUS_CODE == EStatusCode.CANCEL.toString()) {
                         transItems.add(data)
                         customerItems.add(tmpCustomerNameItems[index])
                         transCodeItems.add(tmpTransCodeItems[index])
@@ -180,7 +308,7 @@ class TransactionFragment : Fragment(), MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (context != null){
+        if (context != null && isResumed && isVisible){
             if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
                 if (dataSnapshot.exists()){
                     tmpTransItems.clear()
@@ -203,6 +331,39 @@ class TransactionFragment : Fragment(), MainView {
                             tmpCustomerItems.add(item)
                         }
                     }
+                }
+            }
+            else if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()){
+                if(dataSnapshot.exists() && dataSnapshot.value != null && dataSnapshot.value != ""){
+                    userCodes.clear()
+                    userNames.clear()
+                    userCodes.add("")
+                    userNames.add("All")
+                    val gson = Gson()
+                    val arrayUserListType = object : TypeToken<MutableList<UserList>>() {}.type
+                    val items : MutableList<UserList> = gson.fromJson(dataSnapshot.value.toString(),arrayUserListType)
+
+                    items.sortBy { it.CREATED_DATE }
+                    GlobalScope.launch {
+                        for (data in items){
+                            if (data.STATUS_CODE == EStatusCode.ACTIVE.toString()){
+
+                                presenter.retrieveUser(data.USER_CODE.toString())
+                            }
+                        }
+                    }
+                }
+            }
+            else if (response == EMessageResult.FETCH_USER_SUCCESS.toString()){
+                if(dataSnapshot.exists()){
+                    val item = dataSnapshot.getValue(User::class.java)
+                    userNames.add(item!!.NAME.toString())
+                    userCodes.add(dataSnapshot.key.toString())
+                }
+                if (userNames.size == userCodes.size){
+                    if (userName != "")
+                        spTransactionUser.setSelection(userNames.indexOf(userName))
+                    spUserAdapter.notifyDataSetChanged()
                 }
             }
             fetchTransByCat()

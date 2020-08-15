@@ -27,6 +27,7 @@
         android:layout_height="wrap_content"
         android:text="CH Creation"
         android:textSize="16sp"
+        android:textStyle="bold"
         android:textColor="@color/colorBlack"
         android:id="@+id/tvSplashDescription"
         android:layout_marginVertical="10dp"/>

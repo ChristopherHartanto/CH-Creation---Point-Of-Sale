@@ -19,6 +19,7 @@ import com.chcreation.pointofsale.home.HomeFragment
 import com.chcreation.pointofsale.home.HomeFragment.Companion.tempProductItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.indonesiaCurrencyFormat
+import com.chcreation.pointofsale.normalClickAnimation
 import com.chcreation.pointofsale.transaction.DetailTransactionActivity.Companion.existPayment
 import com.chcreation.pointofsale.transaction.TransactionFragment
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.customerItems
@@ -45,6 +46,7 @@ class PostCheckOutActivity : AppCompatActivity() {
             postCheckOutNew()
 
         btnPostCheckOut.onClick {
+            btnPostCheckOut.startAnimation(normalClickAnimation())
             clearCartData()
             val i = Intent(this@PostCheckOutActivity, MainActivity::class.java)
             i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -55,6 +57,7 @@ class PostCheckOutActivity : AppCompatActivity() {
         }
 
         btnPostCheckOutReceipt.onClick {
+            btnPostCheckOutReceipt.startAnimation(normalClickAnimation())
             startActivity<ReceiptActivity>()
         }
     }

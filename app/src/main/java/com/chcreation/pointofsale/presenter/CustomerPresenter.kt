@@ -13,6 +13,7 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.Exception
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -89,7 +90,7 @@ class CustomerPresenter(private val view: MainView,
                 }
 
                 customer.CODE = "C"+generateCustomerCode()
-                val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+                val timeStamp: String = dateFormat().format(Date())
                 val values  = hashMapOf(
                     ECustomer.NAME.toString() to customer.NAME,
                     ECustomer.EMAIL.toString() to customer.EMAIL,

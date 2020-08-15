@@ -315,7 +315,7 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         }
     }
 
-    fun rotateImage(bitmapSource : Bitmap?) : Bitmap {
+    private fun rotateImage(bitmapSource : Bitmap?) : Bitmap {
         val ei = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ExifInterface(File(currentPhotoPath))
         } else {
@@ -350,7 +350,7 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
             matrix, true)
     }
 
-    fun getRealPathFromURI(uri: Uri): String {
+    private fun getRealPathFromURI(uri: Uri): String {
         @SuppressWarnings("deprecation")
         val cursor = requireActivity().managedQuery(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null);
         val column_index = cursor
@@ -359,7 +359,7 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         return cursor.getString(column_index);
     }
 
-    fun updateCustomer(imageUri: String?){
+    private fun updateCustomer(imageUri: String?){
         val email = etManageCustomerEmail.text.toString()
         val address = etManageCustomerAddress.text.toString()
         val name = etManageCustomerName.text.toString()
@@ -371,17 +371,18 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         if (name == "")
             toast("Please Fill Customer Name !!")
         else{
-            presenter.saveCustomer(Customer(name,email, customer.CREATED_DATE, customer.UPDATED_DATE,phone,
+            presenter.saveCustomer(Customer(name,email, customer.CREATED_DATE, dateFormat().format(Date()),phone,
                 address,note,customer.CODE,image),custKey)
         }
     }
 
-    fun fetchData(){
+    private fun fetchData(){
         etManageCustomerEmail.setText(customer.EMAIL)
         etManageCustomerAddress.setText(customer.ADDRESS)
         etManageCustomerName.setText(customer.NAME)
         etManageCustomerNote.setText(customer.NOTE)
         etManageCustomerPhone.setText(customer.PHONE)
+        etManageCustomerUpdatedDate.setText(parseDateFormat(customer.UPDATED_DATE.toString()))
 
         (activity as AppCompatActivity).supportActionBar?.title = customer.NAME.toString()
 

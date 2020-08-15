@@ -269,6 +269,22 @@ class HomeFragment : Fragment() , MainView {
                     tempProductItems.add(productItems[index])
                     tmpProductKeys.add(productKeys[index])
                 }
+                else if (data.PROD_CODE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
+                    //|| data.CAT.toString().contains(searchFilter)
+                    && (data.CAT.toString() == categoryItems[currentCat]
+                            || currentCat == 0)
+                ){
+                    tempProductItems.add(productItems[index])
+                    tmpProductKeys.add(productKeys[index])
+                }
+                else if (data.PRICE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
+                    //|| data.CAT.toString().contains(searchFilter)
+                    && (data.CAT.toString() == categoryItems[currentCat]
+                            || currentCat == 0)
+                ){
+                    tempProductItems.add(productItems[index])
+                    tmpProductKeys.add(productKeys[index])
+                }
             }
         }else{
             for ((index, data) in productItems.withIndex()) {
@@ -285,7 +301,7 @@ class HomeFragment : Fragment() , MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (context != null && isEnabled){
+        if (context != null && isEnabled && isVisible && isResumed){
             if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
                 if (dataSnapshot.exists()){
                     productKeys.clear()

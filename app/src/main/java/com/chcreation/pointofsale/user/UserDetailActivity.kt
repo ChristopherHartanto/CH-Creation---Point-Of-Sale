@@ -87,15 +87,13 @@ class UserDetailActivity : AppCompatActivity(), MainView {
 
         if (user.USER_CODE == mAuth.currentUser!!.uid){
             etUserDetailName.isEnabled = true
-            etUserDetailEmail.setText(getEmail(this))
-            etUserDetailName.setText(getName(this))
+            //etUserDetailEmail.setText(getEmail(this))
+            //etUserDetailName.setText(getName(this))
 
             btnUserDetailRemove.visibility = View.GONE
         }
-        else{
-            GlobalScope.launch {
-                presenter.retrieveUser(user.USER_CODE.toString())
-            }
+        GlobalScope.launch {
+            presenter.retrieveUser(user.USER_CODE.toString())
         }
 
         val index = userGroupItems.indexOf(user.USER_GROUP)

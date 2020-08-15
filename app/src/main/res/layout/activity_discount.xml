@@ -19,6 +19,7 @@
             android:layout_height="wrap_content"
             android:textStyle="bold"
             android:text="Cash Discount"
+            android:textColor="@color/colorBlack"
             android:gravity="center_horizontal"
             android:id="@+id/tvDiscountCash"
             android:textSize="16sp"/>
@@ -44,6 +45,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textStyle="bold"
+            android:textColor="@color/colorBlack"
             android:text="Percentage Discount"
             android:gravity="center_horizontal"
             android:id="@+id/tvDiscountPercentage"

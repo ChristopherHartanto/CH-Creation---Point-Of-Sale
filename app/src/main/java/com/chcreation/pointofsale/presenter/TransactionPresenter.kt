@@ -347,6 +347,23 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
             .addListenerForSingleValueEvent(postListener)
     }
 
+
+    suspend fun retrieveUser(userId: String){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                view.loadData(p0, EMessageResult.FETCH_USER_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.USER.toString())
+            .child(userId)
+            .addListenerForSingleValueEvent(postListener)
+    }
+
     private fun generateTransCode() : String{
         return database.push().key.toString()
     }

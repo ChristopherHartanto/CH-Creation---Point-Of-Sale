@@ -110,7 +110,7 @@ class UserListFragment : Fragment(), MainView{
 
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()){
+        if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()  && isVisible && isResumed){
             if(dataSnapshot.exists() && dataSnapshot.value != null && dataSnapshot.value != ""){
                 userGroups.clear()
                 userNames.clear()

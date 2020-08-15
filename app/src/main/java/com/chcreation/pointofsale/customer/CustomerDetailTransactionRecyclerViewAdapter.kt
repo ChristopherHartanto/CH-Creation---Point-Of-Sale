@@ -54,7 +54,7 @@ class CustomerDetailTransactionRecyclerViewAdapter(private val context: Context,
             }
 
             receipt.text = receiptFormat(item.TRANS_KEY!!.toInt())
-            date.text = item.UPDATED_DATE.toString()
+            date.text = parseDateFormat(item.UPDATED_DATE.toString())
 
             itemView.onClick {
                 listener(position)

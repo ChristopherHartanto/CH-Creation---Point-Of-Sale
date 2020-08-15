@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.normalClickAnimation
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.util.*
@@ -58,6 +59,7 @@ class CustomerRecyclerViewAdapter(private val context: Context, private val item
             }
 
             itemView.onClick {
+                itemView.startAnimation(normalClickAnimation())
                 listener(position)
             }
         }

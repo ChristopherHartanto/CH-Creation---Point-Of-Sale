@@ -22,12 +22,14 @@
         <com.google.android.material.tabs.TabLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:tabTextColor="@color/colorBlack"
+            app:tabSelectedTextColor="@color/colorPrimary"
             android:id="@+id/tlManageProduct"/>
 
         <androidx.appcompat.widget.SearchView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:queryHint="Search Here"
+            app:queryHint="Search Everything Here"
             app:iconifiedByDefault="false"
             android:id="@+id/svManageProduct"/>
 

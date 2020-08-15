@@ -38,7 +38,7 @@ class DiscountActivity : AppCompatActivity() {
             tvDiscountNewTotal.text = "Total After Tax"
         }
 
-        tvDiscountNewTotalContent.text = totalPrice.toString()
+        tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice)
 
         etDiscountCash.doOnTextChanged { text, start, before, count ->
             if (etDiscountCash.hasFocus() && etDiscountCash.text.toString() != ""){

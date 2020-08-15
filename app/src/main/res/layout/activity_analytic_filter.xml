@@ -10,7 +10,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginVertical="5dp"
         android:layout_marginHorizontal="10dp">
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,25 +24,110 @@
                 android:textColor="@color/colorBlack"
                 android:textStyle="bold"
                 android:textSize="18sp"
-                android:layout_marginBottom="20sp"
-                android:text="Date Range"/>
+                android:text="Filter"/>
 
-            <EditText
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/colorBlack"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="10sp"/>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:textColor="@color/colorBlack"
-                android:textSize="18sp"
-                android:hint="Start Date"
-                android:id="@+id/etAnalyticFilterStartDate"/>
-            <EditText
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorBlack"
+                        android:text="Month"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+                    <Spinner
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:layout_height="50dp"
+                        android:id="@+id/spAnalyticMonth"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorBlack"
+                        android:text="Year"
+                        android:textStyle="bold"
+                        android:gravity="center"/>
+
+                    <Spinner
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:layout_height="50dp"
+                        android:id="@+id/spAnalyticYear"/>
+
+                </LinearLayout>
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/colorBlack"
+                android:layout_marginVertical="10sp"/>
+
+            <CheckBox
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
+                android:layout_marginVertical="5dp"
                 android:textColor="@color/colorBlack"
-                android:textSize="18sp"
-                android:hint="End Date"
-                android:id="@+id/etAnalyticFilterEndDate"/>
+                android:textSize="14sp"
+                android:id="@+id/cbAnalyticFilterTax"
+                android:text="Include Tax"/>
+
+            <CheckBox
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="5dp"
+                android:textColor="@color/colorBlack"
+                android:textSize="14sp"
+                android:id="@+id/cbAnalyticFilterDiscount"
+                android:text="Include Discount"/>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:elevation="10dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_margin="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select User :"
+                android:textColor="@color/colorBlack"
+                android:textStyle="bold"/>
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:id="@+id/spAnalyticUser"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -56,6 +141,7 @@
             android:background="@drawable/button_border_fill"
             android:text="Apply Filter"
             android:layout_margin="7dp"
+            android:textColor="@color/colorWhite"
             android:id="@+id/btnAnalyticFilter"/>
     </LinearLayout>
 

@@ -84,6 +84,8 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_product)
 
+        supportActionBar!!.title = "New Product"
+
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         storage = FirebaseStorage.getInstance().reference

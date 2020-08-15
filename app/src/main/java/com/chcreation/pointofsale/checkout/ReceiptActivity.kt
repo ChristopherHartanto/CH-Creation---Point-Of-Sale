@@ -20,6 +20,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.ErrorActivity.Companion.errorMessage
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.totalReceived
@@ -147,6 +148,10 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         rvReceipt.adapter = adapter
         rvReceipt.layoutManager = LinearLayoutManager(this)
 
+        if (getMerchantImage(this) == "")
+            ivReceiptMerchantImage.visibility = View.GONE
+        else
+            Glide.with(this).load(getMerchantImage(this)).into(ivReceiptMerchantImage)
         tvReceiptCashier.text = mAuth.currentUser?.displayName
 
         val discount = boughtList.DISCOUNT!!
