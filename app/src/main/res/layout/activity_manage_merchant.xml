@@ -43,7 +43,7 @@
                 <TextView
                     android:layout_width="100dp"
                     android:layout_height="100dp"
-                    android:text="P"
+                    android:text="M"
                     android:textSize="36sp"
                     android:gravity="center"
                     android:textStyle="bold"

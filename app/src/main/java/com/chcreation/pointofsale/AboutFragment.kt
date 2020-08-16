@@ -1,5 +1,7 @@
 package com.chcreation.pointofsale
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -13,6 +15,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.fragment_about.*
+import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.ctx
 
 /**
@@ -39,13 +43,44 @@ class AboutFragment : Fragment(), MainView {
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = Homepresenter(this,mAuth,mDatabase,ctx)
 
-        presenter.retrieveAbout(){
-            tvAboutHeader1.text = it.TEXT1
-            tvAboutHeader2.text = it.TEXT2
-            tvAboutHeader3.text = it.TEXT3
+        val version = ctx.packageManager.getPackageInfo(ctx.packageName,0).versionName
+        tvAboutVersion.text = version
 
-            if (it.IMAGE.toString() != "")
-                Glide.with(ctx).load(it.IMAGE).into(ivAbout)
+        presenter.retrieveAbout(){
+            if (isVisible && isResumed){
+                tvAboutPrivacyPolicy.text = it.PRIVACY_POLICY
+                tvAboutTermsCondition.text = it.TERMS_CONDITION
+                tvAboutCreatorDesc.text = it.CREATOR_DESC
+                tvAboutAppDesc.text = it.APP_DESC
+
+                if (it.IMAGE.toString() != "")
+                    Glide.with(ctx).load(it.IMAGE.toString()).into(ivAbout)
+
+                if (it.TERMS_CONDITION == ""){
+                    tvAboutTermsConditionTitle.visibility = View.GONE
+                }
+                if (it.PRIVACY_POLICY == ""){
+                    tvAboutPrivacyPolicyTitle.visibility = View.GONE
+                }
+            }
+        }
+
+        tvAboutTermsCondition.onClick {
+            openWebsite(tvAboutTermsCondition.text.toString())
+        }
+
+        tvAboutPrivacyPolicy.onClick {
+            openWebsite(tvAboutPrivacyPolicy.text.toString())
+        }
+    }
+
+    private fun openWebsite(url: String){
+        try {
+            val i = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            requireActivity().startActivity(i)
+        }catch (e:Exception){
+            e.printStackTrace()
+            showError(ctx,e.message.toString())
         }
     }
 

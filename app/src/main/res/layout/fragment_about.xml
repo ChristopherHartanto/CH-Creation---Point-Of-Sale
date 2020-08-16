@@ -1,41 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".AboutFragment">
+    android:layout_height="wrap_content">
 
-    <ImageView
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginVertical="20sp"
-        android:id="@+id/ivAbout"
-        android:src="@drawable/default_image"/>
-
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorBlack"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:layout_margin="5dp"
-        android:id="@+id/tvAboutHeader1"/>
+        android:orientation="vertical"
+        android:padding="10dp"
+        tools:context=".AboutFragment">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/colorBlack"
-        android:textSize="20sp"
-        android:layout_margin="5dp"
-        android:id="@+id/tvAboutHeader2"/>
+        <ImageView
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/icon"
+            android:layout_marginTop="30dp"
+            android:layout_gravity="center"/>
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/colorBlack"
-        android:textSize="14sp"
-        android:layout_margin="5dp"
-        android:id="@+id/tvAboutHeader3"/>
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:id="@+id/tvAboutVersion"
+            android:layout_marginTop="5dp"
+            android:text="This is App Version"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:layout_marginTop="20sp"
+            android:id="@+id/tvAboutAppDesc"
+            android:text="This is App Description"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginTop="20sp"
+            android:text="About the Creator"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:text="this is about the Creator"
+            android:layout_marginTop="5dp"
+            android:id="@+id/tvAboutCreatorDesc"/>
+
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginVertical="20sp"
+            android:id="@+id/ivAbout"
+            android:src="@drawable/default_image"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="20sp"
+            android:id="@+id/tvAboutPrivacyPolicyTitle"
+            android:text="Privacy Policy"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimary"
+            android:text="this is Privacy Policy Link"
+            android:textSize="16sp"
+            android:layout_margin="10dp"
+            android:id="@+id/tvAboutPrivacyPolicy"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:text="Terms and Condition"
+            android:id="@+id/tvAboutTermsConditionTitle"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimary"
+            android:text="this is Terms and Condition Link"
+            android:layout_margin="10dp"
+            android:textSize="16sp"
+            android:id="@+id/tvAboutTermsCondition"/>
+
+    </LinearLayout>
+</ScrollView>
+

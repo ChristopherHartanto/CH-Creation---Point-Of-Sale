@@ -58,6 +58,7 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
         super.onStart()
 
         btnMerchant.onClick {
+            btnMerchant.startAnimation(normalClickAnimation())
             presenter.retrieveMerchantInfo(merchantItems[selectedMerchant].CREDENTIAL.toString(),merchantItems[selectedMerchant].NAME.toString())
         }
     }

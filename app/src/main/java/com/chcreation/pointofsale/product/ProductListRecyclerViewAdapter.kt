@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.normalClickAnimation
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -39,6 +40,7 @@ class ProductListRecyclerViewAdapter(private val context: Context, private val i
                 image.imageResource = R.drawable.default_image
 
             itemView.onClick {
+                itemView.startAnimation(normalClickAnimation())
                 listener(position)
             }
 //            val size = calculateSizeOfView(context)

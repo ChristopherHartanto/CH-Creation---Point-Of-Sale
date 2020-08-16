@@ -10,6 +10,7 @@ import com.chcreation.pointofsale.login.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_splash.*
 import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.support.v4.ctx
 
 class SplashActivity : AppCompatActivity() {
 
@@ -24,6 +25,9 @@ class SplashActivity : AppCompatActivity() {
 
         supportActionBar!!.hide()
         mAuth = FirebaseAuth.getInstance()
+
+        val version = packageManager.getPackageInfo(packageName,0).versionName
+        tvsplashVersion.text = version
 
         val timer = object: CountDownTimer(1000, 1000) {
             override fun onTick(millisUntilFinished: Long) {

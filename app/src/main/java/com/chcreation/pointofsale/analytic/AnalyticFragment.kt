@@ -397,28 +397,30 @@ class AnalyticFragment : Fragment(), MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
-            if (dataSnapshot.exists()){
-                for (data in dataSnapshot.children){
-                    val item = data.getValue(Product::class.java)
+        if (isVisible && isResumed){
+            if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
+                if (dataSnapshot.exists()){
+                    for (data in dataSnapshot.children){
+                        val item = data.getValue(Product::class.java)
 
-                    if (item != null) {
-                        products.add(item)
+                        if (item != null) {
+                            products.add(item)
+                        }
                     }
                 }
             }
-        }
-        if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
-            if (dataSnapshot.exists()){
-                for (data in dataSnapshot.children){
-                    val item = data.getValue(Transaction::class.java)
+            if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
+                if (dataSnapshot.exists()){
+                    for (data in dataSnapshot.children){
+                        val item = data.getValue(Transaction::class.java)
 
-                    if (item != null && item.STATUS_CODE != EStatusCode.CANCEL.toString()) {
-                        transactions.add(item)
+                        if (item != null && item.STATUS_CODE != EStatusCode.CANCEL.toString()) {
+                            transactions.add(item)
+                        }
                     }
                 }
+                calculate()
             }
-            calculate()
         }
     }
 

@@ -11,6 +11,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.normalClickAnimation
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -39,6 +40,7 @@ class ProductRecyclerViewAdapter(private val context: Context, private val items
         fun bindItem(item: Product,total: Int, listener: (position: Int) -> Unit, position: Int, context: Context) {
             name.text = item.CAT
             itemView.onClick {
+                itemView.startAnimation(normalClickAnimation())
                 listener(position)
             }
 

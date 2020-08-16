@@ -52,6 +52,7 @@ class NewCategory : AppCompatActivity(), MainView {
         presenter.retrieveCategories()
 
         btnNewCategory.onClick {
+            btnNewCategory.startAnimation(normalClickAnimation())
             newCategory = etNewCategory.text.toString()
 
             if (newCategory.isEmpty())

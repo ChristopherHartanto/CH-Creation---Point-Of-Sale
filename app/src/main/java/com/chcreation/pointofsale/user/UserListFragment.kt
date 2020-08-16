@@ -110,38 +110,40 @@ class UserListFragment : Fragment(), MainView{
 
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()  && isVisible && isResumed){
-            if(dataSnapshot.exists() && dataSnapshot.value != null && dataSnapshot.value != ""){
-                userGroups.clear()
-                userNames.clear()
-                val gson = Gson()
-                val arrayUserListType = object : TypeToken<MutableList<UserList>>() {}.type
-                val items : MutableList<UserList> = gson.fromJson(dataSnapshot.value.toString(),arrayUserListType)
+        if (isVisible && isResumed){
+            if (response == EMessageResult.FETCH_USER_LIST_SUCCESS.toString()  && isVisible && isResumed){
+                if(dataSnapshot.exists() && dataSnapshot.value != null && dataSnapshot.value != ""){
+                    userGroups.clear()
+                    userNames.clear()
+                    val gson = Gson()
+                    val arrayUserListType = object : TypeToken<MutableList<UserList>>() {}.type
+                    val items : MutableList<UserList> = gson.fromJson(dataSnapshot.value.toString(),arrayUserListType)
 
-                items.sortBy { it.USER_GROUP }
+                    items.sortBy { it.USER_GROUP }
 
-                for (data in items){
-                    if (data.STATUS_CODE == EStatusCode.ACTIVE.toString()){
-                        userGroups.add(data)
+                    for (data in items){
+                        if (data.STATUS_CODE == EStatusCode.ACTIVE.toString()){
+                            userGroups.add(data)
+                        }
                     }
-                }
-                GlobalScope.launch {
-                    for (data in userGroups){
-                        presenter.retrieveUser(data.USER_CODE.toString())
+                    GlobalScope.launch {
+                        for (data in userGroups){
+                            presenter.retrieveUser(data.USER_CODE.toString())
+                        }
                     }
                 }
             }
-        }
-        if (response == EMessageResult.FETCH_USER_SUCCESS.toString()){
-            if(dataSnapshot.exists()){
-                val item = dataSnapshot.getValue(User::class.java)
-                userNames.add(item!!.NAME.toString())
+            if (response == EMessageResult.FETCH_USER_SUCCESS.toString()){
+                if(dataSnapshot.exists()){
+                    val item = dataSnapshot.getValue(User::class.java)
+                    userNames.add(item!!.NAME.toString())
+                }
             }
-        }
-        if (userGroups.size == userNames.size){
-            adapter.notifyDataSetChanged()
-            pbUserList.visibility = View.GONE
-            srUserList.isRefreshing = false
+            if (userGroups.size == userNames.size){
+                adapter.notifyDataSetChanged()
+                pbUserList.visibility = View.GONE
+                srUserList.isRefreshing = false
+            }
         }
     }
 

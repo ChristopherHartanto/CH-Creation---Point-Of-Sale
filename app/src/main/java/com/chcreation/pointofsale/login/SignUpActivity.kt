@@ -65,8 +65,16 @@ class SignUpActivity : AppCompatActivity(), MainView {
         val name = etSignUpName.text.toString()
         val password = etSignUpPassword.text.toString()
 
-        if (password.length < 6)
-            toast("Password Minimum 6 Length !!")
+        if (password.length < 6){
+            etSignUpPassword.error = "Password Minimum 6 Length !!"
+            btnSignUp.isEnabled = true
+            pbSignUp.visibility = View.GONE
+        }
+        else if (name.isEmpty()){
+            etSignUpName.error = "Name Must be Fill !!"
+            btnSignUp.isEnabled = true
+            pbSignUp.visibility = View.GONE
+        }
         else if (email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
             pbSignUp.visibility = View.VISIBLE
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->

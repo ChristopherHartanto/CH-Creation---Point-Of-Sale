@@ -73,23 +73,25 @@ class CustomerFragment : Fragment(), MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_CUSTOMER_SUCCESS.toString()){
-            if (dataSnapshot.exists()){
-                customerItems.clear()
-                adapter.notifyDataSetChanged()
+        if (isVisible && isResumed){
+            if (response == EMessageResult.FETCH_CUSTOMER_SUCCESS.toString()){
+                if (dataSnapshot.exists()){
+                    customerItems.clear()
+                    adapter.notifyDataSetChanged()
 
-                for (data in dataSnapshot.children){
-                    val item = data.getValue(Customer::class.java)
-                    if (item!!.STATUS_CODE == EStatusCode.ACTIVE.toString()){
-                        customerItems.add(item)
-                        adapter.notifyDataSetChanged()
+                    for (data in dataSnapshot.children){
+                        val item = data.getValue(Customer::class.java)
+                        if (item!!.STATUS_CODE == EStatusCode.ACTIVE.toString()){
+                            customerItems.add(item)
+                            adapter.notifyDataSetChanged()
 
+                        }
                     }
+                    srCustomer.isRefreshing = false
                 }
+
                 srCustomer.isRefreshing = false
             }
-
-            srCustomer.isRefreshing = false
         }
     }
 

@@ -25,6 +25,13 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/tvsplashVersion"
+        android:textColor="@color/colorBlack"
+        android:layout_marginTop="3dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="CH Creation"
         android:textSize="16sp"
         android:textStyle="bold"

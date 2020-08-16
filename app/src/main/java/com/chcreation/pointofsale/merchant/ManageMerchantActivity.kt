@@ -173,12 +173,17 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                             mAuth.currentUser!!.uid,EStatusUser.ACTIVE.toString()))
                 }
                 noButton {
+                    pbMerchant.visibility = View.GONE
+                    btnMerchant.isEnabled = true
                 }
             }.show()
         }
         else{
-            if (getMerchantUserGroup(this@ManageMerchantActivity) == EUserGroup.WAITER.toString())
+            if (getMerchantUserGroup(this@ManageMerchantActivity) == EUserGroup.WAITER.toString()){
+                pbMerchant.visibility = View.GONE
+                btnMerchant.isEnabled = true
                 toast("Only Manager Can Update Merchant Status")
+            }
             else{
                 val image = if (imageUrl == "") merchant!!.IMAGE else imageUrl
                 btnMerchant.isEnabled = false

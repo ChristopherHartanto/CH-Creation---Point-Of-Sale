@@ -226,3 +226,6 @@ class MainActivity : AppCompatActivity(), MainView {
         }
     }
 }
+//https://www.websitepolicies.com/policies/view/mjijhUBA
+//ch.creation1608@gmail.com
+//3634315896
