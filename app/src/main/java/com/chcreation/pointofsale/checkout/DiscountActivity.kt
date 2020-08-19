@@ -36,6 +36,7 @@ class DiscountActivity : AppCompatActivity() {
             tvDiscountPercentage.text = "Percentage Tax"
             tvDiscountCash.text = "Cash Tax"
             tvDiscountNewTotal.text = "Total After Tax"
+            btnDiscount.text = "Apply Tax"
         }
 
         tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice)

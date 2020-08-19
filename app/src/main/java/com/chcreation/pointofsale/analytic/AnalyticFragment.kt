@@ -106,10 +106,10 @@ class AnalyticFragment : Fragment(), MainView {
     private fun initData(){
         if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString()){
             hideProgressBar()
-            tvAnalyticTotalGross.text = "---Un Available for Waiter---"
-            tvAnalyticTotalProfit.text = "---Un Available for Waiter---"
-            tvAnalyticTodayIncome.text = "---Un Available for Waiter---"
-            tvAnalyticMostPurchasedProduct.text = "---Un Available for Waiter---"
+            tvAnalyticTotalGross.text = "-Not Authorized-"
+            tvAnalyticTotalProfit.text = "-Not Authorized-"
+            tvAnalyticTodayIncome.text = "-Not Authorized-"
+            tvAnalyticMostPurchasedProduct.text = "-Not Authorized-"
         }else{
             clearData()
             GlobalScope.launch {

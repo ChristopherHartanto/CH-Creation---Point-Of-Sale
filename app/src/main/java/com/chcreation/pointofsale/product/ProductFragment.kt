@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.EStatusCode
 
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.getMerchant
@@ -134,7 +135,10 @@ class ProductFragment : Fragment(), MainView {
 
             if (dataSnapshot.exists()) {
                 for (data in dataSnapshot.children) {
-                    items.add(data.getValue(Product::class.java)!!)
+                    val item = data.getValue(Product::class.java)!!
+
+                    if (item.STATUS_CODE == EStatusCode.ACTIVE.toString())
+                        items.add(item)
                 }
                 fetchData()
             }

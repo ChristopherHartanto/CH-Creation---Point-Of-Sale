@@ -2,6 +2,7 @@ package com.chcreation.pointofsale.product
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.media.ExifInterface
@@ -20,6 +21,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.*
@@ -73,7 +76,9 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
     private lateinit var spAdapter: ArrayAdapter<String>
     private var manageStock = true
     private var PICK_IMAGE_CAMERA  = 111
+    private var CAMERA_PERMISSION  = 101
     private var PICK_IMAGE_GALLERY = 222
+    private var READ_PERMISION = 202
 
     companion object{
         var filePath: Uri? = null
@@ -242,40 +247,62 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
                 dialogInterface, i ->
             when(i){
                 0 -> {
-                    Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-                        // Ensure that there's a camera activity to handle the intent
-                        takePictureIntent.resolveActivity(ctx.packageManager)?.also {
-                            // Create the File where the photo should go
-                            val photoFile: File? = try {
-                                createImageFile()
-                            } catch (ex: IOException) {
-                                null
-                            }
-                            // Continue only if the File was successfully created
-                            photoFile?.also {
-                                val photoURI: Uri = FileProvider.getUriForFile(
-                                    ctx,
-                                    "com.example.android.fileprovider",
-                                    it
-                                )
-                                Log.d("uri: ",photoURI.toString())
-                                filePath = photoURI
-                                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                                this.startActivityForResult(takePictureIntent, PICK_IMAGE_CAMERA)
-                            }
-                        }
-                    }
+                    if (ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED)
+                        ActivityCompat.requestPermissions(requireActivity(),
+                            arrayOf(android.Manifest.permission.CAMERA),CAMERA_PERMISSION
+                        )
+                    else
+                        openCamera()
+
                 }
                 1 -> {
-                    intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                    this.startActivityForResult(
-                        intent,
-                        PICK_IMAGE_GALLERY
-                    )
+                    if (ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED)
+                        ActivityCompat.requestPermissions(requireActivity(),
+                            arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE),READ_PERMISION
+                        )
+                    else
+                        openGallery()
                 }
             }
         }
 
+    }
+
+    private fun openCamera(){
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            takePictureIntent.resolveActivity(ctx.packageManager)?.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile?.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        ctx,
+                        "com.example.android.fileprovider",
+                        it
+                    )
+                    Log.d("uri: ",photoURI.toString())
+                    filePath = photoURI
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    this.startActivityForResult(takePictureIntent, PICK_IMAGE_CAMERA)
+                }
+            }
+        }
+    }
+
+    private fun openGallery(){
+        var intent = Intent()
+        intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        this.startActivityForResult(
+            intent,
+            PICK_IMAGE_GALLERY
+        )
     }
 
     // Override onActivityResult method
@@ -346,7 +373,30 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
             matrix, true)
     }
 
-    fun getRealPathFromURI(uri: Uri): String {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == CAMERA_PERMISSION){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openCamera()
+            }
+            else
+                toast("Permission Denied")
+        }
+        else if (requestCode == READ_PERMISION){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openGallery()
+            }
+            else
+                toast("Permission Denied")
+        }
+    }
+
+    private fun getRealPathFromURI(uri: Uri): String {
         @SuppressWarnings("deprecation")
         val cursor = requireActivity().managedQuery(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null);
         val column_index = cursor

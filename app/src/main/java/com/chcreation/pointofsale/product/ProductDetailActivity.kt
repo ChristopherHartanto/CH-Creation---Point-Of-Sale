@@ -64,9 +64,17 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
         btnProductDetail.onClick {
             btnProductDetail.startAnimation(normalClickAnimation())
 
-            getBitmapFromView(layoutProductDetail,this@ProductDetailActivity){
+            alert("Are You Want to Share?"){
+                title = "Share"
+                yesButton {
+                    getBitmapFromView(layoutProductDetail,this@ProductDetailActivity){
 
-            }
+                    }
+                }
+                noButton {
+
+                }
+            }.show()
         }
 
         ivProductDetailMoreOptions.onClick {
@@ -92,7 +100,7 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
         tvProductDetailPrice.text = indonesiaCurrencyFormat().format(product.PRICE)
     }
 
-    fun getBitmapFromView(view: View, activity: Activity, callback: (Bitmap) -> Unit) {
+    private fun getBitmapFromView(view: View, activity: Activity, callback: (Bitmap) -> Unit) {
         activity.window?.let { window ->
             val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
             val locationOfViewInWindow = IntArray(2)
@@ -130,7 +138,7 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
         }
     }
 
-    fun store(bm: Bitmap, fileName: String?): File {
+    private fun store(bm: Bitmap, fileName: String?): File {
         val dirPath: String =
             getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath.toString()
         val dir = File(dirPath)

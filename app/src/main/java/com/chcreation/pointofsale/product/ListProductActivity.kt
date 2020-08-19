@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.chcreation.pointofsale.EMessageResult
+import com.chcreation.pointofsale.EStatusCode
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.getMerchant
 import com.chcreation.pointofsale.home.HomeRecyclerViewAdapter
@@ -90,7 +91,9 @@ class ListProductActivity : AppCompatActivity(), MainView {
 
                 for (data in dataSnapshot.children) {
                     val item = data.getValue(Product::class.java)!!
-                    tempProductItems.add(item)
+
+                    if (item.STATUS_CODE == EStatusCode.ACTIVE.toString())
+                        tempProductItems.add(item)
                 }
                 productItems.addAll(tempProductItems)
 
