@@ -63,42 +63,54 @@ class CustomerDetailTransactionFragment : Fragment(), MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_CUSTOMER_TRANSACTION_SUCCESS.toString()){
-            if (dataSnapshot.exists()){
-                enquiryItems.clear()
-                var tmpItems = mutableListOf<Enquiry>()
-                for (data in dataSnapshot.children){
-                    val item = data.getValue(Enquiry::class.java)
-                    tmpItems.add(item!!)
-                    presenter.retrieveTransaction(item.TRANS_KEY.toString())
+        if (isVisible && isResumed){
+            if (response == EMessageResult.FETCH_CUSTOMER_TRANSACTION_SUCCESS.toString()){
+                if (dataSnapshot.exists()){
+                    enquiryItems.clear()
+                    var tmpItems = mutableListOf<Enquiry>()
+                    var checkTransKey = ""
+
+                    for ((index,data) in dataSnapshot.children.withIndex()){
+                        val item = data.getValue(Enquiry::class.java)
+                        tmpItems.add(item!!)
+
+                        if (index == 0){
+                            checkTransKey = item.TRANS_KEY.toString()
+                            presenter.retrieveTransaction(item.TRANS_KEY.toString())
+                        }else if (item.TRANS_KEY.toString() != checkTransKey){
+                            checkTransKey = item.TRANS_KEY.toString()
+                            presenter.retrieveTransaction(item.TRANS_KEY.toString())
+                        }
+                    }
+                    var itemGroupByReceipt = tmpItems.groupBy { it.TRANS_KEY }
+                    for (data in itemGroupByReceipt){
+                        val item = data.value
+                        enquiryItems.add(item[0])
+                    }
+                    enquiryItems.reverse()
+                    adapter.notifyDataSetChanged()
+                    totalTransaction = enquiryItems.size
+                    tvCustomerDetailTransactionTotal.text = totalTransaction.toString()
                 }
-                var itemGroupByReceipt = tmpItems.groupBy { it.TRANS_KEY }
-                for (data in itemGroupByReceipt){
-                    val item = data.value
-                    enquiryItems.add(item[0])
+            }
+            if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
+                if (dataSnapshot.exists()){
+                    val transItem = dataSnapshot.getValue(Transaction::class.java)
+
+                    if (transItem != null) {
+                        if (transItem.STATUS_CODE != EStatusCode.CANCEL.toString())
+                            totalGrossEarning += transItem.TOTAL_PRICE!!
+
+                        if (transItem.STATUS_CODE == EStatusCode.PENDING.toString())
+                            tvCustomerDetailTransactionTotalGrossEarning.textColorResource = R.color.colorPrimary
+
+                        tvCustomerDetailTransactionTotalGrossEarning.text = indonesiaCurrencyFormat().format(totalGrossEarning)
+                    }
+
                 }
-                enquiryItems.reverse()
-                adapter.notifyDataSetChanged()
-                totalTransaction = enquiryItems.size
-                tvCustomerDetailTransactionTotal.text = totalTransaction.toString()
             }
         }
-        if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
-            if (dataSnapshot.exists()){
-                val transItem = dataSnapshot.getValue(Transaction::class.java)
 
-                if (transItem != null) {
-                    if (transItem.STATUS_CODE != EStatusCode.CANCEL.toString())
-                        totalGrossEarning += transItem.TOTAL_PRICE!!
-
-                    if (transItem.STATUS_CODE == EStatusCode.PENDING.toString())
-                        tvCustomerDetailTransactionTotalGrossEarning.textColorResource = R.color.colorPrimary
-
-                    tvCustomerDetailTransactionTotalGrossEarning.text = indonesiaCurrencyFormat().format(totalGrossEarning)
-                }
-
-            }
-        }
     }
 
     override fun response(message: String) {

@@ -10,11 +10,14 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:inputType="textMultiLine"
         android:hint="Enter a note here"
+        android:minLines="5"
         android:maxLines="10"
         android:gravity="start"
-        android:lines="1"
+        android:lines="8"
         android:id="@+id/etNote"
+        android:scrollbars="vertical"
         android:layout_weight="15"/>
 
     <Button

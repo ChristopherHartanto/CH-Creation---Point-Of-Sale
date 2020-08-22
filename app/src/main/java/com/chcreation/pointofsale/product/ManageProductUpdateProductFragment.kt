@@ -443,43 +443,46 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
 
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
-            if (dataSnapshot.exists())
-            {
-                try{
-                    for (data in dataSnapshot.children){
-                        productKey = data.key!!.toInt()
-                        val item = data.getValue(Product::class.java)
-                        product = item!!
+        if (isVisible && isResumed){
+            if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
+                if (dataSnapshot.exists())
+                {
+                    try{
+                        for (data in dataSnapshot.children){
+                            productKey = data.key!!.toInt()
+                            val item = data.getValue(Product::class.java)
+                            product = item!!
+                        }
+                        fetchData()
+                    }catch (e: Exception){
+                        showError(ctx,e.message.toString())
+                        e.printStackTrace()
                     }
-                    fetchData()
-                }catch (e: Exception){
-                    showError(ctx,e.message.toString())
-                    e.printStackTrace()
                 }
-            }
-        }else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()) {
-            categoryItems.clear()
-            categoryItems.add("")
-            categoryItems.add("Create Category")
+            }else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()) {
+                categoryItems.clear()
+                categoryItems.add("")
+                categoryItems.add("Create Category")
 
-            if (dataSnapshot.exists() && dataSnapshot.value != ""){
-                val gson = Gson()
-                val arrayCartType = object : TypeToken<MutableList<Cat>>() {}.type
-                val items : MutableList<Cat> = gson.fromJson(dataSnapshot.value.toString(),arrayCartType)
+                if (dataSnapshot.exists() && dataSnapshot.value != ""){
+                    val gson = Gson()
+                    val arrayCartType = object : TypeToken<MutableList<Cat>>() {}.type
+                    val items : MutableList<Cat> = gson.fromJson(dataSnapshot.value.toString(),arrayCartType)
 
-                for (data in items) {
-                    val item = data.CAT
-                    if (item != "")
-                        categoryItems.add(item.toString())
+                    for (data in items) {
+                        val item = data.CAT
+                        if (item != "")
+                            categoryItems.add(item.toString())
+                    }
+
+                    selectedCategory = categoryItems[0]
+                    presenter.retrieveProductByProdCode(prodCode)
+                    spAdapter.notifyDataSetChanged()
+                    spManageProduct.setSelection(0)
                 }
-
-                selectedCategory = categoryItems[0]
-                presenter.retrieveProductByProdCode(prodCode)
-                spAdapter.notifyDataSetChanged()
-                spManageProduct.setSelection(0)
             }
         }
+
     }
 
     fun clearData(){

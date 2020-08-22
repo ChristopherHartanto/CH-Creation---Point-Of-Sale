@@ -18,6 +18,8 @@ class NoteActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_note)
 
+        supportActionBar?.title = "Note"
+
         etNote.setText(note)
         etNote.doOnTextChanged { text, start, before, count ->
             note = text.toString()

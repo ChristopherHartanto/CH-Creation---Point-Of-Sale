@@ -415,16 +415,19 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-       if (response == EMessageResult.FETCH_CUSTOMER_SUCCESS.toString()){
-           if (dataSnapshot.exists()){
-               for (data in dataSnapshot.children){
-                   val item = data.getValue(Customer::class.java)
-                   custKey = data.key!!.toInt()
-                   customer = item!!
-               }
-               fetchData()
-           }
-       }
+        if (isVisible && isResumed){
+            if (response == EMessageResult.FETCH_CUSTOMER_SUCCESS.toString()){
+                if (dataSnapshot.exists()){
+                    for (data in dataSnapshot.children){
+                        val item = data.getValue(Customer::class.java)
+                        custKey = data.key!!.toInt()
+                        customer = item!!
+                    }
+                    fetchData()
+                }
+            }
+        }
+
     }
 
     override fun response(message: String) {

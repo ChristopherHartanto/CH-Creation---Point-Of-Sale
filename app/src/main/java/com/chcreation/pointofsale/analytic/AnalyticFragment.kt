@@ -190,7 +190,7 @@ class AnalyticFragment : Fragment(), MainView {
                         thirdProfitWeek += profit
                         thirdGrossWeek += gross
                     }
-                    if (date > 22){
+                    if (date > 21){
                         forthGrossWeek += gross
                         forthProfitWeek += profit
                     }
