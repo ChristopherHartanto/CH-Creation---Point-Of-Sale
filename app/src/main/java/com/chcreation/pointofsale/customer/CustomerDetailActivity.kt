@@ -47,12 +47,14 @@ class CustomerDetailActivity : AppCompatActivity(),MainView {
         setContentView(R.layout.activity_customer_detail)
 
         supportActionBar?.title = "Customer Detail"
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         custCode = intent.extras!!.getString(ECustomer.CODE.toString(),"")
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = CustomerPresenter(this,mAuth,mDatabase,this)
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -111,6 +113,10 @@ class CustomerDetailActivity : AppCompatActivity(),MainView {
                         }
                     }.show()
                 }
+                true
+            }
+            android.R.id.home->{
+                finish()
                 true
             }
             else -> super.onOptionsItemSelected(item)

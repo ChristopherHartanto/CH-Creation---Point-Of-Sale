@@ -2,7 +2,9 @@ package com.chcreation.pointofsale.checkout
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -33,6 +35,7 @@ import com.chcreation.pointofsale.home.HomeFragment
 import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.model.Cart
+import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.model.Payment
 import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.presenter.TransactionPresenter
@@ -70,6 +73,10 @@ class ReceiptActivity : AppCompatActivity(), MainView {
     private lateinit var user: User
     private var receiptCode = 0
     private var screenShotPath : Uri? = null
+    private var sincere = ""
+    private var receiptTemplate = ECustomReceipt.RECEIPT1.toString()
+    private var customer = Customer()
+    private var purchasedItems = mutableListOf<Cart>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,6 +88,8 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = TransactionPresenter(this,mAuth,mDatabase,this)
+        sincere = getMerchantSincere(this)
+        receiptTemplate = getMerchantReceiptTemplate(this)
 
         adapterPaymentList = ReceiptPaymentListRecyclerViewAdapter(this,paymentLists)
 
@@ -97,23 +106,28 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
         btnReceiptShare.onClick {
             btnReceiptShare.startAnimation(normalClickAnimation())
+            loading()
 
-            alert ("Are You want to Share?"){
-                title = "Share"
-                yesButton {
-                    pbReceipt.visibility = View.VISIBLE
-                    getBitmapFromView(layoutReceipt,this@ReceiptActivity){
+            selector("Share", arrayListOf("Other Apps")){dialogInterface, i ->
+                when(i){
+                    0 ->{
+                        getBitmapFromView(layoutReceipt.rootView,this@ReceiptActivity){bitmap,uri->
+                            shareImage(uri)
+                            endLoading()
+                            //                store(it,"${receiptFormat(receiptCode)}")
+                        }
 
-                        pbReceipt.visibility = View.GONE
-                        layoutReceipt.alpha = 1F
-                        //                store(it,"${receiptFormat(receiptCode)}")
                     }
-
+                    1->{
+                        getBitmapFromView(layoutReceipt.rootView,this@ReceiptActivity){bitmap,uri->
+                            shareImage(uri)
+                            endLoading()
+                        }
+                    }
                 }
-                noButton {
+            }
 
-                }
-            }.show()
+
         }
     }
 
@@ -135,6 +149,104 @@ class ReceiptActivity : AppCompatActivity(), MainView {
     }
 
     private fun fetchData(){
+        layoutReceiptCustomer.visibility = View.GONE
+        layoutReceiptNote.visibility = View.GONE
+
+        GlobalScope.launch {
+            presenter.retrieveCashier(boughtList.CREATED_BY.toString())
+        }
+        val gson = Gson()
+        val arrayCartType = object : TypeToken<MutableList<Cart>>() {}.type
+        purchasedItems = gson.fromJson(boughtList.DETAIL,arrayCartType)
+
+        adapter = CartRecyclerViewAdapter(this,purchasedItems){
+
+        }
+        rvReceipt.adapter = adapter
+        rvReceipt.layoutManager = LinearLayoutManager(this)
+
+        if (getMerchantImage(this) == "")
+            ivReceiptMerchantImage.visibility = View.GONE
+        else
+            Glide.with(this).load(getMerchantImage(this)).into(ivReceiptMerchantImage)
+        tvReceiptCashier.text = mAuth.currentUser?.displayName
+
+        val discount = boughtList.DISCOUNT!!
+        val tax = boughtList.TAX!!
+        val totalPrice = boughtList.TOTAL_PRICE!!
+        val totalOutstanding = boughtList.TOTAL_OUTSTANDING!!
+
+        val totalPayment = totalPrice - discount + tax
+
+        if (discount != 0 || tax != 0){
+            tvReceiptSubTotal.text = indonesiaCurrencyFormat().format(totalPrice)
+            tvReceiptSubTotalTitle.visibility = View.VISIBLE
+            tvReceiptSubTotal.visibility = View.VISIBLE
+        }
+        else{
+            tvReceiptSubTotalTitle.visibility = View.GONE
+            tvReceiptSubTotal.visibility = View.GONE
+        }
+
+        if (discount == 0){
+            tvReceiptDiscount.visibility = View.GONE
+            tvReceiptDiscountTitle.visibility = View.GONE
+        }
+        if (tax == 0){
+            tvReceiptTax.visibility = View.GONE
+            tvReceiptTaxTitle.visibility = View.GONE
+        }
+
+        tvReceiptDiscount.text = indonesiaCurrencyFormat().format(discount)
+        tvReceiptTax.text = indonesiaCurrencyFormat().format(tax)
+        tvReceiptTotal.text = indonesiaCurrencyFormat().format(totalPayment)
+//
+//        if (note != "")
+//            tvReceiptNote.text = "$note"
+//        else{
+//            layoutReceiptNote.visibility = View.GONE
+//        }
+//        if (transCode != 0){ // 0 berarti new receipt
+//            if (totalReceived >= totalPayment)
+//                tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalReceived-totalPayment)
+//            else{
+//                tvReceiptAmountReceivedTitle.text = "Pending:"
+//                tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalPayment-totalReceived)
+//            }
+//        }
+
+        if (totalOutstanding > 0){
+            tvReceiptAmountReceivedTitle.text = "Pending:"
+            tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalOutstanding)
+        }else{
+            var totalPaid = 0
+            for (data in paymentLists){
+                totalPaid += data.TOTAL_RECEIVED!!
+            }
+            tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalPaid - totalPayment)
+        }
+        tvReceiptTransCode.text = "Receipt: ${receiptFormat(receiptCode)}"
+        tvReceiptDate.text = parseDateFormatFull(boughtList.UPDATED_DATE.toString())
+        tvReceiptSincere.text = sincere
+    }
+
+
+    private fun fetchData2(){
+        layoutReceiptNote.visibility = View.VISIBLE
+
+        if (boughtList.CUST_CODE != "") {
+            layoutReceiptCustomer.visibility = View.VISIBLE
+            GlobalScope.launch {
+                presenter.retrieveCustomerByCode(boughtList.CUST_CODE.toString()) { success, customer ->
+                    if (success){
+                        tvReceiptCustomer.text = customer!!.NAME.toString()
+                        this@ReceiptActivity.customer = customer
+                    }else
+                        layoutReceiptCustomer.visibility = View.GONE
+                }
+            }
+        }
+
         GlobalScope.launch {
             presenter.retrieveCashier(boughtList.CREATED_BY.toString())
         }
@@ -210,6 +322,9 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         }
         tvReceiptTransCode.text = "Receipt: ${receiptFormat(receiptCode)}"
         tvReceiptDate.text = parseDateFormatFull(boughtList.UPDATED_DATE.toString())
+
+        tvReceiptNote.text = boughtList.NOTE
+        tvReceiptSincere.text = sincere
     }
 
     @Throws(IOException::class)
@@ -238,9 +353,24 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         return returnedBitmap
     }
 
-    fun getBitmapFromView(view: View, activity: Activity, callback: (Bitmap) -> Unit) {
+    private fun getScreenBitmap(v: View) : Bitmap {
+        v.isDrawingCacheEnabled = true;
+       v.measure(
+           View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+       v.layout(0, 0, v.measuredWidth, v.measuredHeight);
+
+       v.buildDrawingCache(true);
+       val b = Bitmap.createBitmap(v.drawingCache);
+       v.setDrawingCacheEnabled(false); // clear drawing cache
+       return b;
+    }
+
+    private fun getBitmapFromView(view: View, activity: Activity, callback: (Bitmap, Uri) -> Unit) {
         activity.window?.let { window ->
-            val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+            val height = if (purchasedItems.size > 4) 3000 else view.height
+
+            val bitmap = Bitmap.createBitmap(view.width, height, Bitmap.Config.ARGB_8888)
             val locationOfViewInWindow = IntArray(2)
             view.getLocationInWindow(locationOfViewInWindow)
             try {
@@ -250,7 +380,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                             locationOfViewInWindow[0],
                             locationOfViewInWindow[1],
                             locationOfViewInWindow[0] + view.width,
-                            locationOfViewInWindow[1] + view.height
+                            locationOfViewInWindow[1] + height
                         ), bitmap, { copyResult ->
                         if (copyResult == PixelCopy.SUCCESS) {
                             val photoURI: Uri = FileProvider.getUriForFile(
@@ -259,8 +389,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                                 store(bitmap,"${receiptFormat(receiptCode)}")
                             )
 
-                            shareImage(photoURI)
-                            callback(bitmap)
+                            callback(bitmap,photoURI)
                         }
                         // possible to handle other result codes ...
                     },
@@ -316,6 +445,32 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         }
     }
 
+    private fun shareImageToWhatsApp(uri: Uri,number: String?) {
+        var smsTo = Uri.parse("$number")
+        val intent = Intent()
+        intent.action = Intent.ACTION_SEND
+        intent.type = "image/*"
+        intent.putExtra("jid:", "$smsTo@s.whatsapp.net")
+        intent.putExtra(Intent.EXTRA_TEXT, "")
+        intent.setPackage("com.whatsapp")
+        intent.putExtra(Intent.EXTRA_STREAM, uri)
+        try {
+            startActivity(Intent.createChooser(intent, "Share Screenshot"))
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, "No App Available", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun loading(){
+        btnReceiptShare.visibility = View.GONE
+        //pbReceipt.visibility = View.VISIBLE
+    }
+
+    private fun endLoading(){
+        btnReceiptShare.visibility = View.VISIBLE
+        pbReceipt.visibility = View.GONE
+    }
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_TRANS_LIST_PAYMENT_SUCCESS.toString()){
             if (dataSnapshot.exists()){
@@ -338,7 +493,22 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 val item = dataSnapshot.getValue(com.chcreation.pointofsale.model.Transaction::class.java)
                 receiptCode = dataSnapshot.key!!.toInt()
                 this.boughtList = item!!
-                fetchData()
+                if (receiptTemplate == ECustomReceipt.RECEIPT1.toString())
+                    fetchData()
+                else if (receiptTemplate == ECustomReceipt.RECEIPT2.toString()){
+                    if (boughtList.CUST_CODE != "") {
+                        layoutReceiptCustomer.visibility = View.VISIBLE
+                        presenter.retrieveCustomerByCode(boughtList.CUST_CODE.toString()) { success, customer ->
+                            if (success){
+                                tvReceiptCustomer.text = customer!!.NAME.toString()
+                                this@ReceiptActivity.customer = customer
+                            }else
+                                layoutReceiptCustomer.visibility = View.GONE
+                        }
+                        fetchData2()
+                    }
+
+                }
             }
         }else if (response == EMessageResult.FETCH_USER_SUCCESS.toString()){
             if (dataSnapshot.exists()){

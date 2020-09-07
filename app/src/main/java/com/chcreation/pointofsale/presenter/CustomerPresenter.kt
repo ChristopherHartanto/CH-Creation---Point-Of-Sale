@@ -136,7 +136,7 @@ class CustomerPresenter(private val view: MainView,
         database.child(ETable.CUSTOMER.toString())
             .child(getMerchantCredential(context))
             .child(getMerchant(context))
-            .orderByValue()
+            .orderByChild(ECustomer.NAME.toString())
             .addListenerForSingleValueEvent(postListener)
     }
 

@@ -2,8 +2,11 @@ package com.chcreation.pointofsale
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
+import android.view.animation.TranslateAnimation
+import androidx.core.view.marginBottom
 import org.jetbrains.anko.startActivity
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -25,6 +28,8 @@ fun removeAllSharedPreference(context: Context){
     editor.putString(ESharedPreference.NO_TELP.toString(),"")
     editor.putString(ESharedPreference.USER_GROUP.toString(),"")
     editor.putString(ESharedPreference.ADDRESS.toString(),"")
+    editor.putString(ESharedPreference.CUSTOM_RECEIPT.toString(),ECustomReceipt.RECEIPT1.toString())
+    editor.putString(ESharedPreference.SINCERE.toString(),"Thank You")
     editor.apply()
 }
 
@@ -76,7 +81,45 @@ fun getMerchantNoTel(context: Context) : String{
     return sharedPreference.getString(ESharedPreference.NO_TELP.toString(),"").toString()
 }
 
+fun getMerchantSincere(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.SINCERE.toString(),"Thank You").toString()
+}
+
+fun getMerchantReceiptTemplate(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.CUSTOM_RECEIPT.toString(),ECustomReceipt.RECEIPT1.toString()).toString()
+}
+
 fun normalClickAnimation() : AlphaAnimation = AlphaAnimation(10F,0.5F)
+
+fun slideUp(view: View) {
+    view.setVisibility(View.VISIBLE)
+    val animate = TranslateAnimation(
+        0F,  // fromXDelta
+        0F,  // toXDelta
+        view.height.toFloat() + view.marginBottom.toFloat(),  // fromYDelta
+        0F
+    ) // toYDelta
+    animate.duration = 500
+    animate.fillAfter = true
+    view.startAnimation(animate)
+}
+
+// slide the view from its current position to below itself
+fun slideDown(view: View) {
+    val animate = TranslateAnimation(
+        0F,  // fromXDelta
+        0F,  // toXDelta
+        0F,  // fromYDelta
+        view.height.toFloat() + view.marginBottom.toFloat()
+    ) // toYDelta
+    animate.duration = 500
+    animate.fillAfter = true
+    view.startAnimation(animate)
+}
 
 fun dateFormat() : SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 

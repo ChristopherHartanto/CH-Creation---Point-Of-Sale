@@ -13,7 +13,12 @@ enum class ETable{
     ENQUIRY,
     STOCK_MOVEMENT,
     USER_ACCEPTANCE,
-    ABOUT
+    ABOUT,
+    SINCERE
+}
+
+enum class ESincere{
+    SINCERE
 }
 
 enum class EAbout{
@@ -229,7 +234,14 @@ enum class ESharedPreference{
     NO_TELP,
     ADDRESS,
     NAME,
-    EMAIL
+    EMAIL,
+    SINCERE,
+    CUSTOM_RECEIPT
+}
+
+enum class ECustomReceipt{
+    RECEIPT1,
+    RECEIPT2
 }
 
 enum class EMonth(var value:Int){

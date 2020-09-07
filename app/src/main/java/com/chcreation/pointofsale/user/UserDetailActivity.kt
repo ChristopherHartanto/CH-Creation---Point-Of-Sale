@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Gravity
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -53,6 +54,7 @@ class UserDetailActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_user_detail)
 
         supportActionBar?.title = userName
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -99,6 +101,14 @@ class UserDetailActivity : AppCompatActivity(), MainView {
         val index = userGroupItems.indexOf(user.USER_GROUP)
         spUserDetail.setSelection(index)
         selectedUserGroup = index
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onStart() {

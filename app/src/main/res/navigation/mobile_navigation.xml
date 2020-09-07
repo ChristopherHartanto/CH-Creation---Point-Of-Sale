@@ -52,6 +52,16 @@
     </fragment>
 
     <fragment
+        android:id="@+id/nav_custom_receipt"
+        android:name="com.chcreation.pointofsale.custom_receipt.CustomReceiptFragment"
+        android:label="Receipt Template"
+        tools:layout="@layout/fragment_custom_receipt" >
+        <action
+            android:id="@+id/action_nav_slideshow_to_nav_home"
+            app:destination="@id/nav_check_out" />
+    </fragment>
+
+    <fragment
         android:id="@+id/nav_user_list"
         android:name="com.chcreation.pointofsale.user.UserListFragment"
         android:label="User List"

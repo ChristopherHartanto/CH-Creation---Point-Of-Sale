@@ -54,11 +54,14 @@ class CheckOutActivity : AppCompatActivity(), MainView {
     private lateinit var mDatabase : DatabaseReference
     private lateinit var presenter: CheckOutPresenter
     private var totalPayment = 0
+    private var custName = "-"
     private var existCheckOutNote = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_check_out)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -145,13 +148,19 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                 }
                 true
             }
+            android.R.id.home->{
+                finish()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun newCheckOutSetUp(){
-        if (selectCustomerName != "")
+        if (selectCustomerName != ""){
+            custName = selectCustomerName
             supportActionBar?.title = selectCustomerName
+        }
         else
             supportActionBar?.title = "No Customer"
 
@@ -164,8 +173,10 @@ class CheckOutActivity : AppCompatActivity(), MainView {
         if (paymentMethod == "")
             toast("Please Select Payment Method !")
         else{
-
-            totalReceived = etCheckOutAmountReceived.text.toString().toInt()
+            if (etCheckOutAmountReceived.text.toString() != "")
+                totalReceived = etCheckOutAmountReceived.text.toString().toInt()
+            else if (etCheckOutAmountReceived.text.toString() == "")
+                totalReceived = 0
 
             if (totalPayment - totalReceived > 0)
                 totalOutStanding = totalPayment - totalReceived
@@ -174,7 +185,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             val orderDetail = gson.toJson(cartItems)
             var statusCode = if (totalOutStanding > 0) EStatusCode.PENDING else EStatusCode.DONE
 
-            alert ("Continue to Check Out?"){
+            alert ("Payment Received: ${indonesiaCurrencyFormat().format(totalReceived)}\nCustomer: $custName"){
                 title = "Confirmation"
 
                 yesButton {
@@ -202,7 +213,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
     }
 
     private fun existCheckOutSetUp(){
-
+        custName = customerItems[transPosition]
         supportActionBar?.title = customerItems[transPosition]
 
         presenter.retrievePendingPayment(transCodeItems[transPosition])
@@ -212,8 +223,10 @@ class CheckOutActivity : AppCompatActivity(), MainView {
         if (paymentMethod == "")
             toast("Please Select Payment Method !")
         else{
-
-            totalReceived = etCheckOutAmountReceived.text.toString().toInt()
+            if (etCheckOutAmountReceived.text.toString() != "")
+                totalReceived = etCheckOutAmountReceived.text.toString().toInt()
+            else if (etCheckOutAmountReceived.text.toString() == "")
+                totalReceived = 0
 
             totalOutStanding = postTotalPayment - totalReceived
             if (totalOutStanding < 0)
@@ -222,7 +235,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             val gson = Gson()
             val orderDetail = gson.toJson(cartItems)
 
-            alert ("Continue to Check Out?"){
+            alert ("Payment Received: ${indonesiaCurrencyFormat().format(totalReceived)}\nCustomer: $custName"){
                 title = "Confirmation"
 
                 yesButton {

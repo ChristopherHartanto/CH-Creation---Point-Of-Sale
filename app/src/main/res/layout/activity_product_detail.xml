@@ -14,12 +14,21 @@
         android:layout_weight="4"
         android:id="@+id/layoutProductDetail"
         android:orientation="vertical">
-        <ImageView
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:src="@drawable/default_image"
-            android:id="@+id/ivProductDetailImage"/>
+            android:layout_weight="1">
+
+            <ProgressBar
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:id="@+id/pbProductDetail"/>
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/ivProductDetailImage"/>
+        </FrameLayout>
 
         <TextView
             android:layout_width="match_parent"

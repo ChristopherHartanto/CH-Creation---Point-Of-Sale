@@ -17,6 +17,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -84,7 +85,8 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_product)
 
-        supportActionBar!!.title = "New Product"
+        supportActionBar!!.title = "Set Up Product"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -102,6 +104,14 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         spProduct.onItemSelectedListener = this
         spProduct.gravity = Gravity.CENTER
 
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onStart() {

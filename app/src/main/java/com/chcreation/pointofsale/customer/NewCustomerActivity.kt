@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
+import android.view.MenuItem
 import android.widget.ArrayAdapter
 import androidx.core.content.FileProvider
 import androidx.core.widget.doOnTextChanged
@@ -56,6 +57,7 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_new_customer)
 
         supportActionBar!!.title = "New Customer"
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -91,6 +93,14 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
         layoutCustomerDefaultImage.onClick {
             toast("You Can Add Picture After Save this Data")
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     @Throws(IOException::class)

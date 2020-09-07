@@ -25,6 +25,10 @@
             android:title="@string/transaction" />
 
         <item
+            android:id="@+id/nav_custom_receipt"
+            android:title="@string/custom_receipt" />
+
+        <item
             android:id="@+id/nav_analytics"
             android:title="Analytic" />
 

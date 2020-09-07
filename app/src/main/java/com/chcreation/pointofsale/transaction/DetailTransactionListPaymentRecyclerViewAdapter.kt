@@ -50,9 +50,9 @@ class DetailTransactionListPaymentRecyclerViewAdapter(private val context: Conte
                 paymentMethod.imageResource = R.drawable.card
 
             if (item.NOTE == "")
-                note.text = "N : ${item.PAYMENT_METHOD}"
+                note.text = "${item.PAYMENT_METHOD}"
             else
-                note.text = "N : ${item.NOTE}"
+                note.text = "${item.NOTE}"
 
             itemView.onClick {
                 listener(position)

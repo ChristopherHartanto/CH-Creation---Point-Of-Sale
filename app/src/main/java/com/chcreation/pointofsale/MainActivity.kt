@@ -1,6 +1,8 @@
 package com.chcreation.pointofsale
 
 import android.app.Activity
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
@@ -49,7 +51,7 @@ class MainActivity : AppCompatActivity(), MainView {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private var doubleBackToExitPressedOnce = false
-
+    private lateinit var sharedPreference: SharedPreferences
     private lateinit var presenter: Homepresenter
     private lateinit var merchantPresenter: MerchantPresenter
     private lateinit var mAuth: FirebaseAuth
@@ -72,12 +74,12 @@ class MainActivity : AppCompatActivity(), MainView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
     }
 
     override fun onStart() {
         super.onStart()
 
+        sharedPreference =  getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
@@ -88,13 +90,20 @@ class MainActivity : AppCompatActivity(), MainView {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_check_out
+                R.id.nav_check_out,R.id.nav_manage_product,R.id.nav_catalog,R.id.nav_customer,
+                R.id.nav_transaction,R.id.nav_custom_receipt,R.id.nav_analytics,R.id.nav_user_list,R.id.nav_about
             ), drawerLayout
         )
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = Homepresenter(this,mAuth,mDatabase,this)
         merchantPresenter = MerchantPresenter(this,mAuth,mDatabase,this)
+
+        presenter.retrieveSincere(){
+            val editor = sharedPreference.edit()
+            editor.putString(ESharedPreference.SINCERE.toString(),it.SINCERE)
+            editor.apply()
+        }
         GlobalScope.launch {
             //presenter.retrieveUserLists()
             merchantPresenter.retrieveInvitation(encodeEmail(getEmail(this@MainActivity)))

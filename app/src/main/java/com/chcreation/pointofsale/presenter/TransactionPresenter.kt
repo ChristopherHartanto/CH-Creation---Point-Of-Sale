@@ -2,6 +2,7 @@ package com.chcreation.pointofsale.presenter
 
 import android.content.Context
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
@@ -131,6 +132,40 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
             database.child(ETable.CUSTOMER.toString())
                 .child(getMerchantCredential(context))
                 .child(getMerchant(context))
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun retrieveCustomerByCode(custCode: String,callBack: (success: Boolean,customer: Customer?) -> Unit){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        for (data in p0.children){
+                            val item = data.getValue(Customer::class.java)
+                            if (item != null){
+                                callBack(true,item)
+                            }else
+                                callBack(false,null)
+                        }
+                    }else{
+                        callBack(false,null)
+                    }
+                }
+
+            }
+            database.child(ETable.CUSTOMER.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
+                .orderByChild(ECustomer.CODE.toString())
+                .equalTo(custCode)
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())

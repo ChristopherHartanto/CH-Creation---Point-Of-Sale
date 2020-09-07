@@ -2,6 +2,7 @@ package com.chcreation.pointofsale.product
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -49,6 +50,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
         currentCat = intent.extras!!.getString("category","")
 
         supportActionBar?.title = currentCat
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         adapter = ProductListRecyclerViewAdapter(
             this,
@@ -67,6 +69,14 @@ class ListProductActivity : AppCompatActivity(), MainView {
         GlobalScope.launch {
             presenter.retrieveCategories()
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     private fun fetchProductByCat(){

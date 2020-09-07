@@ -32,10 +32,9 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:text="P"
-                android:textSize="28sp"
+                android:textSize="24sp"
                 android:gravity="center"
-                android:textStyle="bold"
-                android:textColor="@color/colorBlack"
+                android:textColor="@color/colorWhite"
                 android:id="@+id/tvRowProductFirstName"/>
         </FrameLayout>
 

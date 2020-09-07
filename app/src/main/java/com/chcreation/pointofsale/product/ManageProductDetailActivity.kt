@@ -50,6 +50,7 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
         presenter = ProductPresenter(this,mAuth,mDatabase,this)
 
         supportActionBar?.title = "Product Detail"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         prodCode = intent.extras!!.getString(EProduct.PROD_CODE.toString(),"")
     }
 
@@ -112,6 +113,10 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
                         }
                     }.show()
                 }
+                true
+            }
+            android.R.id.home->{
+                finish()
                 true
             }
             else -> super.onOptionsItemSelected(item)

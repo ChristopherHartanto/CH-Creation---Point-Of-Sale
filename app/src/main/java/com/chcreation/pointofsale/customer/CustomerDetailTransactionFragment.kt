@@ -63,7 +63,7 @@ class CustomerDetailTransactionFragment : Fragment(), MainView {
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
-        if (isVisible && isResumed){
+        if (isVisible){
             if (response == EMessageResult.FETCH_CUSTOMER_TRANSACTION_SUCCESS.toString()){
                 if (dataSnapshot.exists()){
                     enquiryItems.clear()

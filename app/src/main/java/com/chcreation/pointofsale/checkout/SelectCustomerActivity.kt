@@ -3,6 +3,7 @@ package com.chcreation.pointofsale.checkout
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -45,6 +46,7 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_select_customer)
 
         supportActionBar!!.title = "Select Customer"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -70,6 +72,14 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
             startActivity<NewCustomerActivity>()
             finish()
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

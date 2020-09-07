@@ -3,6 +3,7 @@ package com.chcreation.pointofsale.user
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Gravity
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -37,6 +38,7 @@ class AddUserActivity : AppCompatActivity(), MainView, AdapterView.OnItemSelecte
         setContentView(R.layout.activity_add_user)
 
         supportActionBar?.title = "Add User"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -71,6 +73,14 @@ class AddUserActivity : AppCompatActivity(), MainView, AdapterView.OnItemSelecte
                 }.show()
             }
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {

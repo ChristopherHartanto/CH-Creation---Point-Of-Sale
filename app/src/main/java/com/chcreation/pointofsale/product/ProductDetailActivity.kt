@@ -16,6 +16,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.GlideDrawable
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.DiscountActivity
 import com.chcreation.pointofsale.checkout.NoteActivity
@@ -92,8 +95,33 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
     }
 
     private fun fetchData(){
-        if (product.IMAGE.toString() != "")
-            Glide.with(this).load(product.IMAGE.toString()).into(ivProductDetailImage)
+        if (product.IMAGE.toString() != ""){
+            Glide.with(this).load(product.IMAGE.toString()).listener(object :
+                RequestListener<String, GlideDrawable> {
+                override fun onException(
+                    e: java.lang.Exception?,
+                    model: String?,
+                    target: Target<GlideDrawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    pbProductDetail.visibility = View.GONE
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: GlideDrawable?,
+                    model: String?,
+                    target: Target<GlideDrawable>?,
+                    isFromMemoryCache: Boolean,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    pbProductDetail.visibility = View.GONE
+                    return false
+                }
+
+            }).into(ivProductDetailImage)
+        }
+
 
         tvProductDetailName.text = product.NAME.toString()
         tvProductDetailDesc.text = product.DESC.toString()

@@ -12,6 +12,7 @@ import android.view.animation.AlphaAnimation
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CartActivity
 import com.chcreation.pointofsale.model.Cart
@@ -50,6 +51,8 @@ class ManageProductFragment : Fragment() , MainView {
     private var tempProductItems : ArrayList<Product> = arrayListOf()
     private var currentCat = 0
     private var searchFilter = ""
+    private var isSlideUp = true
+    private var isSlideDown = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -81,6 +84,25 @@ class ManageProductFragment : Fragment() , MainView {
 
         rvManageProduct.layoutManager = LinearLayoutManager(ctx)
         rvManageProduct.adapter = adapter
+
+        rvManageProduct.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (dy > 0){
+                    if (isSlideDown){
+                        slideDown(fbManageProduct)
+                        isSlideDown = false
+                    }
+                    isSlideUp = true
+                }else{
+                    if (isSlideUp)
+                        slideUp(fbManageProduct)
+                    isSlideUp = false
+                    isSlideDown = true
+                }
+            }
+
+        })
 
         tlManageProduct.tabMode = TabLayout.MODE_FIXED
 

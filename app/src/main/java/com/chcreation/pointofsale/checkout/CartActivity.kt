@@ -3,6 +3,7 @@ package com.chcreation.pointofsale.checkout
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.R
@@ -34,6 +35,7 @@ class CartActivity : AppCompatActivity() {
         setContentView(R.layout.activity_cart)
 
         supportActionBar!!.title = "Cart"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -104,6 +106,13 @@ class CartActivity : AppCompatActivity() {
             tvCartNote.text = "Note: ${note}"
         btnCart.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPayment)}"
 
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

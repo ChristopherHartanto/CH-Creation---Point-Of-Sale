@@ -11,8 +11,9 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
-    <uses-feature android:name="android.hardware.camera.autoFocus"
-        android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.camera.autoFocus"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -22,7 +23,8 @@
         android:roundIcon="@drawable/icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".analytic.AnalyticFilterActivity"></activity>
+        <activity android:name=".custom_receipt.CustomReceiptActivity"></activity>
+        <activity android:name=".analytic.AnalyticFilterActivity" />
         <activity android:name=".analytic.AnalyticActivity" />
         <activity android:name=".product.InstallmentPlanActivity" />
         <activity android:name=".user.AddUserActivity" />

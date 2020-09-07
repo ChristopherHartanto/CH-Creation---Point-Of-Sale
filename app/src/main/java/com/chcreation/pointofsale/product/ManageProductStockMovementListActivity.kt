@@ -2,6 +2,7 @@ package com.chcreation.pointofsale.product
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.EStatusCode
@@ -43,6 +44,7 @@ class ManageProductStockMovementListActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_manage_product_stock_movement_list)
 
         supportActionBar?.title = "Stock Movement"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -57,6 +59,14 @@ class ManageProductStockMovementListActivity : AppCompatActivity(), MainView {
         linearLayoutManager.reverseLayout = true
         linearLayoutManager.stackFromEnd = true
         rvManageProductStockMovementList.layoutManager = linearLayoutManager
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onStart() {

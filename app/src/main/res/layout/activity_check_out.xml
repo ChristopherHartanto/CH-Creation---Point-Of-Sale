@@ -29,13 +29,6 @@
         android:orientation="vertical"
         android:id="@+id/layoutCheckOutProgress">
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/pbCheckOut"
-            android:visibility="gone"
-            android:layout_gravity="center"/>
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -165,8 +158,14 @@
             </LinearLayout>
 
         </LinearLayout>
-    </FrameLayout>
 
+        <ProgressBar
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/pbCheckOut"
+            android:visibility="gone"
+            android:layout_gravity="center"/>
+    </FrameLayout>
 
 
 </LinearLayout>

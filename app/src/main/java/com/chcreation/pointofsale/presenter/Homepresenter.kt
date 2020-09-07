@@ -3,6 +3,7 @@ package com.chcreation.pointofsale.presenter
 import android.content.Context
 import android.util.Log
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.custom_receipt.Sincere
 import com.chcreation.pointofsale.model.About
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.model.User
@@ -161,6 +162,55 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
 
             }
             database.child(ETable.ABOUT.toString())
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e:java.lang.Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun saveSincere(sincere:String,callBack:(success:Boolean) -> Unit){
+        try{
+
+            database.child(ETable.SINCERE.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
+                .child(ESincere.SINCERE.toString())
+                .setValue(sincere)
+                .addOnSuccessListener {
+                    callBack(true)
+                }
+                .addOnFailureListener {
+                    callBack(false)
+                }
+        }catch (e:java.lang.Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun retrieveSincere(callBack:(sincere:Sincere) -> Unit){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        val item = p0.getValue(Sincere::class.java)
+
+                        if (item != null) {
+                            callBack(item)
+                        }
+                    }
+
+                }
+
+            }
+            database.child(ETable.SINCERE.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchant(context))
                 .addListenerForSingleValueEvent(postListener)
         }catch (e:java.lang.Exception){
             showError(context,e.message.toString())

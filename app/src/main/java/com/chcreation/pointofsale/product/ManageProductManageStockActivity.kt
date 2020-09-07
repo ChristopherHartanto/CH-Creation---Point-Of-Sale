@@ -2,6 +2,7 @@ package com.chcreation.pointofsale.product
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.StockMovement
@@ -35,6 +36,7 @@ class ManageProductManageStockActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_manage_product_manage_stock)
 
         supportActionBar?.title = product.NAME.toString()
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -67,6 +69,14 @@ class ManageProductManageStockActivity : AppCompatActivity(), MainView {
             }
             btnManageStockMissingStock.isEnabled = true
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     private fun showAlert(){
