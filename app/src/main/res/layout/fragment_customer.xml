@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".customer.CustomerFragment"
-    android:padding="10dp">
+    android:padding="5dp">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
@@ -21,7 +21,7 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom |end"
+        android:layout_gravity="bottom|end"
         android:layout_margin="30dp"
         android:src="@drawable/plus"
         android:id="@+id/fbCustomer"/>

@@ -236,6 +236,10 @@ enum class ESharedPreference{
     NAME,
     EMAIL,
     SINCERE,
+    CUSTOMER_NAME,
+    CUSTOMER_NO_TEL,
+    CUSTOMER_ADDRESS,
+    RECEIPT_MERCHANT_ICON,
     CUSTOM_RECEIPT
 }
 

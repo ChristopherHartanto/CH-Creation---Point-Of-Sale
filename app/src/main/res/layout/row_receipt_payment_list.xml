@@ -10,8 +10,8 @@
         android:layout_height="wrap_content"
         android:gravity="end"
         android:textColor="@color/colorBlack"
-        android:layout_marginBottom="5dp"
-        android:textSize="16sp"
+        android:layout_marginBottom="3dp"
+        android:textSize="14sp"
         android:id="@+id/tvRowReceiptPaymentListPrice"/>
 
 </LinearLayout>

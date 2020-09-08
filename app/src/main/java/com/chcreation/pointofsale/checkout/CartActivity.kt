@@ -41,7 +41,20 @@ class CartActivity : AppCompatActivity() {
         mDatabase = FirebaseDatabase.getInstance().reference
 
         adapter = CartRecyclerViewAdapter(this, cartItems){
+            alert ("Remove ${cartItems[it].NAME} ${cartItems[it].Qty} Qty?"){
+                title = "Remove"
+                yesButton {a->
+                    cartItems.removeAt(it)
+                    totalPrice = sumPrice()
+                    totalQty = countQty()
+                    sumPriceDetail()
 
+                    if (cartItems.size == 0)
+                        finish()
+                    adapter.notifyDataSetChanged()
+                }
+                noButton {  }
+            }.show()
         }
         rvCart.adapter = adapter
         rvCart.layoutManager = LinearLayoutManager(this)
@@ -91,20 +104,7 @@ class CartActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        val totalPayment = totalPrice - discount + tax
-
-        if (discount != 0 || tax != 0){
-            tvCartDiscount.text = "Discount : ${indonesiaCurrencyFormat().format(discount)}"
-            tvCartTax.text = "Tax: ${indonesiaCurrencyFormat().format(tax)}"
-
-            tvCartSubTotal.text ="Sub Total : ${indonesiaCurrencyFormat().format(totalPrice)}"
-            tvCartSubTotal.visibility = View.VISIBLE
-        }
-
-        tvCartTotal.text = "Total : ${indonesiaCurrencyFormat().format(totalPayment)}"
-        if (note != "")
-            tvCartNote.text = "Note: ${note}"
-        btnCart.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPayment)}"
+        sumPriceDetail()
 
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -131,4 +131,38 @@ class CartActivity : AppCompatActivity() {
         super.onBackPressed()
     }
 
+
+    private fun sumPrice() : Int{
+        var total = 0
+
+        for (data in cartItems){
+            total += (data.PRICE!! * data.Qty!!)
+        }
+        return total
+    }
+
+    private fun sumPriceDetail(){
+
+        val totalPayment = totalPrice - discount + tax
+        if (discount != 0 || tax != 0){
+            tvCartDiscount.text = "Discount : ${indonesiaCurrencyFormat().format(discount)}"
+            tvCartTax.text = "Tax: ${indonesiaCurrencyFormat().format(tax)}"
+
+            tvCartSubTotal.text ="Sub Total : ${indonesiaCurrencyFormat().format(totalPrice)}"
+            tvCartSubTotal.visibility = View.VISIBLE
+        }
+
+        tvCartTotal.text = "Total : ${indonesiaCurrencyFormat().format(totalPayment)}"
+        if (note != "")
+            tvCartNote.text = "Note: ${note}"
+        btnCart.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPayment)}"
+    }
+
+    private fun countQty() : Int{
+        var total = 0
+        for (data in cartItems){
+            total += data.Qty!!
+        }
+        return total
+    }
 }

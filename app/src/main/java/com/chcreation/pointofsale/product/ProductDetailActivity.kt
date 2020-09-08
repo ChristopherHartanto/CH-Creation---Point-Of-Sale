@@ -120,6 +120,9 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
                 }
 
             }).into(ivProductDetailImage)
+        }else{
+            ivProductDetailImage.imageResource = R.drawable.default_image
+            pbProductDetail.visibility = View.GONE
         }
 
 

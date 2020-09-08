@@ -11,10 +11,11 @@ import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.normalClickAnimation
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
-class CartRecyclerViewAdapter(private val context: Context, private val items: List<Cart>,private val listener: (product: Product) -> Unit)
+class CartRecyclerViewAdapter(private val context: Context, private val items: List<Cart>,private val listener: (position: Int) -> Unit)
     : RecyclerView.Adapter<CartRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -39,7 +40,7 @@ class CartRecyclerViewAdapter(private val context: Context, private val items: L
         private val price = view.findViewById<TextView>(R.id.tvRowCartPrice)
         private val totalPrice = view.findViewById<TextView>(R.id.tvRowCartTotalPrice)
 
-        fun bindItem(cart: Cart, listener: (listenerProduct: Product) -> Unit, position: Int) {
+        fun bindItem(cart: Cart, listener: (position: Int) -> Unit, position: Int) {
 
             name.text = cart.NAME
             price.text = indonesiaCurrencyFormat().format(cart.PRICE)
@@ -47,7 +48,8 @@ class CartRecyclerViewAdapter(private val context: Context, private val items: L
             qty.text = "${cart.Qty}x"
 
             itemView.onClick {
-
+                itemView.startAnimation(normalClickAnimation())
+                listener(position)
             }
         }
 

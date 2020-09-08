@@ -8,17 +8,23 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.customer.CustomerDetailActivity
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.model.Transaction
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.imageResource
+import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.textColorResource
 import java.text.SimpleDateFormat
 
-class TransactionRecyclerViewAdapter(private val context: Context, private val items: MutableList<Transaction>,
+class TransactionRecyclerViewAdapter(private val context: Context,
+                                     private val fragmentActivity: FragmentActivity,
+                                     private val items: MutableList<Transaction>,
                                      private val customerList: List<String>,
                                      private val transCodeList: List<Int>,
                                      private val listener: (position: Int) -> Unit)
@@ -30,7 +36,7 @@ class TransactionRecyclerViewAdapter(private val context: Context, private val i
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_transaction, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(items[position],transCodeList[position],customerList[position],listener, position)
+        holder.bindItem(fragmentActivity,items[position],transCodeList[position],customerList[position],listener, position)
     }
 
     override fun getItemCount(): Int = items.size
@@ -46,7 +52,7 @@ class TransactionRecyclerViewAdapter(private val context: Context, private val i
         private val ivCustomer = view.findViewById<ImageView>(R.id.ivRowTransactionCustomer)
         private val layoutCustomer = view.findViewById<LinearLayout>(R.id.layoutRowTransactionCustomer)
 
-        fun bindItem(item: Transaction, transCode: Int, custName: String, listener: (position: Int) -> Unit, position: Int) {
+        fun bindItem(fragmentActivity: FragmentActivity,item: Transaction, transCode: Int, custName: String, listener: (position: Int) -> Unit, position: Int) {
             code.text = receiptFormat(transCode)
             if (custName != "")
                 customer.text = custName
@@ -91,6 +97,12 @@ class TransactionRecyclerViewAdapter(private val context: Context, private val i
             itemView.onClick {
                 itemView.startAnimation(normalClickAnimation())
                 listener(position)
+            }
+
+            customer.onClick {
+                customer.startAnimation(normalClickAnimation())
+                fragmentActivity.startActivity(fragmentActivity.intentFor<CustomerDetailActivity>(ECustomer.CODE.toString()
+                        to item.CUST_CODE))
             }
         }
 

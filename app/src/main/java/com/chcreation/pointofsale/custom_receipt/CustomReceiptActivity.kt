@@ -5,10 +5,8 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
-import com.chcreation.pointofsale.ECustomReceipt
-import com.chcreation.pointofsale.ESharedPreference
-import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.normalClickAnimation
+import android.view.View
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
@@ -44,11 +42,21 @@ class CustomReceiptActivity : AppCompatActivity(), MainView {
 
         template = intent.extras!!.getString(ESharedPreference.CUSTOM_RECEIPT.toString()).toString()
 
-        if (template == ECustomReceipt.RECEIPT1.toString())
+        if (template == ECustomReceipt.RECEIPT1.toString()){
+            cvCustomReceiptCustInfo.visibility = View.GONE
             ivCustomReceiptImage.imageResource = R.drawable.receipt1
-        else if (template == ECustomReceipt.RECEIPT2.toString())
+            supportActionBar?.title = "Template 1"
+        }
+        else if (template == ECustomReceipt.RECEIPT2.toString()){
+            cvCustomReceiptCustInfo.visibility = View.VISIBLE
             ivCustomReceiptImage.imageResource = R.drawable.receipt2
+            supportActionBar?.title = "Template 2"
+        }
 
+        cbCustomReceiptCustAddress.isChecked = getMerchantReceiptCustAddress(this)
+        cbCustomReceiptCustName.isChecked = getMerchantReceiptCustName(this)
+        cbCustomReceiptCustNoTel.isChecked = getMerchantReceiptCustNoTel(this)
+        cbCustomReceiptShowMerchantImage.isChecked = getMerchantReceiptImage(this)
 
         btnCustomReceiptSave.onClick {
             btnCustomReceiptSave.startAnimation(normalClickAnimation())
@@ -62,8 +70,12 @@ class CustomReceiptActivity : AppCompatActivity(), MainView {
                         val editor = sharedPreference.edit()
                         editor.putString(ESharedPreference.CUSTOM_RECEIPT.toString(),template)
                         editor.putString(ESharedPreference.SINCERE.toString(),sincere)
+                        editor.putBoolean(ESharedPreference.CUSTOMER_NAME.toString(),cbCustomReceiptCustName.isChecked)
+                        editor.putBoolean(ESharedPreference.CUSTOMER_ADDRESS.toString(),cbCustomReceiptCustAddress.isChecked)
+                        editor.putBoolean(ESharedPreference.CUSTOMER_NO_TEL.toString(),cbCustomReceiptCustNoTel.isChecked)
+                        editor.putBoolean(ESharedPreference.RECEIPT_MERCHANT_ICON.toString(),cbCustomReceiptShowMerchantImage.isChecked)
                         editor.apply()
-                        toast("Success")
+                        toast("Save Success")
                         finish()
                     }else
                         toast("Failed to Save")

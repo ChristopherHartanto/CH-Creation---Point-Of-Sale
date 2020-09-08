@@ -30,6 +30,10 @@ fun removeAllSharedPreference(context: Context){
     editor.putString(ESharedPreference.ADDRESS.toString(),"")
     editor.putString(ESharedPreference.CUSTOM_RECEIPT.toString(),ECustomReceipt.RECEIPT1.toString())
     editor.putString(ESharedPreference.SINCERE.toString(),"Thank You")
+    editor.putBoolean(ESharedPreference.CUSTOMER_ADDRESS.toString(),false)
+    editor.putBoolean(ESharedPreference.CUSTOMER_NO_TEL.toString(),false)
+    editor.putBoolean(ESharedPreference.CUSTOMER_NAME.toString(),false)
+    editor.putBoolean(ESharedPreference.RECEIPT_MERCHANT_ICON.toString(),false)
     editor.apply()
 }
 
@@ -85,6 +89,30 @@ fun getMerchantSincere(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
     return sharedPreference.getString(ESharedPreference.SINCERE.toString(),"Thank You").toString()
+}
+
+fun getMerchantReceiptCustName(context: Context) : Boolean{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getBoolean(ESharedPreference.CUSTOMER_NAME.toString(),false)
+}
+
+fun getMerchantReceiptCustNoTel(context: Context) : Boolean{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getBoolean(ESharedPreference.CUSTOMER_NO_TEL.toString(),false)
+}
+
+fun getMerchantReceiptCustAddress(context: Context) : Boolean{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getBoolean(ESharedPreference.CUSTOMER_ADDRESS.toString(),false)
+}
+
+fun getMerchantReceiptImage(context: Context) : Boolean{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getBoolean(ESharedPreference.RECEIPT_MERCHANT_ICON.toString(),false)
 }
 
 fun getMerchantReceiptTemplate(context: Context) : String{
@@ -176,9 +204,10 @@ fun parseTimeFormat(date: String) : String {
 }
 
 fun indonesiaCurrencyFormat() : NumberFormat{  //  ex : indoCurrencyFormat().format(10000)
-    val format = NumberFormat.getCurrencyInstance()
-    format.maximumFractionDigits = 0
-    format.currency = Currency.getInstance("IDR")
+    val locale = Locale("in","ID")
+    val format = NumberFormat.getCurrencyInstance(locale)
+//    format.maximumFractionDigits = 0
+//    format.currency = Currency.getInstance("IDR")
     return  format
 }
 

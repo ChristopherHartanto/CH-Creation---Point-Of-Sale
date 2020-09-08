@@ -21,6 +21,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.view.marginTop
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.*
@@ -149,7 +150,15 @@ class ReceiptActivity : AppCompatActivity(), MainView {
     }
 
     private fun fetchData(){
+        if (getMerchantReceiptImage(this))
+            ivReceiptMerchantImage.visibility = View.VISIBLE
+        else
+            ivReceiptMerchantImage.visibility = View.GONE
+
         layoutReceiptCustomer.visibility = View.GONE
+        layoutReceiptCustomerAddress.visibility = View.GONE
+        layoutReceiptCustomerNoTel.visibility = View.GONE
+
         layoutReceiptNote.visibility = View.GONE
 
         GlobalScope.launch {
@@ -232,19 +241,41 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
 
     private fun fetchData2(){
+        if (getMerchantReceiptImage(this))
+            ivReceiptMerchantImage.visibility = View.VISIBLE
+        else
+            ivReceiptMerchantImage.visibility = View.GONE
+
         layoutReceiptNote.visibility = View.VISIBLE
 
         if (boughtList.CUST_CODE != "") {
-            layoutReceiptCustomer.visibility = View.VISIBLE
-            GlobalScope.launch {
-                presenter.retrieveCustomerByCode(boughtList.CUST_CODE.toString()) { success, customer ->
-                    if (success){
-                        tvReceiptCustomer.text = customer!!.NAME.toString()
-                        this@ReceiptActivity.customer = customer
-                    }else
-                        layoutReceiptCustomer.visibility = View.GONE
-                }
-            }
+            if (getMerchantReceiptCustName(this))
+                layoutReceiptCustomer.visibility = View.VISIBLE
+            else
+                layoutReceiptCustomer.visibility = View.GONE
+
+            if (getMerchantReceiptCustAddress(this))
+                layoutReceiptCustomerAddress.visibility = View.VISIBLE
+            else
+                layoutReceiptCustomerAddress.visibility = View.GONE
+
+            if (getMerchantReceiptCustNoTel(this))
+                layoutReceiptCustomerNoTel.visibility = View.VISIBLE
+            else
+                layoutReceiptCustomerNoTel.visibility = View.GONE
+
+            tvReceiptCustomer.text = customer.NAME.toString()
+            tvReceiptCustomerAddress.text = customer.ADDRESS.toString()
+            tvReceiptCustomerNoTel.text = customer.PHONE.toString()
+//            GlobalScope.launch {
+//                presenter.retrieveCustomerByCode(boughtList.CUST_CODE.toString()) { success, customer ->
+//                    if (success){
+//                        tvReceiptCustomer.text = customer!!.NAME.toString()
+//                        this@ReceiptActivity.customer = customer
+//                    }else
+//                        layoutReceiptCustomer.visibility = View.GONE
+//                }
+//            }
         }
 
         GlobalScope.launch {
@@ -369,8 +400,13 @@ class ReceiptActivity : AppCompatActivity(), MainView {
     private fun getBitmapFromView(view: View, activity: Activity, callback: (Bitmap, Uri) -> Unit) {
         activity.window?.let { window ->
             val height = if (purchasedItems.size > 4) 3000 else view.height
+            val width = view.measuredWidth
 
-            val bitmap = Bitmap.createBitmap(view.width, height, Bitmap.Config.ARGB_8888)
+            view.rootView.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+
+            val bitmap = Bitmap.createBitmap(width, view.measuredHeight, Bitmap.Config.ARGB_8888)
             val locationOfViewInWindow = IntArray(2)
             view.getLocationInWindow(locationOfViewInWindow)
             try {
@@ -379,8 +415,8 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                         Rect(
                             locationOfViewInWindow[0],
                             locationOfViewInWindow[1],
-                            locationOfViewInWindow[0] + view.width,
-                            locationOfViewInWindow[1] + height
+                            locationOfViewInWindow[0] + width,
+                            locationOfViewInWindow[1] + view.measuredHeight
                         ), bitmap, { copyResult ->
                         if (copyResult == PixelCopy.SUCCESS) {
                             val photoURI: Uri = FileProvider.getUriForFile(
@@ -394,14 +430,17 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                         // possible to handle other result codes ...
                     },
                         Handler())
-                }else
+                }else{
+                    endLoading()
                     toast("Screenshot is not support for this device")
+                }
             } catch (e: IllegalArgumentException) {
                 // PixelCopy may throw IllegalArgumentException, make sure to handle it
                 toast(e.message.toString())
+                endLoading()
                 e.printStackTrace()
             }
-            pbReceipt.visibility = View.GONE
+            endLoading()
         }
     }
 
@@ -410,7 +449,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
             getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.absolutePath.toString()
         val dir = File(dirPath)
         if (!dir.exists()) dir.mkdirs()
-        val file = File(dirPath, "${fileName}.jpg")
+        val file = File(dirPath, "receipt.jpg")
         try {
             val fOut = FileOutputStream(file)
             bm.compress(Bitmap.CompressFormat.PNG, 85, fOut)
@@ -436,7 +475,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         intent.action = Intent.ACTION_SEND
         intent.type = "image/*"
         intent.putExtra(Intent.EXTRA_SUBJECT, "")
-        intent.putExtra(Intent.EXTRA_TEXT, "")
+        intent.putExtra(Intent.EXTRA_TEXT, receiptFormat(receiptCode))
         intent.putExtra(Intent.EXTRA_STREAM, uri)
         try {
             startActivity(Intent.createChooser(intent, "Share Screenshot"))
@@ -502,11 +541,13 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                             if (success){
                                 tvReceiptCustomer.text = customer!!.NAME.toString()
                                 this@ReceiptActivity.customer = customer
-                            }else
-                                layoutReceiptCustomer.visibility = View.GONE
+                                fetchData2()
+                            }else{
+                                fetchData()
+                            }
                         }
-                        fetchData2()
-                    }
+                    }else
+                        fetchData()
 
                 }
             }

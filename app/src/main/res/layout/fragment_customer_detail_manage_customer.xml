@@ -1,161 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingTop="50dp"
-    android:paddingHorizontal="5dp"
+    android:layout_height="match_parent"
     tools:context=".customer.CustomerDetailManageCustomerFragment">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="50dp"
+        android:paddingHorizontal="5dp">
 
-    <FrameLayout
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:id="@+id/layoutManageCustomerDefaultImage"
-        android:visibility="gone">
+        <FrameLayout
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:id="@+id/layoutManageCustomerDefaultImage"
+            android:visibility="gone">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@color/colorPrimary"/>
+
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:text="P"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:id="@+id/tvManageCustomerFirstName"/>
+        </FrameLayout>
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@color/colorPrimary"/>
+            android:layout_gravity="center"
+            android:id="@+id/ivManageCustomerImage"
+            android:src="@drawable/default_image"/>
 
-        <TextView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:text="P"
-            android:textSize="36sp"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:textColor="@color/colorBlack"
-            android:id="@+id/tvManageCustomerFirstName"/>
-    </FrameLayout>
-
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:id="@+id/ivManageCustomerImage"
-        android:src="@drawable/default_image"/>
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:elevation="10dp">
-        <LinearLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_margin="10dp">
-
-            <com.google.android.material.textfield.TextInputLayout
+            android:layout_marginTop="50dp"
+            android:elevation="10dp">
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_margin="10dp">
 
-                <EditText
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/name"
-                    android:inputType="textEmailAddress"
-                    android:id="@+id/etManageCustomerName"/>
+                    android:layout_height="wrap_content">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/name"
+                        android:inputType="textEmailAddress"
+                        android:id="@+id/etManageCustomerName"/>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <EditText
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/email"
-                    android:inputType="textEmailAddress"
-                    android:id="@+id/etManageCustomerEmail"/>
+                    android:layout_height="wrap_content">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/email"
+                        android:inputType="textEmailAddress"
+                        android:id="@+id/etManageCustomerEmail"/>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <EditText
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/phone"
-                    android:inputType="phone"
-                    android:id="@+id/etManageCustomerPhone"/>
+                    android:layout_height="wrap_content">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/phone"
+                        android:inputType="phone"
+                        android:id="@+id/etManageCustomerPhone"/>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <EditText
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/address"
-                    android:inputType="text"
-                    android:id="@+id/etManageCustomerAddress"/>
+                    android:layout_height="wrap_content">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/address"
+                        android:inputType="textMultiLine"
+                        android:lines="2"
+                        android:maxLines="2"
+                        android:gravity="top"
+                        android:id="@+id/etManageCustomerAddress"/>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <EditText
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/note"
-                    android:inputType="text"
-                    android:id="@+id/etManageCustomerNote"/>
+                    android:layout_height="wrap_content">
 
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/note"
+                        android:inputType="text"
+                        android:maxLines="2"
+                        android:id="@+id/etManageCustomerNote"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:elevation="10dp">
-        <LinearLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="vertical">
-
-            <com.google.android.material.textfield.TextInputLayout
+            android:layout_marginTop="5dp"
+            android:elevation="10dp">
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <EditText
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:orientation="vertical">
+
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:enabled="false"
-                    android:id="@+id/etManageCustomerUpdatedDate"
-                    android:hint="Updated Date"/>
-            </com.google.android.material.textfield.TextInputLayout>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+                    android:layout_height="wrap_content">
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:id="@+id/etManageCustomerUpdatedDate"
+                        android:hint="Updated Date"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-    <ProgressBar
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/pbManageCustomer"
-        android:visibility="gone"/>
+        <ProgressBar
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/pbManageCustomer"
+            android:visibility="gone"/>
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/btnManageCustomerSave"
-        android:text="@string/save"
-        android:textColor="@color/colorWhite"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/button_border_fill"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnManageCustomerSave"
+            android:text="@string/save"
+            android:textColor="@color/colorWhite"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/button_border_fill"/>
 
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -15,6 +15,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.util.*
+import kotlin.collections.HashMap
 
 
 class TransactionPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference, private val context: Context){
@@ -301,12 +302,18 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
                         for (data in p0.children){
 
                             val currentDate: String = dateFormat().format(Date())
+
+                            val values: HashMap<String,Any>  = hashMapOf(
+                                EStock_Movement.STATUS_CODE.toString() to statusCode,
+                                EStock_Movement.UPDATED_DATE.toString() to currentDate
+                            )
+
                             database.child(ETable.STOCK_MOVEMENT.toString())
                                 .child(getMerchantCredential(context))
                                 .child(getMerchant(context))
                                 .child(data.key.toString())
-                                .child(EStock_Movement.STATUS_CODE.toString())
-                                .setValue(statusCode).addOnFailureListener {
+                                .updateChildren(values)
+                                .addOnFailureListener {
                                     view.response(it.message.toString())
                                 }.addOnSuccessListener {
                                     database.child(ETable.STOCK_MOVEMENT.toString())

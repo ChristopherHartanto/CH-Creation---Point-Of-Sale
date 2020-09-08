@@ -216,7 +216,7 @@ class TransactionFragment : Fragment(), MainView {
         tvTransactionFilterName.text = "All"
 
         clearData()
-        adapter = TransactionRecyclerViewAdapter(ctx, transItems, customerItems, transCodeItems){
+        adapter = TransactionRecyclerViewAdapter(ctx,requireActivity(), transItems, customerItems, transCodeItems){
             transPosition = it
             startActivity<DetailTransactionActivity>()
         }
