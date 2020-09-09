@@ -322,6 +322,7 @@ class TransactionFragment : Fragment(), MainView {
                     }
                     presenter.retrieveCustomers()
                 }
+                pbTransaction.visibility = View.GONE
             }else if (response == EMessageResult.FETCH_CUSTOMER_SUCCESS.toString()){
                 if (dataSnapshot.exists()){
                     tmpCustomerItems.clear()

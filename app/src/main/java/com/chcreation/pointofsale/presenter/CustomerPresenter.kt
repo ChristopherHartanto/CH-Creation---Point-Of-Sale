@@ -54,9 +54,9 @@ class CustomerPresenter(private val view: MainView,
             }
     }
 
-    fun saveCustomer(customer: Customer){
+    fun saveCustomer(customer: Customer, callback: (custKey: String,success:Boolean)->Unit){
 
-        getCustomerPrimaryKey(customer)
+        getCustomerPrimaryKey(customer,callback)
     }
 
     fun deleteCustomer(custKey: Int){
@@ -74,7 +74,7 @@ class CustomerPresenter(private val view: MainView,
             }
     }
 
-    private fun getCustomerPrimaryKey(customer: Customer){
+    private fun getCustomerPrimaryKey(customer: Customer,callback:(custKey: String, success: Boolean)->Unit){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 database.removeEventListener(this)
@@ -105,13 +105,12 @@ class CustomerPresenter(private val view: MainView,
                     .child(getMerchant(context))
                     .child(key.toString())
                     .setValue(values).addOnFailureListener {
-                        view.response(it.message.toString())
+                        callback("",false)
                     }
                     .addOnSuccessListener {
-                        view.response(EMessageResult.SUCCESS.toString())
+                        callback(customer.CODE.toString(),true)
                     }
             }
-
         }
         database.child(ETable.CUSTOMER.toString())
             .child(getMerchantCredential(context))

@@ -24,12 +24,19 @@
         <androidx.appcompat.widget.SearchView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="8"
+            android:layout_weight="9"
             app:queryHint="Search Everything Here"
             app:iconifiedByDefault="false"
             android:id="@+id/svHomeSearch"
             android:visibility="invisible"/>
 
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_sort_black_24dp"
+            android:id="@+id/ivHomeSort"
+            android:layout_marginHorizontal="3dp"/>
     </LinearLayout>
 
     <ProgressBar

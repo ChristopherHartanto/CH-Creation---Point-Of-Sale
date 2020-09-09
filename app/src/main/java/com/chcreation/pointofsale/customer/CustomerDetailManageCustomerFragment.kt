@@ -384,6 +384,9 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         etManageCustomerPhone.setText(customer.PHONE)
         etManageCustomerUpdatedDate.setText(parseDateFormat(customer.UPDATED_DATE.toString()))
 
+        if (customer.STATUS_CODE == EStatusCode.DELETE.toString())
+            btnManageCustomerSave.visibility = View.GONE
+
         (activity as AppCompatActivity).supportActionBar?.title = customer.NAME.toString()
 
         if (bitmap != null){
@@ -425,6 +428,7 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
                     }
                     fetchData()
                 }
+                pbManageCustomer.visibility = View.GONE
             }
         }
 

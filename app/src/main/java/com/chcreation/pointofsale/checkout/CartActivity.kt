@@ -49,8 +49,10 @@ class CartActivity : AppCompatActivity() {
                     totalQty = countQty()
                     sumPriceDetail()
 
-                    if (cartItems.size == 0)
+                    if (cartItems.size == 0){
+                        PostCheckOutActivity().clearCartData()
                         finish()
+                    }
                     adapter.notifyDataSetChanged()
                 }
                 noButton {  }

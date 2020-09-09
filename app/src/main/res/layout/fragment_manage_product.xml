@@ -9,7 +9,7 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom |end"
+        android:layout_gravity="bottom|end"
         android:layout_margin="30dp"
         android:src="@drawable/plus"
         android:id="@+id/fbManageProduct"/>
@@ -26,15 +26,29 @@
             app:tabSelectedTextColor="@color/colorPrimary"
             android:id="@+id/tlManageProduct"/>
 
-        <androidx.appcompat.widget.SearchView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:queryHint="Search Everything Here"
-            app:iconifiedByDefault="false"
-            android:id="@+id/svManageProduct"/>
+            android:layout_height="wrap_content">
+            <androidx.appcompat.widget.SearchView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="9"
+                app:queryHint="Search Everything Here"
+                app:iconifiedByDefault="false"
+                android:id="@+id/svManageProduct"/>
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sort_black_24dp"
+                android:id="@+id/ivSort"
+                android:layout_marginHorizontal="3dp"/>
+        </LinearLayout>
+
 
         <ProgressBar
-            android:layout_width="wrap_content"
+            android:layout_width="30dp"
             android:layout_height="match_parent"
             android:id="@+id/pbManageProduct"
             android:layout_gravity="center"/>

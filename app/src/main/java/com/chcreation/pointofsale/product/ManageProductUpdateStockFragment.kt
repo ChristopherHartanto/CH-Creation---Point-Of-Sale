@@ -33,16 +33,16 @@ class ManageProductUpdateStockFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         if (!product.MANAGE_STOCK){
-            layoutManageProductStock.alpha = 0.3F
-            tvManageProductStockMovementStock.text = "No Active"
-            btnManageProductStockMovement.isEnabled = false
-            btnManageProductManageStock.isEnabled = false
+            //layoutManageProductStock.alpha = 0.3F
+            tvManageProductStockMovementStock.text = "Inactive"
+            //btnManageProductStockMovement.isEnabled = false
+            //btnManageProductManageStock.isEnabled = false
         }
         else{
             tvManageProductStockMovementStock.text = product.STOCK.toString()
-            layoutManageProductStock.alpha = 1F
-            btnManageProductStockMovement.isEnabled = true
-            btnManageProductManageStock.isEnabled = true
+            //layoutManageProductStock.alpha = 1F
+            //btnManageProductStockMovement.isEnabled = true
+            //btnManageProductManageStock.isEnabled = true
         }
 
         btnManageProductStockMovement.onClick {
@@ -54,10 +54,14 @@ class ManageProductUpdateStockFragment : Fragment() {
         btnManageProductManageStock.onClick {
             btnManageProductManageStock.startAnimation(normalClickAnimation())
 
-            if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString())
-                toast("Only Manager Can Update Stock")
-            else
-                ctx.startActivity<ManageProductManageStockActivity>()
+            if (!product.MANAGE_STOCK)
+                toast("Current Product is Inactive")
+            else{
+                if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString())
+                    toast("Only Manager Can Update Stock")
+                else
+                    ctx.startActivity<ManageProductManageStockActivity>()
+            }
         }
     }
 

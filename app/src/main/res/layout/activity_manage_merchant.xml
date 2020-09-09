@@ -87,9 +87,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/etMerchantAddress"
                     android:inputType="textMultiLine"
-                    android:gravity="top"
                     android:maxLines="2"
-                    android:lines="2"
                     android:hint="Address"/>
             </com.google.android.material.textfield.TextInputLayout>
             <EditText
@@ -101,8 +99,8 @@
                 android:layout_marginBottom="20dp"/>
 
             <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_gravity="center"
                 android:visibility="gone"
                 android:id="@+id/pbMerchant"/>

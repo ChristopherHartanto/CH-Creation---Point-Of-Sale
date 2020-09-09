@@ -31,7 +31,7 @@
                 android:text="Sign Up"
                 android:gravity="center"
                 android:textColor="@color/colorBlack"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:layout_marginBottom="30sp"/>
 
             <LinearLayout
@@ -122,12 +122,12 @@
 
             <Button
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:layout_marginHorizontal="30dp"
                 android:id="@+id/btnSignUp"
                 android:layout_marginTop="30sp"
                 android:textColor="@color/colorWhite"
-                android:background="@drawable/button_border_fill"
+                android:background="@color/colorPrimary"
                 android:text="Create Account"/>
 
         </LinearLayout>
@@ -135,8 +135,8 @@
     </LinearLayout>
 
     <ProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:id="@+id/pbSignUp"
         android:layout_gravity="center"
         android:visibility="gone"/>

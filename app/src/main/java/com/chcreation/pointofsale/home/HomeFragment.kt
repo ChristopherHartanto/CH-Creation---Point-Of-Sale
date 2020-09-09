@@ -27,6 +27,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.fragment_manage_product.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
@@ -49,6 +50,7 @@ class HomeFragment : Fragment() , MainView {
     private var currentCat = 0
     private var searchFilter = ""
     private var isEnabled = true
+    private var sortBy = ESort.PROD_NAME.toString()
 
     companion object{
         var tempProductItems : ArrayList<Product> = arrayListOf()
@@ -161,7 +163,24 @@ class HomeFragment : Fragment() , MainView {
 
         pbHome.visibility = View.VISIBLE
 
+        ivHomeSort.onClick{
+            ivHomeSort.startAnimation(normalClickAnimation())
 
+            selector("Sort by", arrayListOf("Product Name","Product Code","Product Price")){dialogInterface, i ->
+                when(i){
+                    0->{
+                        sortBy = ESort.PROD_NAME.toString()
+                    }
+                    1->{
+                        sortBy = ESort.PROD_CODE.toString()
+                    }
+                    2->{
+                        sortBy = ESort.PROD_PRICE.toString()
+                    }
+                }
+                fetchProductByCat()
+            }
+        }
     }
 
     override fun onStart() {
@@ -261,6 +280,13 @@ class HomeFragment : Fragment() , MainView {
     fun fetchProductByCat(){
         tempProductItems.clear()
         tmpProductKeys.clear()
+
+        when (sortBy) {
+            ESort.PROD_PRICE.toString() -> productItems.sortWith(compareBy {it.PRICE})
+            ESort.PROD_CODE.toString() -> productItems.sortWith(compareBy {it.PROD_CODE})
+            else -> productItems.sortWith(compareBy {it.NAME})
+        }
+
         if (searchFilter != ""){
             for ((index, data) in productItems.withIndex()) {
                 if (data.NAME.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))

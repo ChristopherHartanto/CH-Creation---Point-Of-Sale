@@ -57,7 +57,7 @@ class CustomerFragment : Fragment(), MainView {
         }
 
         fbCustomer.onClick {
-            startActivity<NewCustomerActivity>()
+            startActivity(intentFor<NewCustomerActivity>("checkOut" to false))
         }
         rvCustomer.adapter = adapter
         rvCustomer.layoutManager = LinearLayoutManager(ctx)

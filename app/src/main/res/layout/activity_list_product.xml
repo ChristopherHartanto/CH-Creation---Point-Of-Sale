@@ -9,11 +9,10 @@
     tools:context=".product.ListProductActivity">
 
     <ProgressBar
-        android:layout_width="wrap_content"
+        android:layout_width="30dp"
         android:layout_height="match_parent"
         android:id="@+id/pbListProduct"
         android:layout_gravity="center"/>
-
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"

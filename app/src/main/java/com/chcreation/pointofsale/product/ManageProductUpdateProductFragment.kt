@@ -25,6 +25,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.GlideDrawable
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Cat
 
@@ -424,10 +427,37 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
 
         (activity as AppCompatActivity).supportActionBar?.title = product.NAME.toString()
 
-        if (bitmap != null)
+        if (bitmap != null){
             ivManageProductImage.setImageBitmap(rotateImage(bitmap!!))
-        else if (product.IMAGE.toString() != "")
-            Glide.with(ctx).load(product.IMAGE).into(ivManageProductImage)
+            pbManageProductLoadImage.visibility = View.GONE
+        }
+        else if (product.IMAGE.toString() != ""){
+            Glide.with(ctx).load(product.IMAGE).listener(object :
+                RequestListener<String, GlideDrawable> {
+                override fun onException(
+                    e: Exception?,
+                    model: String?,
+                    target: Target<GlideDrawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    pbManageProductLoadImage.visibility = View.GONE
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: GlideDrawable?,
+                    model: String?,
+                    target: Target<GlideDrawable>?,
+                    isFromMemoryCache: Boolean,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    pbManageProductLoadImage.visibility = View.GONE
+                    return false
+                }
+
+            }).into(ivManageProductImage)
+        }else
+            pbManageProductLoadImage.visibility = View.GONE
 
         if (categoryItems.size != 0){
             val index = categoryItems.indexOf(product.CAT)
@@ -459,6 +489,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
                         e.printStackTrace()
                     }
                 }
+                pbManageProduct.visibility = View.GONE
             }else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()) {
                 categoryItems.clear()
                 categoryItems.add("")

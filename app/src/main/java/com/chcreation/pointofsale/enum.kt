@@ -248,6 +248,12 @@ enum class ECustomReceipt{
     RECEIPT2
 }
 
+enum class ESort{
+    PROD_NAME,
+    PROD_CODE,
+    PROD_PRICE
+}
+
 enum class EMonth(var value:Int){
     All(99),
     January(1),

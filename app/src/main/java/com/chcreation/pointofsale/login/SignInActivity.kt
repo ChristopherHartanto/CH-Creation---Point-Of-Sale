@@ -14,6 +14,7 @@ import com.chcreation.pointofsale.model.UserAcceptance
 import com.chcreation.pointofsale.presenter.MerchantPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
@@ -22,11 +23,8 @@ import kotlinx.android.synthetic.main.activity_sign_in.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.noButton
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.yesButton
 
 class SignInActivity : AppCompatActivity(), MainView {
 
@@ -57,6 +55,29 @@ class SignInActivity : AppCompatActivity(), MainView {
             pbSignIn.visibility = View.VISIBLE
 
             login()
+        }
+
+        tvForgotPassword.onClick {
+            tvForgotPassword.startAnimation(normalClickAnimation())
+            email = etSignInEmail.text.toString()
+            if (email != ""){
+                alert ("Reset Password will be Send to $email"){
+                    title = "Reset Password"
+                    yesButton {
+                        mAuth.sendPasswordResetEmail(email).addOnCompleteListener {
+                            alert ("Please Check Your Email"){
+                                title = "Reset Password"
+                                yesButton {  }
+                            }.show()
+                        }.addOnFailureListener {
+                            toast("Failed to Send")
+                        }
+                    }
+                    noButton {  }
+                }.show()
+            }
+            else
+                toast("Please Fill Your Email Address")
         }
     }
 

@@ -53,6 +53,7 @@ class ManageProductFragment : Fragment() , MainView {
     private var searchFilter = ""
     private var isSlideUp = true
     private var isSlideDown = true
+    private var sortBy = ESort.PROD_NAME.toString()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -150,6 +151,24 @@ class ManageProductFragment : Fragment() , MainView {
 
         pbManageProduct.visibility = View.VISIBLE
 
+        ivSort.onClick{
+            ivSort.startAnimation(normalClickAnimation())
+
+            selector("Sort by", arrayListOf("Product Name","Product Code","Product Price")){dialogInterface, i ->
+                when(i){
+                    0->{
+                        sortBy = ESort.PROD_NAME.toString()
+                    }
+                    1->{
+                        sortBy = ESort.PROD_CODE.toString()
+                    }
+                    2->{
+                        sortBy = ESort.PROD_PRICE.toString()
+                    }
+                }
+                fetchProductByCat()
+            }
+        }
 
     }
 
@@ -182,6 +201,12 @@ class ManageProductFragment : Fragment() , MainView {
     fun fetchProductByCat(){
         tempProductItems.clear()
         tmpProductKeys.clear()
+        when (sortBy) {
+            ESort.PROD_PRICE.toString() -> productItems.sortWith(compareBy {it.PRICE})
+            ESort.PROD_CODE.toString() -> productItems.sortWith(compareBy {it.PROD_CODE})
+            else -> productItems.sortWith(compareBy {it.NAME})
+        }
+
         if (searchFilter != ""){
             for ((index, data) in productItems.withIndex()) {
                 if (data.NAME.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))

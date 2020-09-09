@@ -29,7 +29,7 @@
                 android:text="Sign In"
                 android:gravity="center"
                 android:textColor="@color/colorBlack"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:layout_marginBottom="30sp"/>
 
             <LinearLayout
@@ -93,20 +93,30 @@
 
             <Button
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:id="@+id/btnSignIn"
                 android:layout_marginHorizontal="30sp"
-                android:layout_marginTop="20sp"
+                android:layout_marginTop="30sp"
                 android:textColor="@color/colorWhite"
-                android:background="@drawable/button_border_fill"
+                android:background="@color/colorPrimary"
                 android:text="Login"/>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Forgot Password"
+                android:layout_marginTop="20dp"
+                android:textColor="@color/colorPrimary"
+                android:id="@+id/tvForgotPassword"/>
+
         </LinearLayout>
+
     </LinearLayout>
 
     <ProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_gravity="center"
         android:id="@+id/pbSignIn"
         android:visibility="gone"/>

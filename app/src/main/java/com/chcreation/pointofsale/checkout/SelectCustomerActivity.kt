@@ -22,6 +22,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_select_customer.*
 import kotlinx.android.synthetic.main.fragment_customer.*
+import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.ctx
@@ -69,7 +70,7 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
         presenter.retrieveCustomers()
 
         fbSelectCustomer.onClick {
-            startActivity<NewCustomerActivity>()
+            startActivity(intentFor<NewCustomerActivity>("checkOut" to true))
             finish()
         }
     }

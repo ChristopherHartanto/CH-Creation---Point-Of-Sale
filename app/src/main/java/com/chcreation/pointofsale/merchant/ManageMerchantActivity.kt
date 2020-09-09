@@ -169,6 +169,8 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
 
         if (merchantName == ""){
             toast("Please Fill Merchant Name !")
+            pbMerchant.visibility = View.GONE
+            btnMerchant.isEnabled = true
         }
         else if (merchant!!.NAME == ""){
             alert("Once Create Your Merchant Name Cannot Edit!"){

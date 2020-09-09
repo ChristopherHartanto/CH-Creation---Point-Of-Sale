@@ -3,6 +3,7 @@ package com.chcreation.pointofsale.product
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Gravity
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -29,6 +30,7 @@ class InstallmentPlanActivity : AppCompatActivity() {
         setContentView(R.layout.activity_installment_plan)
 
         supportActionBar!!.title = "Installment Plan"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         var price = intent.extras!!.getInt("price",0)
 
@@ -81,5 +83,13 @@ class InstallmentPlanActivity : AppCompatActivity() {
 
             tvInstallmentPlanTotalMonth.text = "${indonesiaCurrencyFormat().format(totalPerMonth)} / month"
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 }

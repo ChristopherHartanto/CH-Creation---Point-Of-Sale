@@ -13,10 +13,13 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
 import androidx.core.content.FileProvider
 import androidx.core.widget.doOnTextChanged
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.SelectCustomerActivity.Companion.selectCustomerCode
+import com.chcreation.pointofsale.checkout.SelectCustomerActivity.Companion.selectCustomerName
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
@@ -68,6 +71,7 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
         btnCustomerSave.onClick {
 
             btnCustomerSave.startAnimation(normalClickAnimation())
+            loading()
 
             val email = etCustomerEmail.text.toString()
             val name = etCustomerName.text.toString()
@@ -77,10 +81,24 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
 
             if (name == ""){
                 etCustomerName.error = "Please Fill the Field"
+                endLoading()
                 return@onClick
             }
 
-            presenter.saveCustomer(Customer(name,email,"","",phone,address,note))
+            presenter.saveCustomer(Customer(name,email,"","",phone,address,note)){key,success->
+                if (success){
+                    toast("Save Success")
+                    val checkOut = intent.extras?.getBoolean("checkOut",false)
+                    if (checkOut!!){
+                        selectCustomerName = name
+                        selectCustomerCode = key
+                    }
+                    finish()
+                }else
+                    toast("Failed")
+
+                endLoading()
+            }
         }
 
         etCustomerName.doOnTextChanged { text, start, before, count ->
@@ -251,13 +269,21 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
         return cursor.getString(column_index);
     }
 
+    private fun loading(){
+        pbCustomer.visibility = View.GONE
+        btnCustomerSave.isEnabled = false
+    }
+
+    private fun endLoading(){
+        pbCustomer.visibility = View.VISIBLE
+        btnCustomerSave.isEnabled = true
+    }
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun response(message: String) {
-        if (message == EMessageResult.SUCCESS.toString())
-            finish()
         toast(message)
     }
 }

@@ -21,11 +21,8 @@ import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_merchant.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.noButton
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.yesButton
 
 class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelectedListener {
 
@@ -58,6 +55,7 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
         super.onStart()
 
         btnMerchant.onClick {
+            pbMerchant.visibility = View.VISIBLE
             btnMerchant.startAnimation(normalClickAnimation())
             presenter.retrieveMerchantInfo(merchantItems[selectedMerchant].CREDENTIAL.toString(),merchantItems[selectedMerchant].NAME.toString())
         }
@@ -96,6 +94,7 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
                 spMerchant.onItemSelectedListener = this
                 spMerchant.gravity = Gravity.CENTER
             }
+            pbMerchant.visibility = View.GONE
         }else if (response == EMessageResult.FETCH_MERCHANT_SUCCESS.toString()){
             if (dataSnapshot.exists()){
                 val item = dataSnapshot.getValue(Merchant::class.java)
@@ -110,7 +109,9 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
 
                 startActivity<MainActivity>()
                 finish()
-            }
+            }else
+                toast("Error")
+            pbMerchant.visibility = View.GONE
         }
     }
 
