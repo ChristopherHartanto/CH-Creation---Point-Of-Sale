@@ -81,6 +81,7 @@ class ListProductActivity : AppCompatActivity(), MainView {
 
     private fun fetchProductByCat(){
         tempProductItems.clear()
+        productItems.sortWith(compareBy {it.CREATED_DATE})
         for ((index, data) in productItems.withIndex()) {
             if (data.CAT.toString() == currentCat){
                 tempProductImageItems.add(productItems[index].IMAGE.toString())

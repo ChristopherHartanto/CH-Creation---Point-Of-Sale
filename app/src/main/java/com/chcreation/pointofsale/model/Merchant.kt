@@ -1,5 +1,6 @@
 package com.chcreation.pointofsale.model
 
+import com.chcreation.pointofsale.EStatusCode
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -21,7 +22,9 @@ data class Merchant(
 data class Cat(
     var CAT: String? = "",
     var CREATED_DATE: String? = "",
-    var UPDATED_DATE: String? = ""
+    var UPDATED_DATE: String? = "",
+    var UPDATED_BY: String? = "",
+    var STATUS_CODE: String? = EStatusCode.ACTIVE.toString()
 )
 
 data class UserList(

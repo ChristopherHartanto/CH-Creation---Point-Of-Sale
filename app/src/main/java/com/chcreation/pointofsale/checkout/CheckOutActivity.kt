@@ -185,7 +185,9 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             val orderDetail = gson.toJson(cartItems)
             var statusCode = if (totalOutStanding > 0) EStatusCode.PENDING else EStatusCode.DONE
 
-            alert ("Payment Received: ${indonesiaCurrencyFormat().format(totalReceived)}\nCustomer: $custName"){
+            alert ("Payment Received: ${indonesiaCurrencyFormat().format(totalReceived)}" +
+                    "\nCustomer: $custName" +
+                    "\nNote: $note"){
                 title = "Confirmation"
 
                 yesButton {

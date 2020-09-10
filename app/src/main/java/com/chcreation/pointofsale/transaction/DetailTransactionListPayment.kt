@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.yesButton
 
@@ -64,7 +65,15 @@ class DetailTransactionListPayment : Fragment(), MainView {
         presenter = TransactionPresenter(this,mAuth,mDatabase,ctx)
 
         adapter = DetailTransactionListPaymentRecyclerViewAdapter(ctx,itemListPayments){
-
+            itemListPayments[it].USER_CODE?.let { it1 ->
+                presenter.getUserName(it1){cashier->
+                    alert ("Cashier: $cashier\nPayment Method: ${itemListPayments[it].PAYMENT_METHOD}\n" +
+                            "Note: ${itemListPayments[it].NOTE}"){
+                        title = "Payment Detail"
+                        yesButton {  }
+                    }.show()
+                }
+            }
         }
 
         rvListPayment.adapter = adapter

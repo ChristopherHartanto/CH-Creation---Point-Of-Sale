@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorBlack"
                 android:gravity="center"
-                android:textSize="28sp"
+                android:textSize="26sp"
                 android:text="CH CREATION"
                 android:textStyle="bold"
                 android:id="@+id/tvReceiptMerchantName"/>

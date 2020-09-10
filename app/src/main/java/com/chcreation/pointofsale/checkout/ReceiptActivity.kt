@@ -135,13 +135,13 @@ class ReceiptActivity : AppCompatActivity(), MainView {
     override fun onStart() {
         super.onStart()
 
-        if (transCode != 0){
+        if (transCode != 0){ // from post check out
             GlobalScope.launch {
                 presenter.retrieveTransactionListPayments(transCode)
                 presenter.retrieveTransaction(transCode)
             }
         }
-        else{
+        else{ // from transaction
             GlobalScope.launch {
                 presenter.retrieveTransactionListPayments(transCodeItems[transPosition])
                 presenter.retrieveTransaction(transCodeItems[transPosition])

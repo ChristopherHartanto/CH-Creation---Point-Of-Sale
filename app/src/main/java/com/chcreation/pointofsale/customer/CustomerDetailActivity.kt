@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.PostCheckOutActivity
 import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.Companion.bitmap
 import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.Companion.currentPhotoPath
 import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.Companion.custKey
@@ -59,6 +60,7 @@ class CustomerDetailActivity : AppCompatActivity(),MainView {
     override fun onDestroy() {
         super.onDestroy()
 
+        PostCheckOutActivity().clearCartData()
         custCode = ""
     }
 

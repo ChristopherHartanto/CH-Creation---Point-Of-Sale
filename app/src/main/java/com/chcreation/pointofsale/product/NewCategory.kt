@@ -71,13 +71,14 @@ class NewCategory : AppCompatActivity(), MainView {
             else{
                 val check = categoryItems.any {
                     it.CAT!!.toLowerCase(Locale.getDefault()) == newCategory.toLowerCase(Locale.getDefault())
+                            && it.STATUS_CODE == EStatusCode.ACTIVE.toString()
                 }
 
                 if (check)
                     toast("This Category Already Exist")
                 else{
-                    categoryItems.add(Cat(newCategory, dateFormat().format(Date()),
-                        mAuth.currentUser!!.uid))
+                    categoryItems.add(Cat(newCategory, dateFormat().format(Date()),dateFormat().format(Date()),
+                        mAuth.currentUser!!.uid,EStatusCode.ACTIVE.toString()))
 
                     val gson = Gson()
                     val categoryItem = gson.toJson(categoryItems)

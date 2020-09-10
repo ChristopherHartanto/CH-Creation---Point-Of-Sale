@@ -101,7 +101,7 @@ class SignInActivity : AppCompatActivity(), MainView {
                     }
                     Toast.makeText(this, "Login Success ", Toast.LENGTH_LONG).show()
                 }else {
-                    Toast.makeText(this, "Error Success, try again later ", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Email or Password Wrong", Toast.LENGTH_LONG).show()
                     btnSignIn.isEnabled = true
                     pbSignIn.visibility = View.GONE
                 }

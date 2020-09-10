@@ -462,7 +462,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
 
                 for (data in items) {
                     val item = data.CAT
-                    if (item != "")
+                    if (item != "" && data.STATUS_CODE == EStatusCode.ACTIVE.toString())
                         categoryItems.add(item.toString())
                 }
                 spProduct.setSelection(0)
@@ -490,6 +490,6 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         selectedCategory = categoryItems[position]
         positionSpinner = position
         if (position == 1)
-            startActivity<NewCategory>()
+            startActivity<ListCategoryActivity>()
     }
 }

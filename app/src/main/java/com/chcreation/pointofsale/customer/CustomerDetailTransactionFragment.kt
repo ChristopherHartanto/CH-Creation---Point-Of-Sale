@@ -10,6 +10,8 @@ import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.EStatusCode
 
 import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.checkout.CheckOutActivity
+import com.chcreation.pointofsale.checkout.ReceiptActivity
 import com.chcreation.pointofsale.customer.CustomerDetailActivity.Companion.custCode
 import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.chcreation.pointofsale.model.Enquiry
@@ -22,6 +24,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.fragment_customer_detail_transaction.*
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.textColorResource
 
@@ -53,11 +56,13 @@ class CustomerDetailTransactionFragment : Fragment(), MainView {
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = CustomerPresenter(this,mAuth,mDatabase,ctx)
         adapter = CustomerDetailTransactionRecyclerViewAdapter(ctx,enquiryItems){
-
+            CheckOutActivity.transCode = enquiryItems[it].TRANS_KEY!!
+            ctx.startActivity<ReceiptActivity>()
         }
 
         rvCustomerDetailTransaction.adapter = adapter
         rvCustomerDetailTransaction.layoutManager = LinearLayoutManager(ctx)
+        tvCustomerDetailTransactionTotalGrossEarning.text = indonesiaCurrencyFormat().format(0)
 
         presenter.retrieveCustomerTransaction(custCode)
     }

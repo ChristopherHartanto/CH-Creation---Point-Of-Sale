@@ -27,6 +27,12 @@ enum class EAbout{
     TEXT3,
     IMAGE
 }
+
+enum class ECategory{
+    NAME,
+    STATUS_CODE
+}
+
 enum class EProduct{
     NAME,
     DESC,

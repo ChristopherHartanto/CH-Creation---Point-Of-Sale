@@ -25,14 +25,14 @@
             android:textStyle="bold"/>
 
         <EditText
-            android:layout_width="100dp"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:inputType="number"
             android:layout_gravity="center"
             android:textColor="@color/colorBlack"
             android:gravity="center"
             android:hint="0"
-            android:textSize="52sp"
+            android:textSize="48sp"
             android:layout_marginVertical="30dp"
             android:id="@+id/etManageProductManageStockQty"/>
 

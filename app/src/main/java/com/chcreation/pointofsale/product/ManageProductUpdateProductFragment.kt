@@ -460,8 +460,10 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
             pbManageProductLoadImage.visibility = View.GONE
 
         if (categoryItems.size != 0){
-            val index = categoryItems.indexOf(product.CAT)
-            spManageProduct.setSelection(index)
+            if (categoryItems.contains(product.CAT)){
+                val index = categoryItems.indexOf(product.CAT)
+                spManageProduct.setSelection(index)
+            }
         }
 
         swManageProduct.isChecked = product.MANAGE_STOCK
@@ -502,8 +504,11 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
 
                     for (data in items) {
                         val item = data.CAT
-                        if (item != "")
-                            categoryItems.add(item.toString())
+                        if (item != ""){
+                            if (data.STATUS_CODE == EStatusCode.ACTIVE.toString()){
+                                categoryItems.add(item.toString())
+                            }
+                        }
                     }
 
                     selectedCategory = categoryItems[0]
@@ -544,7 +549,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         selectedCategory = categoryItems[position]
         positionSpinner = position
         if (position == 1)
-            ctx.startActivity<NewCategory>()
+            ctx.startActivity<ListCategoryActivity>()
     }
 
 }

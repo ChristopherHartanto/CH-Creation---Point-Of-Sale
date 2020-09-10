@@ -40,6 +40,7 @@
                     android:id="@+id/tvCustomerDetailTransactionTotal"
                     android:textColor="@color/colorBlack"
                     android:textSize="21sp"
+                    android:text="0"
                     android:gravity="end"
                     android:textStyle="bold"/>
             </LinearLayout>

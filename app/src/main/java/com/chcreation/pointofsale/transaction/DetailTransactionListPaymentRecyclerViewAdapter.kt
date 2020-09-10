@@ -55,6 +55,7 @@ class DetailTransactionListPaymentRecyclerViewAdapter(private val context: Conte
                 note.text = "${item.NOTE}"
 
             itemView.onClick {
+                itemView.startAnimation(normalClickAnimation())
                 listener(position)
             }
         }

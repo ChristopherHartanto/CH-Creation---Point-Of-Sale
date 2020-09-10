@@ -9,13 +9,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.chcreation.pointofsale.EStatusCode
-import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.model.Enquiry
 import com.chcreation.pointofsale.model.Product
-import com.chcreation.pointofsale.parseDateFormat
-import com.chcreation.pointofsale.receiptFormat
 import com.squareup.picasso.Picasso
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -57,6 +54,8 @@ class CustomerDetailTransactionRecyclerViewAdapter(private val context: Context,
             date.text = parseDateFormat(item.UPDATED_DATE.toString())
 
             itemView.onClick {
+                itemView.startAnimation(normalClickAnimation())
+
                 listener(position)
             }
         }

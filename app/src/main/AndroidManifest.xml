@@ -23,7 +23,8 @@
         android:roundIcon="@drawable/icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".custom_receipt.CustomReceiptActivity"></activity>
+        <activity android:name=".product.ListCategoryActivity"></activity>
+        <activity android:name=".custom_receipt.CustomReceiptActivity" />
         <activity android:name=".analytic.AnalyticFilterActivity" />
         <activity android:name=".analytic.AnalyticActivity" />
         <activity android:name=".product.InstallmentPlanActivity" />

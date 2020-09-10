@@ -283,7 +283,7 @@ class HomeFragment : Fragment() , MainView {
 
         when (sortBy) {
             ESort.PROD_PRICE.toString() -> productItems.sortWith(compareBy {it.PRICE})
-            ESort.PROD_CODE.toString() -> productItems.sortWith(compareBy {it.PROD_CODE})
+            ESort.PROD_CODE.toString() -> productItems.sortWith(compareBy {it.CODE})
             else -> productItems.sortWith(compareBy {it.NAME})
         }
 
@@ -363,8 +363,10 @@ class HomeFragment : Fragment() , MainView {
                     val items : MutableList<Cat> = gson.fromJson(dataSnapshot.value.toString(),arrayCartType)
 
                     for (data in items) {
-                        tlHome.addTab(tlHome.newTab().setText(data.CAT))
-                        categoryItems.add(data.CAT.toString())
+                        if (data.STATUS_CODE == EStatusCode.ACTIVE.toString()){
+                            tlHome.addTab(tlHome.newTab().setText(data.CAT))
+                            categoryItems.add(data.CAT.toString())
+                        }
                     }
                     if (categoryItems.size > 4)
                         tlHome.tabMode = TabLayout.MODE_SCROLLABLE

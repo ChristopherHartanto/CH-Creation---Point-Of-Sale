@@ -51,6 +51,11 @@ class StockMovementListRecyclerView(private val context: Context, private val it
                 note.text = "N : ${item.STATUS}"
 
             date.text = parseDateFormatFull(item.CREATED_DATE.toString())
+
+            itemView.onClick {
+                itemView.startAnimation(normalClickAnimation())
+                listener(position)
+            }
         }
     }
 }

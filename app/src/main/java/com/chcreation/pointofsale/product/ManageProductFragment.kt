@@ -203,7 +203,7 @@ class ManageProductFragment : Fragment() , MainView {
         tmpProductKeys.clear()
         when (sortBy) {
             ESort.PROD_PRICE.toString() -> productItems.sortWith(compareBy {it.PRICE})
-            ESort.PROD_CODE.toString() -> productItems.sortWith(compareBy {it.PROD_CODE})
+            ESort.PROD_CODE.toString() -> productItems.sortWith(compareBy {it.CODE})
             else -> productItems.sortWith(compareBy {it.NAME})
         }
 
@@ -286,8 +286,10 @@ class ManageProductFragment : Fragment() , MainView {
                     val items : MutableList<Cat> = gson.fromJson(dataSnapshot.value.toString(),arrayCartType)
 
                     for (data in items) {
-                        tlManageProduct.addTab(tlManageProduct.newTab().setText(data.CAT))
-                        categoryItems.add(data.CAT.toString())
+                        if (data.STATUS_CODE == EStatusCode.ACTIVE.toString()) {
+                            tlManageProduct.addTab(tlManageProduct.newTab().setText(data.CAT))
+                            categoryItems.add(data.CAT.toString())
+                        }
                     }
 
                     if (categoryItems.size > 4)

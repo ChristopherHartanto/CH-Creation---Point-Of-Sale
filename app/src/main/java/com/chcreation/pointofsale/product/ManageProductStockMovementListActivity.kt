@@ -26,7 +26,9 @@ import kotlinx.android.synthetic.main.activity_manage_product_stock_movement_lis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.yesButton
 
 class ManageProductStockMovementListActivity : AppCompatActivity(), MainView {
 
@@ -51,7 +53,12 @@ class ManageProductStockMovementListActivity : AppCompatActivity(), MainView {
         presenter = ProductPresenter(this,mAuth,mDatabase,this)
 
         adapter = StockMovementListRecyclerView(this,stockMovementItems){
-
+            stockMovementItems[it].UPDATED_BY?.let { it1 -> presenter.getUserName(it1){name ->
+                alert ("PIC: $name"){
+                    title = "Info"
+                    yesButton {  }
+                }.show()
+            } }
         }
 
         rvManageProductStockMovementList.adapter = adapter
