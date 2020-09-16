@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.UserAcceptance
 import com.chcreation.pointofsale.presenter.UserPresenter
 import com.chcreation.pointofsale.view.MainView
@@ -19,7 +20,6 @@ import kotlinx.android.synthetic.main.activity_add_user.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.yesButton
 import java.util.*
@@ -32,6 +32,7 @@ class AddUserActivity : AppCompatActivity(), MainView, AdapterView.OnItemSelecte
     private lateinit var presenter: UserPresenter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
+    private var email = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +57,7 @@ class AddUserActivity : AppCompatActivity(), MainView, AdapterView.OnItemSelecte
         btnAddUser.onClick {
             btnAddUser.startAnimation(normalClickAnimation())
 
-            val email = etAddUserEmail.text.toString()
+            email = etAddUserEmail.text.toString()
             if (email.isEmpty())
                 toast("Email Must be Fill")
             else{
@@ -64,8 +65,12 @@ class AddUserActivity : AppCompatActivity(), MainView, AdapterView.OnItemSelecte
                     title = "Confirmation"
                     yesButton {
                         presenter.inviteUser(UserAcceptance(getMerchantCredential(this@AddUserActivity),
-                            getMerchant(this@AddUserActivity),userGroupItems[selectedUserGroup],
+                            getMerchantCode(this@AddUserActivity),getMerchantName(this@AddUserActivity),userGroupItems[selectedUserGroup],
                             dateFormat().format(Date())),encodeEmail(email))
+
+                        val log = "Invite ${email}"
+                        presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+
                     }
                     noButton {
 
@@ -97,8 +102,14 @@ class AddUserActivity : AppCompatActivity(), MainView, AdapterView.OnItemSelecte
 
     override fun response(message: String) {
         if (message == EMessageResult.CREATE_INVITATION_SUCCESS.toString()){
-            toast("Invite Success")
-            finish()
-        }
+            alert ("Login with $email and Accept This Invitation"){
+                title = "Invite Success"
+
+                yesButton {
+                    finish()
+                }
+            }.show()
+        }else
+            toast(message)
     }
 }

@@ -5,13 +5,9 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.EStatusCode
 import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.getMerchant
-import com.chcreation.pointofsale.home.HomeRecyclerViewAdapter
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.view.MainView
@@ -20,11 +16,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_list_product.*
-import kotlinx.android.synthetic.main.activity_new_product.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.intentFor
-import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
 import org.jetbrains.anko.toast
 
 class ListProductActivity : AppCompatActivity(), MainView {

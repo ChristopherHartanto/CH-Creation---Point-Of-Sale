@@ -17,6 +17,7 @@ import com.chcreation.pointofsale.customer.CustomerFragment
 import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalQty
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Payment
 import com.chcreation.pointofsale.model.Transaction
 import com.chcreation.pointofsale.presenter.CheckOutPresenter
@@ -204,7 +205,14 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                             statusCode.toString(), dateFormat().format(Date()), dateFormat().format(Date()),
                             mAuth.currentUser!!.uid,mAuth.currentUser!!.uid)
                             , Payment("", totalReceived,paymentMethod, note,
-                                mAuth.currentUser!!.uid,EStatusCode.DONE.toString()), cartItems)
+                                mAuth.currentUser!!.uid,EStatusCode.DONE.toString()), cartItems){
+
+                            val log = if (custName != "") "Receive ${indonesiaCurrencyFormat().format(totalReceived)}  from $custName"
+                            else
+                                "Receive ${indonesiaCurrencyFormat().format(totalReceived)}  from Receipt ${receiptFormat(it.toInt())}"
+                            presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+                        }
+
                     }
                 }
 
@@ -249,6 +257,8 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                         Payment("", totalReceived,paymentMethod, note, mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
                         totalOutStanding,transItems[transPosition])
 
+                    val log = "Receive ${indonesiaCurrencyFormat().format(totalReceived)} from Receipt ${receiptFormat(transCodeItems[transPosition])}"
+                    presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
                 }
 
                 noButton {

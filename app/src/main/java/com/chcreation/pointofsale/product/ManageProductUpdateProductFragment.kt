@@ -29,12 +29,14 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Cat
 
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
 import com.chcreation.pointofsale.product.ManageProductDetailActivity.Companion.prodCode
+import com.chcreation.pointofsale.product.ManageProductDetailActivity.Companion.prodName
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
@@ -47,13 +49,14 @@ import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.zxing.Result
 import kotlinx.android.synthetic.main.activity_new_product.*
-import kotlinx.android.synthetic.main.fragment_manage_product.*
+import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_manage_product_update_product.*
-import kotlinx.android.synthetic.main.fragment_manage_product_update_product.pbManageProduct
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -67,7 +70,8 @@ import java.lang.Exception
 import java.util.*
 
 
-class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnItemSelectedListener {
+class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnItemSelectedListener,
+    ZXingScannerView.ResultHandler {
 
     private lateinit var presenter: ProductPresenter
     private lateinit var mAuth: FirebaseAuth
@@ -80,8 +84,10 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
     private var manageStock = true
     private var PICK_IMAGE_CAMERA  = 111
     private var CAMERA_PERMISSION  = 101
+    private var CAMERA_PERMISSION_SCAN  = 102
     private var PICK_IMAGE_GALLERY = 222
     private var READ_PERMISION = 202
+    private lateinit var mScannerView : ZXingScannerView
 
     companion object{
         var filePath: Uri? = null
@@ -106,6 +112,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         mDatabase = FirebaseDatabase.getInstance().reference
         storage = FirebaseStorage.getInstance().reference
         presenter = ProductPresenter(this,mAuth,mDatabase,ctx)
+        mScannerView = ZXingScannerView(ctx)
 
         spAdapter = ArrayAdapter(ctx, android.R.layout.simple_spinner_item,categoryItems)
         spAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -127,6 +134,23 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         presenter.retrieveCategories()
         ivManageProductImage.onClick {
             selectImage()
+        }
+
+        ivManageProductScan.onClick { cs->
+            ivManageProductScan.startAnimation(normalClickAnimation())
+
+            if (ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED)
+                ActivityCompat.requestPermissions(requireActivity(),
+                    arrayOf(android.Manifest.permission.CAMERA),CAMERA_PERMISSION
+                )
+            else
+                openScanBarcode()
+        }
+
+        btnManageProductScanCancel.onClick {
+            btnManageProductScanCancel.startAnimation(normalClickAnimation())
+            cancelScan()
         }
     }
 
@@ -178,10 +202,15 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         if (imageUri != null)
             image = imageUri
 
+        prodName = name
+
         presenter.saveProduct(Product(name,price,desc,cost,manageStock,product.STOCK,image,
             product.PROD_CODE,product.UOM_CODE,categoryItems[positionSpinner],prodCode,
             EStatusCode.ACTIVE.toString(),product.CREATED_DATE,
             dateFormat().format(Date()), product.CREATED_BY,mAuth.currentUser!!.uid),productKey)
+
+        val log = "Update Product $name"
+        presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
     }
     private fun uploadImage(){
         if(filePath != null){
@@ -222,6 +251,20 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         }
     }
 
+    private fun openScanBarcode(){
+        layoutManageProductScan.visibility = View.VISIBLE
+        mScannerView.setAutoFocus(true)
+        mScannerView.setResultHandler(this)
+        layoutManageProductScanContent.addView(mScannerView)
+        mScannerView.startCamera()
+    }
+
+    private fun cancelScan(){
+        mScannerView.stopCamera();
+        mScannerView.removeAllViewsInLayout()
+        layoutManageProductScanContent.removeAllViews()
+        layoutManageProductScan.visibility = View.GONE
+    }
 
     @Throws(IOException::class)
     private fun createImageFile(): File {
@@ -340,6 +383,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
                 e.printStackTrace()
             }
         }
+
     }
 
     fun rotateImage(bitmapSource : Bitmap) : Bitmap {
@@ -393,6 +437,14 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         else if (requestCode == READ_PERMISION){
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 openGallery()
+            }
+            else
+                toast("Permission Denied")
+        }
+
+        else if (requestCode == CAMERA_PERMISSION_SCAN){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openScanBarcode()
             }
             else
                 toast("Permission Denied")
@@ -550,6 +602,11 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         positionSpinner = position
         if (position == 1)
             ctx.startActivity<ListCategoryActivity>()
+    }
+
+    override fun handleResult(p0: Result?) {
+        etManageProductCode.setText(p0.toString())
+        cancelScan()
     }
 
 }

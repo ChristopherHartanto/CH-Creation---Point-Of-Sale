@@ -2,21 +2,13 @@ package com.chcreation.pointofsale.presenter
 
 import android.content.Context
 import com.chcreation.pointofsale.*
-import com.chcreation.pointofsale.checkout.CheckOutActivity
 import com.chcreation.pointofsale.model.*
-import com.chcreation.pointofsale.product.NewCategory
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
 
 class ProductPresenter(private val view: MainView,
                        private val auth: FirebaseAuth,
@@ -54,7 +46,7 @@ class ProductPresenter(private val view: MainView,
                         for (data in p0.children){
                             database.child(ETable.PRODUCT.toString())
                                 .child(getMerchantCredential(context))
-                                .child(getMerchant(context))
+                                .child(getMerchantCode(context))
                                 .child(data.key.toString())
                                 .child(EProduct.STATUS_CODE.toString())
                                 .setValue(EStatusCode.DELETE.toString()).addOnFailureListener {
@@ -70,7 +62,7 @@ class ProductPresenter(private val view: MainView,
             }
             database.child(ETable.PRODUCT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByChild(EProduct.PROD_CODE.toString())
                 .equalTo(prodCode)
                 .addListenerForSingleValueEvent(postListener)
@@ -107,7 +99,7 @@ class ProductPresenter(private val view: MainView,
             }
             database.child(ETable.PRODUCT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByKey()
                 .limitToLast(1)
                 .addListenerForSingleValueEvent(postListener)
@@ -139,7 +131,7 @@ class ProductPresenter(private val view: MainView,
             )
             database.child(ETable.PRODUCT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .child(key.toString())
                 .setValue(values).addOnFailureListener {
                     view.response(it.message.toString())
@@ -157,7 +149,7 @@ class ProductPresenter(private val view: MainView,
         try{
             database.child(ETable.MERCHANT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .child(EMerchant.CAT.toString())
                 .setValue(categoryItems).addOnFailureListener {
                     view.response(it.message.toString())
@@ -185,7 +177,7 @@ class ProductPresenter(private val view: MainView,
             }
             database.child(ETable.MERCHANT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .child(EMerchant.CAT.toString())
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
@@ -207,7 +199,7 @@ class ProductPresenter(private val view: MainView,
             }
             database.child(ETable.PRODUCT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByChild(EProduct.CAT.toString())
                 .addListenerForSingleValueEvent(postListener)
 
@@ -231,7 +223,7 @@ class ProductPresenter(private val view: MainView,
             }
             database.child(ETable.PRODUCT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByChild(EProduct.PROD_CODE.toString())
                 .equalTo(prodCode)
                 .addListenerForSingleValueEvent(postListener)
@@ -256,7 +248,7 @@ class ProductPresenter(private val view: MainView,
             }
             database.child(ETable.STOCK_MOVEMENT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByChild(EProduct.PROD_CODE.toString())
                 .equalTo(prodCode)
                 .addListenerForSingleValueEvent(postListener)
@@ -294,7 +286,7 @@ class ProductPresenter(private val view: MainView,
 
                     database.child(ETable.STOCK_MOVEMENT.toString())
                         .child(getMerchantCredential(context))
-                        .child(getMerchant(context))
+                        .child(getMerchantCode(context))
                         .child(stockMovementKey.toString())
                         .setValue(values).addOnFailureListener {
                             view.response(it.message.toString())
@@ -308,7 +300,7 @@ class ProductPresenter(private val view: MainView,
             }
             database.child(ETable.STOCK_MOVEMENT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByKey()
                 .limitToLast(1)
                 .addListenerForSingleValueEvent(postListener)
@@ -347,7 +339,7 @@ class ProductPresenter(private val view: MainView,
 
                     database.child(ETable.STOCK_MOVEMENT.toString())
                         .child(getMerchantCredential(context))
-                        .child(getMerchant(context))
+                        .child(getMerchantCode(context))
                         .child(stockMovementKey.toString())
                         .setValue(values).addOnFailureListener {
                             view.response(it.message.toString())
@@ -361,7 +353,7 @@ class ProductPresenter(private val view: MainView,
             }
             database.child(ETable.STOCK_MOVEMENT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByKey()
                 .limitToLast(1)
                 .addListenerForSingleValueEvent(postListener)
@@ -412,9 +404,51 @@ class ProductPresenter(private val view: MainView,
         }
         database.child(ETable.MERCHANT.toString())
             .child(getMerchantCredential(context))
-            .child(getMerchant(context))
+            .child(getMerchantCode(context))
             .child(EMerchant.USER_LIST.toString())
             .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun saveActivityLogs(logs: ActivityLogs){
+        try{
+            var key = 0
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        for (data in p0.children){
+                            key = data.key.toString().toInt() + 1
+                            break
+                        }
+                    }
+                    val values  = hashMapOf(
+                        EActivityLogs.LOG.toString() to logs.LOG,
+                        EActivityLogs.CREATED_BY.toString() to logs.CREATED_BY,
+                        EActivityLogs.CREATED_DATE.toString() to logs.CREATED_DATE
+                    )
+
+                    database.child(ETable.ACTIVITY_LOGS.toString())
+                        .child(getMerchantCredential(context))
+                        .child(getMerchantCode(context))
+                        .child(key.toString())
+                        .setValue(values)
+
+                }
+
+            }
+            database.child(ETable.ACTIVITY_LOGS.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchantCode(context))
+                .orderByKey()
+                .limitToLast(1)
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e:java.lang.Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
     }
 
     private fun generateProdCode() : String{

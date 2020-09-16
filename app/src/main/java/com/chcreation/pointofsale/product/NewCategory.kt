@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import com.chcreation.pointofsale.*
-import com.chcreation.pointofsale.model.Cart
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Cat
 import com.chcreation.pointofsale.presenter.ProductPresenter
 import com.chcreation.pointofsale.view.MainView
@@ -17,7 +17,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_new_category.*
-import org.jetbrains.anko.alert
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 import java.util.*
@@ -46,7 +45,7 @@ class NewCategory : AppCompatActivity(), MainView {
         presenter = ProductPresenter(this,mAuth,mDatabase,this)
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
-        merchant = getMerchant(this)
+        merchant = getMerchantCode(this)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -79,6 +78,9 @@ class NewCategory : AppCompatActivity(), MainView {
                 else{
                     categoryItems.add(Cat(newCategory, dateFormat().format(Date()),dateFormat().format(Date()),
                         mAuth.currentUser!!.uid,EStatusCode.ACTIVE.toString()))
+
+                    val log = "Create Category ${newCategory}"
+                    presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
 
                     val gson = Gson()
                     val categoryItem = gson.toJson(categoryItems)

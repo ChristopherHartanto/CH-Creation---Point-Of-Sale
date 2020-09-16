@@ -4,6 +4,7 @@ import android.content.Context
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transCode
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transDate
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Payment
 import com.chcreation.pointofsale.model.Transaction
@@ -34,7 +35,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
 
     }
 
-    fun saveTransaction(transaction: Transaction,payment: Payment, cartItems: ArrayList<Cart>){
+    fun saveTransaction(transaction: Transaction,payment: Payment, cartItems: ArrayList<Cart>, callback:(receipt:String)->Unit){
         try{
             for ((index,data) in cartItems.withIndex()){
                 if (cartItems[index].MANAGE_STOCK!!){
@@ -50,7 +51,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
 
                             database.child(ETable.PRODUCT.toString())
                                 .child(getMerchantCredential(context))
-                                .child(getMerchant(context))
+                                .child(getMerchantCode(context))
                                 .child(cartItems[index].PROD_KEY.toString())
                                 .child(EProduct.STOCK.toString())
                                 .setValue(currentStock - cartItems[index].Qty!!).addOnFailureListener {
@@ -63,13 +64,15 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                     }
                     database.child(ETable.PRODUCT.toString())
                         .child(getMerchantCredential(context))
-                        .child(getMerchant(context))
+                        .child(getMerchantCode(context))
                         .child(cartItems[index].PROD_KEY.toString())
                         .child(EProduct.STOCK.toString())
                         .addListenerForSingleValueEvent(postListener)
                 }
                 if (index == cartItems.size-1)
-                    getTransPrimaryKey(transaction,payment,cartItems)
+                    getTransPrimaryKey(transaction,payment,cartItems){
+                        callback(it)
+                    }
             }
         }catch (e: Exception){
             showError(context,e.message.toString())
@@ -110,7 +113,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
 
                         database.child(ETable.ENQUIRY.toString())
                             .child(getMerchantCredential(context))
-                            .child(getMerchant(context))
+                            .child(getMerchantCode(context))
                             .child(enquiryKey.toString())
                             .setValue(values).addOnFailureListener {
                                 view.response(it.message.toString())
@@ -126,7 +129,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.ENQUIRY.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByKey()
                 .limitToLast(1)
                 .addListenerForSingleValueEvent(postListener)
@@ -167,7 +170,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
 
                         database.child(ETable.STOCK_MOVEMENT.toString())
                             .child(getMerchantCredential(context))
-                            .child(getMerchant(context))
+                            .child(getMerchantCode(context))
                             .child(stockMovementKey.toString())
                             .setValue(values).addOnFailureListener {
                                 view.response(it.message.toString())
@@ -183,7 +186,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.STOCK_MOVEMENT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByKey()
                 .limitToLast(1)
                 .addListenerForSingleValueEvent(postListener)
@@ -193,7 +196,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
         }
     }
 
-    private fun getTransPrimaryKey(transaction: Transaction,payment: Payment, cartItems: ArrayList<Cart>){
+    private fun getTransPrimaryKey(transaction: Transaction,payment: Payment, cartItems: ArrayList<Cart>, callback:(receipt:String)->Unit){
         try{
             postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -235,20 +238,21 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                     )
                     database.child(ETable.TRANSACTION.toString())
                         .child(getMerchantCredential(context))
-                        .child(getMerchant(context))
+                        .child(getMerchantCode(context))
                         .child(transactionKey.toString())
                         .setValue(values).addOnFailureListener {
                             view.response(it.message.toString())
                         }
                         .addOnSuccessListener {
                             updatePayment(transactionKey,payment)
+                            callback(transactionKey.toString())
                         }
                 }
 
             }
             database.child(ETable.TRANSACTION.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByKey()
                 .limitToLast(1)
                 .addListenerForSingleValueEvent(postListener)
@@ -286,7 +290,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                     )
                     database.child(ETable.PAYMENT.toString())
                         .child(getMerchantCredential(context))
-                        .child(getMerchant(context))
+                        .child(getMerchantCode(context))
                         .child(transactionKey.toString())
                         .child(paymentKey.toString())
                         .setValue(values).addOnFailureListener {
@@ -300,7 +304,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.PAYMENT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .child(transactionKey.toString())
                 .orderByKey()
                 .limitToLast(1)
@@ -325,7 +329,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.TRANSACTION.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .child(transactionCode.toString())
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: java.lang.Exception){
@@ -364,7 +368,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                     )
                     database.child(ETable.PAYMENT.toString())
                         .child(getMerchantCredential(context))
-                        .child(getMerchant(context))
+                        .child(getMerchantCode(context))
                         .child(transactionCode.toString())
                         .child(paymentKey.toString())
                         .setValue(values).addOnFailureListener {
@@ -378,7 +382,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.PAYMENT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .child(transactionCode.toString())
                 .orderByKey()
                 .limitToLast(1)
@@ -413,7 +417,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
             )
             database.child(ETable.TRANSACTION.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .child(transactionCode.toString())
                 .setValue(values).addOnFailureListener {
                     view.response(it.message.toString())
@@ -446,7 +450,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                         for (data in p0.children){
                             database.child(ETable.STOCK_MOVEMENT.toString())
                                 .child(getMerchantCredential(context))
-                                .child(getMerchant(context))
+                                .child(getMerchantCode(context))
                                 .child(data.key.toString())
                                 .child(EStock_Movement.STATUS_CODE.toString())
                                 .setValue(status).addOnFailureListener {
@@ -457,7 +461,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
 
                             database.child(ETable.STOCK_MOVEMENT.toString())
                                 .child(getMerchantCredential(context))
-                                .child(getMerchant(context))
+                                .child(getMerchantCode(context))
                                 .child(data.key.toString())
                                 .child(EStock_Movement.UPDATED_DATE.toString())
                                 .setValue(dateFormat().format(Date())).addOnFailureListener {
@@ -474,7 +478,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.STOCK_MOVEMENT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByChild(EStock_Movement.TRANS_KEY.toString())
                 .equalTo(transactionKey.toDouble())
                 .addListenerForSingleValueEvent(postListener)
@@ -496,7 +500,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                         for (data in p0.children){
                             database.child(ETable.ENQUIRY.toString())
                                 .child(getMerchantCredential(context))
-                                .child(getMerchant(context))
+                                .child(getMerchantCode(context))
                                 .child(data.key.toString())
                                 .child(E_Enquiry.STATUS_CODE.toString())
                                 .setValue(status).addOnFailureListener {
@@ -507,7 +511,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
 
                             database.child(ETable.ENQUIRY.toString())
                                 .child(getMerchantCredential(context))
-                                .child(getMerchant(context))
+                                .child(getMerchantCode(context))
                                 .child(data.key.toString())
                                 .child(E_Enquiry.UPDATED_DATE.toString())
                                 .setValue(dateFormat().format(Date())).addOnFailureListener {
@@ -518,7 +522,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
 
                             database.child(ETable.ENQUIRY.toString())
                                 .child(getMerchantCredential(context))
-                                .child(getMerchant(context))
+                                .child(getMerchantCode(context))
                                 .child(data.key.toString())
                                 .child(E_Enquiry.UPDATED_BY.toString())
                                 .setValue(updatedBy).addOnFailureListener {
@@ -535,11 +539,53 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.ENQUIRY.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .orderByChild(E_Enquiry.TRANS_KEY.toString())
                 .equalTo(transactionKey.toDouble())
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: java.lang.Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun saveActivityLogs(logs: ActivityLogs){
+        try{
+            var key = 0
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        for (data in p0.children){
+                            key = data.key.toString().toInt() + 1
+                            break
+                        }
+                    }
+                    val values  = hashMapOf(
+                        EActivityLogs.LOG.toString() to logs.LOG,
+                        EActivityLogs.CREATED_BY.toString() to logs.CREATED_BY,
+                        EActivityLogs.CREATED_DATE.toString() to logs.CREATED_DATE
+                    )
+
+                    database.child(ETable.ACTIVITY_LOGS.toString())
+                        .child(getMerchantCredential(context))
+                        .child(getMerchantCode(context))
+                        .child(key.toString())
+                        .setValue(values)
+
+                }
+
+            }
+            database.child(ETable.ACTIVITY_LOGS.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchantCode(context))
+                .orderByKey()
+                .limitToLast(1)
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e:java.lang.Exception){
             showError(context,e.message.toString())
             e.printStackTrace()
         }

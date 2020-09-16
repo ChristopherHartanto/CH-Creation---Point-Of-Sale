@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.model.UserList
 import com.chcreation.pointofsale.presenter.AnalyticPresenter

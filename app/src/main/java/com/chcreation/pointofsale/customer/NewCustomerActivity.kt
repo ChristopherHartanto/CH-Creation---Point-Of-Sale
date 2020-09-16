@@ -20,6 +20,7 @@ import androidx.core.widget.doOnTextChanged
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.SelectCustomerActivity.Companion.selectCustomerCode
 import com.chcreation.pointofsale.checkout.SelectCustomerActivity.Companion.selectCustomerName
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
@@ -88,6 +89,9 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
             presenter.saveCustomer(Customer(name,email,"","",phone,address,note)){key,success->
                 if (success){
                     toast("Save Success")
+                    presenter.saveActivityLogs(ActivityLogs("Create New Customer: $name",
+                        mAuth.currentUser?.uid,
+                        dateFormat().format(Date())))
                     val checkOut = intent.extras?.getBoolean("checkOut",false)
                     if (checkOut!!){
                         selectCustomerName = name

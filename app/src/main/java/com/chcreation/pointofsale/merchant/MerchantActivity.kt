@@ -57,7 +57,9 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
         btnMerchant.onClick {
             pbMerchant.visibility = View.VISIBLE
             btnMerchant.startAnimation(normalClickAnimation())
-            presenter.retrieveMerchantInfo(merchantItems[selectedMerchant].CREDENTIAL.toString(),merchantItems[selectedMerchant].NAME.toString())
+            val merchantCode = if(merchantItems[selectedMerchant].MERCHANT_CODE == "") merchantItems[selectedMerchant].NAME.toString()
+                                    else merchantItems[selectedMerchant].MERCHANT_CODE.toString()
+            presenter.retrieveMerchantInfo(merchantItems[selectedMerchant].CREDENTIAL.toString(),merchantCode)
         }
     }
 
@@ -81,6 +83,7 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
                 for (data in dataSnapshot.children) {
                     val item = data.getValue(AvailableMerchant::class.java)
                     if (item!!.STATUS == EStatusCode.ACTIVE.toString())
+                        presenter
                         merchantItems.add(item)
                 }
                 for (data in merchantItems){
@@ -93,8 +96,29 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
                 spMerchant.adapter = spAdapter
                 spMerchant.onItemSelectedListener = this
                 spMerchant.gravity = Gravity.CENTER
-            }
-            pbMerchant.visibility = View.GONE
+
+                //checking name region
+                btnMerchant.isEnabled = false
+                for ((index,data) in merchantItems.withIndex()){
+                    val merchantCode = if (data.MERCHANT_CODE == "") data.NAME else data.MERCHANT_CODE
+                    presenter.getMerchantName(data.CREDENTIAL.toString(),
+                        merchantCode.toString(),index){success, merchantName, key ->
+                        if (success){
+                            if (merchantName != merchantItems[key].NAME){
+                                merchantItems[key].NAME = merchantName
+                                merchantNameItems[key] = merchantName
+                                spAdapter.notifyDataSetChanged()
+                            }
+                        }
+                        if (key == merchantItems.size-1){
+                            pbMerchant.visibility = View.GONE
+                            btnMerchant.isEnabled = true
+                        }
+                    }
+                }
+                //checking name endregion
+            }else
+                pbMerchant.visibility = View.GONE
         }else if (response == EMessageResult.FETCH_MERCHANT_SUCCESS.toString()){
             if (dataSnapshot.exists()){
                 val item = dataSnapshot.getValue(Merchant::class.java)
@@ -102,7 +126,8 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
                 editor.putString(ESharedPreference.USER_GROUP.toString(), merchantItems[selectedMerchant].USER_GROUP.toString())
                 editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(), merchantItems[selectedMerchant].CREDENTIAL.toString())
                 editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(), item!!.IMAGE)
-                editor.putString(ESharedPreference.MERCHANT.toString(), item.NAME)
+                editor.putString(ESharedPreference.MERCHANT_CODE.toString(), if (item.MERCHANT_CODE == "") item.NAME else item.MERCHANT_CODE)
+                editor.putString(ESharedPreference.MERCHANT_NAME.toString(), item.NAME)
                 editor.putString(ESharedPreference.ADDRESS.toString(), item.ADDRESS)
                 editor.putString(ESharedPreference.NO_TELP.toString(), item.NO_TELP)
                 editor.apply()

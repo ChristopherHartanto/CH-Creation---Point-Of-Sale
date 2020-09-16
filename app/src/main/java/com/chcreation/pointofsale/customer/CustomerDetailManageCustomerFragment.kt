@@ -25,6 +25,7 @@ import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.*
 
 import com.chcreation.pointofsale.customer.CustomerDetailActivity.Companion.custCode
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
@@ -73,6 +74,7 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
 
     companion object{
         var custKey = 0
+        var custName = ""
         var filePath:Uri? = null
         var bitmap: Bitmap? = null
         var currentPhotoPath = ""
@@ -373,6 +375,12 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         else{
             presenter.saveCustomer(Customer(name,email, customer.CREATED_DATE, dateFormat().format(Date()),phone,
                 address,note,customer.CODE,image),custKey)
+
+            presenter.saveActivityLogs(
+                ActivityLogs("Update Customer: $name",
+                    mAuth.currentUser?.uid,
+                    dateFormat().format(Date()))
+            )
         }
     }
 
@@ -415,6 +423,7 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         currentPhotoPath = ""
         customer = Customer()
         custKey = 0
+        custName = ""
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
@@ -424,7 +433,8 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
                     for (data in dataSnapshot.children){
                         val item = data.getValue(Customer::class.java)
                         custKey = data.key!!.toInt()
-                        customer = item!!
+                        custName = item!!.NAME.toString()
+                        customer = item
                     }
                     fetchData()
                 }
@@ -439,6 +449,7 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
            toast("Success Update")
            pbManageCustomer.visibility = View.GONE
            clearData()
+           requireActivity().finish()
        }
     }
 }

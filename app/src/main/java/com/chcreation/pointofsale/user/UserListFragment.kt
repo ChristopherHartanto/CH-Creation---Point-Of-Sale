@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.PostCheckOutActivity
 
 import com.chcreation.pointofsale.login.LoginActivity
 import com.chcreation.pointofsale.model.Cat
@@ -89,6 +90,7 @@ class UserListFragment : Fragment(), MainView{
                 yesButton {
                     mAuth.signOut()
                     removeAllSharedPreference(ctx)
+                    PostCheckOutActivity().clearCartData()
                     startActivity<LoginActivity>()
                     requireActivity().finish()
                 }

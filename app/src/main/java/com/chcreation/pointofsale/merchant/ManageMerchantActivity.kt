@@ -24,7 +24,7 @@ import androidx.core.content.FileProvider
 import androidx.core.widget.doOnTextChanged
 import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.*
-import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.AvailableMerchant
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.presenter.MerchantPresenter
@@ -39,14 +39,10 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
 import kotlinx.android.synthetic.main.activity_manage_merchant.*
-import kotlinx.android.synthetic.main.activity_new_product.*
-import kotlinx.android.synthetic.main.fragment_customer_detail_manage_customer.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.toast
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -82,12 +78,13 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
         presenter = MerchantPresenter(this,mAuth,mDatabase, this)
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
+        btnMerchant.isEnabled = false
         GlobalScope.launch {
             presenter.retrieveCurrentMerchant()
         }
 
         layoutMerchantDefaultImage.onClick {
-            if (getMerchant(this@ManageMerchantActivity) == "")
+            if (getMerchantCode(this@ManageMerchantActivity) == "")
                 toast("You Can Add Photo After Create Merchant")
             else{
                 selectImage()
@@ -173,15 +170,17 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             btnMerchant.isEnabled = true
         }
         else if (merchant!!.NAME == ""){
-            alert("Once Create Your Merchant Name Cannot Edit!"){
-                title = "Note!"
+            alert("Continue to Create Merchant?"){
+                title = "Confirmation!"
                 yesButton {
                     btnMerchant.isEnabled = false
                     pbMerchant.visibility = View.VISIBLE
+                    val merchantCode = generateMerchantCode()
                     presenter.createNewMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,"",null,null,
-                        currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid),
+                        currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid,merchantCode),
                         AvailableMerchant(merchantName,EUserGroup.MANAGER.toString(),currentDate,currentDate,
-                            mAuth.currentUser!!.uid,EStatusUser.ACTIVE.toString()))
+                            mAuth.currentUser!!.uid,EStatusUser.ACTIVE.toString(),merchantCode))
+
                 }
                 noButton {
                     pbMerchant.visibility = View.GONE
@@ -197,12 +196,16 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             }
             else{
                 val image = if (imageUrl == "") merchant!!.IMAGE else imageUrl
+                val merchantCode = if (merchant!!.MERCHANT_CODE == "") merchant!!.NAME else merchant!!.MERCHANT_CODE
+
                 btnMerchant.isEnabled = false
                 pbMerchant.visibility = View.VISIBLE
                 presenter.updateMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,image,
                     merchant!!.USER_LIST,merchant!!.CAT,merchant!!.CREATED_DATE,
                     dateFormat().format(Date()),merchant!!.CREATED_BY,
-                    mAuth.currentUser!!.uid),merchantName)
+                    mAuth.currentUser!!.uid,merchantCode),merchantName)
+
+                presenter.saveActivityLogs(ActivityLogs("Update Merchant",mAuth.currentUser!!.uid,dateFormat().format(Date())))
             }
         }
     }
@@ -412,7 +415,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             etMerchantAddress.setText(merchant!!.ADDRESS)
             etMerchantBusinessInfo.setText(merchant!!.BUSINESS_INFO)
             etMerchantName.setText(merchant!!.NAME)
-            etMerchantName.isEnabled = false
+            //etMerchantName.isEnabled = false
             etMerchantNoTelp.setText(merchant!!.NO_TELP)
 
             if (merchant!!.IMAGE == ""){
@@ -428,6 +431,10 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
         }
     }
 
+    private fun generateMerchantCode() : String{
+        return "M${mDatabase.push().key.toString()}"
+    }
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_MERCHANT_SUCCESS.toString()){
             if (dataSnapshot.exists()){
@@ -435,6 +442,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                 merchant = item!!
 
                 fetchData()
+                btnMerchant.isEnabled = true
             }
         }
     }
@@ -443,7 +451,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
         if (message == EMessageResult.SUCCESS.toString())
         {
             editor = sharedPreference.edit()
-            editor.putString(ESharedPreference.MERCHANT.toString(),etMerchantName.text.toString())
+            editor.putString(ESharedPreference.MERCHANT_CODE.toString(),etMerchantName.text.toString())
             editor.putString(ESharedPreference.USER_GROUP.toString(),EUserGroup.MANAGER.toString())
             editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(), mAuth.currentUser?.uid)
             editor.putString(ESharedPreference.ADDRESS.toString(),etMerchantAddress.text.toString())
@@ -465,6 +473,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             editor = sharedPreference.edit()
             editor.putString(ESharedPreference.ADDRESS.toString(),etMerchantAddress.text.toString())
             editor.putString(ESharedPreference.NO_TELP.toString(),etMerchantNoTelp.text.toString())
+            editor.putString(ESharedPreference.MERCHANT_NAME.toString(),etMerchantName.text.toString())
             editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(),image)
             editor.apply()
 

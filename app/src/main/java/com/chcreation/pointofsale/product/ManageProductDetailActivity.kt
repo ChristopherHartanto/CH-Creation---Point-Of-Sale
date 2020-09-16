@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CheckOutActivity
 import com.chcreation.pointofsale.checkout.SelectCustomerActivity
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.presenter.ProductPresenter
 import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.bitmap
 import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.currentPhotoPath
@@ -31,11 +32,13 @@ import kotlinx.android.synthetic.main.activity_manage_product_detail.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
+import java.util.*
 
 class ManageProductDetailActivity : AppCompatActivity(),MainView {
 
     companion object{
         var prodCode = ""
+        var prodName = ""
     }
     private lateinit var presenter: ProductPresenter
     private lateinit var mAuth: FirebaseAuth
@@ -58,6 +61,7 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
         super.onDestroy()
 
         prodCode = ""
+        prodName = ""
     }
 
     override fun onStart() {
@@ -107,6 +111,9 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
                         title = "Delete"
                         yesButton {
                             presenter.deleteProduct(prodCode)
+
+                            val log = "Delete Product $prodName"
+                            presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
                         }
                         noButton {
 

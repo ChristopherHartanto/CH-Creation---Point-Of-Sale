@@ -16,6 +16,7 @@ import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.
 import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.Companion.currentPhotoPath
 import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.Companion.custKey
 import com.chcreation.pointofsale.customer.CustomerDetailManageCustomerFragment.Companion.filePath
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.transaction.DetailTransactionActivity
 import com.chcreation.pointofsale.transaction.DetailTransactionListPayment
@@ -32,6 +33,7 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.yesButton
+import java.util.*
 
 class CustomerDetailActivity : AppCompatActivity(),MainView {
 
@@ -109,6 +111,11 @@ class CustomerDetailActivity : AppCompatActivity(),MainView {
                         title = "Delete"
                         yesButton {
                             presenter.deleteCustomer(custKey)
+                            presenter.saveActivityLogs(
+                                ActivityLogs("Delete Customer: ${CustomerDetailManageCustomerFragment.custName}",
+                                    mAuth.currentUser?.uid,
+                                    dateFormat().format(Date()))
+                            )
                         }
                         noButton {
 

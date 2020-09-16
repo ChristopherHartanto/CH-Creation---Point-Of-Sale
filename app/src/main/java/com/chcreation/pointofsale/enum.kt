@@ -14,11 +14,18 @@ enum class ETable{
     STOCK_MOVEMENT,
     USER_ACCEPTANCE,
     ABOUT,
-    SINCERE
+    SINCERE,
+    ACTIVITY_LOGS
 }
 
 enum class ESincere{
     SINCERE
+}
+
+enum class EActivityLogs{
+    LOG,
+    CREATED_DATE,
+    CREATED_BY
 }
 
 enum class EAbout{
@@ -64,7 +71,8 @@ enum class EMerchant{
     CAT,
     IMAGE,
     USER_LIST,
-    ADDRESS
+    ADDRESS,
+    MERCHANT_CODE
 }
 
 enum class EAvailableMerchant{
@@ -73,7 +81,8 @@ enum class EAvailableMerchant{
     STATUS,
     CREDENTIAL,
     USER_GROUP,
-    NAME
+    NAME,
+    MERCHANT_CODE
 }
 
 enum class ECustomer{
@@ -169,6 +178,7 @@ enum class EUserAcceptance{
     CREATED_DATE,
     EMAIL,
     CREDENTIAL,
+    MERCHANT_CODE,
     NAME,
     USER_GROUP
 }
@@ -198,7 +208,8 @@ enum class EMessageResult{
     FETCH_USER_SUCCESS,
     FETCH_USER_LIST_SUCCESS,
     CREATE_INVITATION_SUCCESS,
-    FETCH_INVITATION_SUCCESS
+    FETCH_INVITATION_SUCCESS,
+    FETCH_ACTIVITY_LOG_SUCCESS
 }
 
 enum class EPaymentMethod{
@@ -233,7 +244,8 @@ enum class EUserGroup{
 }
 
 enum class ESharedPreference{
-    MERCHANT,
+    MERCHANT_CODE,
+    MERCHANT_NAME,
     MERCHANT_CREDENTIAL,
     MERCHANT_IMAGE,
     USER_GROUP,

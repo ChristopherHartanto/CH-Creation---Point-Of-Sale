@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.StockMovement
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
@@ -112,6 +113,8 @@ class ManageProductManageStockActivity : AppCompatActivity(), MainView {
             prodCode,productKey,0,note,
             dateFormat().format(Date()),dateFormat().format(Date()), mAuth.currentUser?.uid
         ))
+        val log = if(action == 1) "Incoming Stock: $qty Qty" else "Missing Stock: $qty Qty"
+        presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

@@ -117,16 +117,30 @@
                         android:layout_height="50dp"
                         android:id="@+id/spManageProduct" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-                        <EditText
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/etManageProductCode"
-                            android:inputType="text"
-                            android:hint="Product Code"/>
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="9"
+                            android:layout_height="wrap_content">
+                            <EditText
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/etManageProductCode"
+                                android:inputType="text"
+                                android:hint="Product Code"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/scan"
+                            android:id="@+id/ivManageProductScan"
+                            android:layout_marginHorizontal="3dp"/>
+                    </LinearLayout>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -230,5 +244,31 @@
         android:layout_height="30dp"
         android:layout_gravity="center"
         android:id="@+id/pbManageProduct"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:id="@+id/layoutManageProductScan"
+        android:background="@color/colorWhite"
+        android:visibility="gone"
+        android:layout_gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:id="@+id/layoutManageProductScanContent"
+            android:orientation="horizontal" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:id="@+id/btnManageProductScanCancel"
+            android:background="@drawable/button_border"
+            android:textColor="@color/colorBlack"
+            android:text="Cancel"
+            android:layout_marginVertical="5dp"/>
+    </LinearLayout>
 
 </FrameLayout>

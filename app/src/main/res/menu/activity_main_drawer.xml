@@ -33,6 +33,10 @@
             android:title="Analytic" />
 
         <item
+            android:id="@+id/nav_activity_logs"
+            android:title="Activity Logs" />
+
+        <item
             android:id="@+id/nav_user_list"
             android:title="User List" />
 

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Cat
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
@@ -52,6 +53,10 @@ class ListCategoryActivity : AppCompatActivity(), MainView {
                     val gson = Gson()
                     val categoryItem = gson.toJson(categoryItems)
                     presenter.saveNewCategory(categoryItem)
+
+                    val log = "Delete Category ${categoryItems[it].CAT}"
+                    presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+
                 }
 
                 noButton {  }

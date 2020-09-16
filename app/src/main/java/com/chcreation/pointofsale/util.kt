@@ -4,14 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.view.View
 import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import androidx.core.view.marginBottom
 import org.jetbrains.anko.startActivity
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 private lateinit var sharedPreference: SharedPreferences
@@ -23,7 +20,8 @@ fun removeAllSharedPreference(context: Context){
     val editor = sharedPreference.edit()
     editor.putString(ESharedPreference.NAME.toString(),"")
     editor.putString(ESharedPreference.EMAIL.toString(),"")
-    editor.putString(ESharedPreference.MERCHANT.toString(),"")
+    editor.putString(ESharedPreference.MERCHANT_NAME.toString(),"")
+    editor.putString(ESharedPreference.MERCHANT_CODE.toString(),"")
     editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(),"")
     editor.putString(ESharedPreference.NO_TELP.toString(),"")
     editor.putString(ESharedPreference.USER_GROUP.toString(),"")
@@ -49,10 +47,16 @@ fun getEmail(context: Context) : String{
     return sharedPreference.getString(ESharedPreference.EMAIL.toString(),"").toString()
 }
 
-fun getMerchant(context: Context) : String{
+fun getMerchantCode(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
-    return sharedPreference.getString(ESharedPreference.MERCHANT.toString(),"").toString()
+    return sharedPreference.getString(ESharedPreference.MERCHANT_CODE.toString(),"").toString()
+}
+
+fun getMerchantName(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.MERCHANT_NAME.toString(),"").toString()
 }
 
 fun getMerchantCredential(context: Context) : String{

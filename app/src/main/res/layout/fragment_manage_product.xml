@@ -41,6 +41,14 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
+                android:src="@drawable/scan"
+                android:id="@+id/ivManageProductScan"
+                android:layout_marginHorizontal="3dp"/>
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
                 android:src="@drawable/ic_sort_black_24dp"
                 android:id="@+id/ivSort"
                 android:layout_marginHorizontal="3dp"/>
@@ -63,6 +71,32 @@
                 android:id="@+id/rvManageProduct"/>
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:id="@+id/layoutManageProductScan"
+        android:background="@color/colorWhite"
+        android:visibility="gone"
+        android:layout_gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:id="@+id/layoutManageProductScanContent"
+            android:orientation="horizontal" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:id="@+id/btnManageProductCancel"
+            android:background="@drawable/button_border"
+            android:textColor="@color/colorBlack"
+            android:text="Cancel"
+            android:layout_marginVertical="5dp"/>
     </LinearLayout>
 
 </FrameLayout>

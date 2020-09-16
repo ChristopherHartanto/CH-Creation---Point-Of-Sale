@@ -8,13 +8,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.EStatusCode
 
 import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.getMerchant
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.ProductPresenter
 import com.chcreation.pointofsale.view.MainView
@@ -22,10 +19,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_product.*
-import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.*
 
 /**

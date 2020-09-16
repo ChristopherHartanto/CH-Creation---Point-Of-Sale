@@ -2,10 +2,7 @@ package com.chcreation.pointofsale.presenter
 
 import android.content.Context
 import com.chcreation.pointofsale.*
-import com.chcreation.pointofsale.model.AvailableMerchant
-import com.chcreation.pointofsale.model.Merchant
-import com.chcreation.pointofsale.model.UserAcceptance
-import com.chcreation.pointofsale.model.UserList
+import com.chcreation.pointofsale.model.*
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -17,7 +14,6 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.Exception
-import java.text.SimpleDateFormat
 import java.util.*
 
 class MerchantPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference, private var context: Context){
@@ -86,7 +82,7 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                 createUserList(userAcceptance)
                 createNewMerchantList(AvailableMerchant(
                     userAcceptance.NAME,userAcceptance.USER_GROUP,userAcceptance.CREATED_DATE,userAcceptance.CREATED_DATE,
-                    userAcceptance.CREDENTIAL,EStatusCode.ACTIVE.toString()))
+                    userAcceptance.CREDENTIAL,EStatusCode.ACTIVE.toString(),userAcceptance.MERCHANT_CODE))
             }
         }catch (e: Exception){
             showError(context,e.message.toString())
@@ -170,7 +166,7 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.MERCHANT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())
@@ -178,7 +174,7 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
         }
     }
 
-    fun retrieveMerchantInfo(credential: String, merchantName: String){
+    fun retrieveMerchantInfo(credential: String, merchantCode: String){
         try {
             postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -192,7 +188,36 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.MERCHANT.toString())
                 .child(credential)
-                .child(merchantName)
+                .child(merchantCode)
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun getMerchantName(credential: String, merchantCode: String,key:Int, callback:(success:Boolean, merchantName:String, key: Int) -> Unit){
+        try {
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        val item = p0.getValue(Merchant::class.java)
+                        if (item != null) {
+                            item.NAME?.let { callback(true, it,key) }
+                        }else
+                            callback(false,"",-99)
+                    }else
+                        callback(false,"",-99)
+                }
+
+            }
+            database.child(ETable.MERCHANT.toString())
+                .child(credential)
+                .child(merchantCode)
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())
@@ -225,6 +250,7 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                 EMerchant.UPDATED_BY.toString() to merchant.UPDATED_BY,
                 EMerchant.UPDATED_DATE.toString() to merchant.CREATED_DATE,
                 EMerchant.IMAGE.toString() to merchant.IMAGE,
+                EMerchant.MERCHANT_CODE.toString() to merchant.MERCHANT_CODE,
                 EMerchant.USER_LIST.toString() to userList
             )
 
@@ -248,8 +274,8 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
         try {
 
             GlobalScope.launch {
-                if (merchant.NAME != oldName)
-                    updateAvailableMerchantName(merchant.NAME.toString(),oldName)
+//                if (merchant.NAME != oldName)
+//                    updateAvailableMerchantName(merchant.NAME.toString(),oldName)
 
                 val values  = hashMapOf(
                     EMerchant.NAME.toString() to merchant.NAME,
@@ -262,7 +288,8 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                     EMerchant.UPDATED_DATE.toString() to merchant.CREATED_DATE,
                     EMerchant.IMAGE.toString() to merchant.IMAGE,
                     EMerchant.USER_LIST.toString() to merchant.USER_LIST,
-                    EMerchant.CAT.toString() to merchant.CAT
+                    EMerchant.CAT.toString() to merchant.CAT,
+                    EMerchant.MERCHANT_CODE.toString() to merchant.MERCHANT_CODE
                 )
 
                 database.child(ETable.MERCHANT.toString())
@@ -340,7 +367,8 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                         EAvailableMerchant.CREDENTIAL.toString() to availableMerchant.CREDENTIAL,
                         EAvailableMerchant.STATUS.toString() to availableMerchant.STATUS,
                         EAvailableMerchant.USER_GROUP.toString() to availableMerchant.USER_GROUP,
-                        EAvailableMerchant.NAME.toString() to availableMerchant.NAME
+                        EAvailableMerchant.NAME.toString() to availableMerchant.NAME,
+                        EAvailableMerchant.MERCHANT_CODE.toString() to availableMerchant.MERCHANT_CODE
                     )
 
                     database.child(ETable.AVAILABLE_MERCHANT.toString())
@@ -361,6 +389,48 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                 .limitToLast(1)
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun saveActivityLogs(logs: ActivityLogs){
+        try{
+            var key = 0
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        for (data in p0.children){
+                            key = data.key.toString().toInt() + 1
+                            break
+                        }
+                    }
+                    val values  = hashMapOf(
+                        EActivityLogs.LOG.toString() to logs.LOG,
+                        EActivityLogs.CREATED_BY.toString() to logs.CREATED_BY,
+                        EActivityLogs.CREATED_DATE.toString() to logs.CREATED_DATE
+                    )
+
+                    database.child(ETable.ACTIVITY_LOGS.toString())
+                        .child(getMerchantCredential(context))
+                        .child(getMerchantCode(context))
+                        .child(key.toString())
+                        .setValue(values)
+
+                }
+
+            }
+            database.child(ETable.ACTIVITY_LOGS.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchantCode(context))
+                .orderByKey()
+                .limitToLast(1)
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e:java.lang.Exception){
             showError(context,e.message.toString())
             e.printStackTrace()
         }

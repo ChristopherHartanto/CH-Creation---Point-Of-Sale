@@ -1,6 +1,5 @@
 package com.chcreation.pointofsale
 
-import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -11,8 +10,6 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -25,11 +22,9 @@ import androidx.appcompat.widget.Toolbar
 import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.home.HomeFragment.Companion.active
 import com.chcreation.pointofsale.merchant.ManageMerchantActivity
-import com.chcreation.pointofsale.merchant.MerchantActivity
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.model.UserAcceptance
 import com.chcreation.pointofsale.model.UserList
-import com.chcreation.pointofsale.presenter.CustomerPresenter
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.MerchantPresenter
 import com.chcreation.pointofsale.view.MainView
@@ -38,13 +33,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.toast
 import java.util.*
 
 class MainActivity : AppCompatActivity(), MainView {
@@ -73,7 +65,6 @@ class MainActivity : AppCompatActivity(), MainView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
     }
 
     override fun onStart() {
@@ -91,7 +82,8 @@ class MainActivity : AppCompatActivity(), MainView {
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_check_out,R.id.nav_manage_product,R.id.nav_catalog,R.id.nav_customer,
-                R.id.nav_transaction,R.id.nav_custom_receipt,R.id.nav_analytics,R.id.nav_user_list,R.id.nav_about
+                R.id.nav_transaction,R.id.nav_custom_receipt,R.id.nav_analytics,R.id.nav_activity_logs,
+                R.id.nav_user_list,R.id.nav_about
             ), drawerLayout
         )
         mAuth = FirebaseAuth.getInstance()
@@ -117,7 +109,7 @@ class MainActivity : AppCompatActivity(), MainView {
         layoutNavHeaderDefaultImage = view.findViewById<FrameLayout>(R.id.layoutNavHeaderDefaultImage)
         layoutNavHeader = view.findViewById<LinearLayout>(R.id.layoutNavHeader)
 
-        tvNavHeaderMerchantName.text = getMerchant(this)
+        tvNavHeaderMerchantName.text = getMerchantCode(this)
         tvUserName.text = "${getName(this)} (${getMerchantUserGroup(this)})"
 
         layoutNavHeader.onClick {
@@ -128,7 +120,7 @@ class MainActivity : AppCompatActivity(), MainView {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        if (getMerchant(this) != "")
+        if (getMerchantCode(this) != "")
             presenter.retrieveMerchant()
     }
 

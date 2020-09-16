@@ -4,12 +4,15 @@ import com.chcreation.pointofsale.home.HomeRecyclerViewAdapter
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import androidx.appcompat.widget.SearchView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +22,7 @@ import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Cat
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
+import com.chcreation.pointofsale.product.ManageProductDetailActivity.Companion.prodName
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
@@ -27,17 +31,19 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.zxing.Result
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_manage_product.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.*
 import java.util.*
 import kotlin.collections.ArrayList
 
-class ManageProductFragment : Fragment() , MainView {
+class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHandler  {
 
     private lateinit var adapter: HomeRecyclerViewAdapter
     private var productItems : ArrayList<Product> = arrayListOf()
@@ -53,7 +59,10 @@ class ManageProductFragment : Fragment() , MainView {
     private var searchFilter = ""
     private var isSlideUp = true
     private var isSlideDown = true
+    private var isScanning = false
+    private var CAMERA_PERMISSION  = 101
     private var sortBy = ESort.PROD_NAME.toString()
+    private lateinit var mScannerView : ZXingScannerView
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,14 +79,17 @@ class ManageProductFragment : Fragment() , MainView {
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = Homepresenter(this,mAuth,mDatabase,ctx)
+        mScannerView = ZXingScannerView(ctx)
 
         adapter = HomeRecyclerViewAdapter(
             ctx,
             tempProductItems
         ) {
             try {
-                startActivity(intentFor<ManageProductDetailActivity>(EProduct.PROD_CODE.toString() to tempProductItems[it].PROD_CODE))
-
+                if (!isScanning){
+                    prodName = tempProductItems[it].NAME.toString()
+                    startActivity(intentFor<ManageProductDetailActivity>(EProduct.PROD_CODE.toString() to tempProductItems[it].PROD_CODE))
+                }
             }catch (e: Exception){
                 showError(ctx,e.message.toString())
             }
@@ -170,6 +182,22 @@ class ManageProductFragment : Fragment() , MainView {
             }
         }
 
+        ivManageProductScan.onClick { cs->
+            ivManageProductScan.startAnimation(normalClickAnimation())
+
+            if (ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED)
+                ActivityCompat.requestPermissions(requireActivity(),
+                    arrayOf(android.Manifest.permission.CAMERA),CAMERA_PERMISSION
+                )
+            else
+                openScanBarcode()
+        }
+
+        btnManageProductCancel.onClick {
+            btnManageProductCancel.startAnimation(normalClickAnimation())
+            cancelScan()
+        }
     }
 
     override fun onStart() {
@@ -184,6 +212,22 @@ class ManageProductFragment : Fragment() , MainView {
         currentCat = 0
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == CAMERA_PERMISSION){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openScanBarcode()
+            }
+            else
+                toast("Permission Denied")
+        }
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
@@ -196,6 +240,23 @@ class ManageProductFragment : Fragment() , MainView {
         if (savedInstanceState != null) {
             savedInstanceState.getStringArray("categoryItems")?.let { categoryItems.addAll(it) }
         }
+    }
+
+    private fun openScanBarcode(){
+        isScanning = true
+        layoutManageProductScan.visibility = View.VISIBLE
+        mScannerView.setAutoFocus(true)
+        mScannerView.setResultHandler(this@ManageProductFragment)
+        layoutManageProductScanContent.addView(mScannerView)
+        mScannerView.startCamera()
+    }
+
+    private fun cancelScan(){
+        mScannerView.stopCamera();
+        mScannerView.removeAllViewsInLayout()
+        layoutManageProductScanContent.removeAllViews()
+        layoutManageProductScan.visibility = View.GONE
+        isScanning = false
     }
 
     fun fetchProductByCat(){
@@ -223,7 +284,7 @@ class ManageProductFragment : Fragment() , MainView {
                     tempProductItems.add(productItems[index])
                     tmpProductKeys.add(productKeys[index])
                 }
-                else if (data.PROD_CODE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
+                else if (data.CODE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
                     && (data.CAT.toString() == categoryItems[currentCat]
                             || currentCat == 0)
                 ){
@@ -307,4 +368,11 @@ class ManageProductFragment : Fragment() , MainView {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    override fun handleResult(p0: Result?) {
+        if (p0 != null) {
+            svManageProduct.setQuery(p0.text,false)
+            fetchProductByCat()
+        }
+        cancelScan()
+    }
 }

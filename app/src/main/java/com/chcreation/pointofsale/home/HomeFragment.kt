@@ -2,6 +2,7 @@ package com.chcreation.pointofsale.home
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +10,8 @@ import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import android.widget.AbsListView
 import androidx.appcompat.widget.SearchView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +21,7 @@ import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Cat
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.Homepresenter
+import com.chcreation.pointofsale.product.NewProductActivity
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
@@ -26,17 +30,19 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.zxing.Result
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_manage_product.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.*
 import java.util.*
 import kotlin.collections.ArrayList
 
-class HomeFragment : Fragment() , MainView {
+class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
 
     private lateinit var adapter: HomeRecyclerViewAdapter
     private var productItems : ArrayList<Product> = arrayListOf()
@@ -50,7 +56,10 @@ class HomeFragment : Fragment() , MainView {
     private var currentCat = 0
     private var searchFilter = ""
     private var isEnabled = true
+    private var isScanning = false
+    private var CAMERA_PERMISSION  = 101
     private var sortBy = ESort.PROD_NAME.toString()
+    private lateinit var mScannerView : ZXingScannerView
 
     companion object{
         var tempProductItems : ArrayList<Product> = arrayListOf()
@@ -77,29 +86,31 @@ class HomeFragment : Fragment() , MainView {
         mDatabase = FirebaseDatabase.getInstance().reference
         sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
         presenter = Homepresenter(this,mAuth,mDatabase,ctx)
+        mScannerView = ZXingScannerView(ctx)
 
         adapter = HomeRecyclerViewAdapter(
             ctx,
             tempProductItems
         ) {
             try {
+                if(!isScanning){
+                    addCart(it)
+                    totalQty = countQty()
+                    totalPrice = sumPrice()
 
-                addCart(it)
-                totalQty = countQty()
-                totalPrice = sumPrice()
+                    if (tempProductItems[it].MANAGE_STOCK)
+                        tempProductItems[it] = Product(tempProductItems[it].NAME,tempProductItems[it].PRICE,tempProductItems[it].DESC,tempProductItems[it].COST, tempProductItems[it].MANAGE_STOCK,
+                            tempProductItems[it].STOCK!! - 1,tempProductItems[it].IMAGE,tempProductItems[it].PROD_CODE,tempProductItems[it].UOM_CODE,tempProductItems[it].CAT,
+                            tempProductItems[it].CODE,tempProductItems[it].STATUS_CODE,tempProductItems[it].CREATED_DATE,tempProductItems[it].UPDATED_DATE,
+                            tempProductItems[it].CREATED_BY,tempProductItems[it].UPDATED_BY)
 
-                if (tempProductItems[it].MANAGE_STOCK)
-                    tempProductItems[it] = Product(tempProductItems[it].NAME,tempProductItems[it].PRICE,tempProductItems[it].DESC,tempProductItems[it].COST, tempProductItems[it].MANAGE_STOCK,
-                        tempProductItems[it].STOCK!! - 1,tempProductItems[it].IMAGE,tempProductItems[it].PROD_CODE,tempProductItems[it].UOM_CODE,tempProductItems[it].CAT,
-                        tempProductItems[it].CODE,tempProductItems[it].STATUS_CODE,tempProductItems[it].CREATED_DATE,tempProductItems[it].UPDATED_DATE,
-                        tempProductItems[it].CREATED_BY,tempProductItems[it].UPDATED_BY)
+                    adapter.notifyDataSetChanged()
 
-                adapter.notifyDataSetChanged()
-
-                btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
-                btnHomeAddItem.startAnimation(normalClickAnimation())
-                btnHomeAddItem.backgroundResource = R.drawable.button_border_fill
-                btnHomeAddItem.textColorResource = R.color.colorWhite
+                    btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
+                    btnHomeAddItem.startAnimation(normalClickAnimation())
+                    btnHomeAddItem.backgroundResource = R.drawable.button_border_fill
+                    btnHomeAddItem.textColorResource = R.color.colorWhite
+                }
             }catch (e: Exception){
                 showError(ctx,e.message.toString())
             }
@@ -142,15 +153,17 @@ class HomeFragment : Fragment() , MainView {
         })
 
         btnHomeAddItem.onClick {
-            if (cartItems.size == 0)
-                alert("Add some Items to Your Cart First.") {
-                    title = "Empty Cart"
+            if (!isScanning){
+                if (cartItems.size == 0)
+                    alert("Add some Items to Your Cart First.") {
+                        title = "Empty Cart"
 
-                    yesButton {  }
-                }.show()
-            else{
-                btnHomeAddItem.startAnimation(normalClickAnimation())
-                startActivity<CartActivity>()
+                        yesButton {  }
+                    }.show()
+                else{
+                    btnHomeAddItem.startAnimation(normalClickAnimation())
+                    startActivity<CartActivity>()
+                }
             }
         }
 
@@ -181,6 +194,29 @@ class HomeFragment : Fragment() , MainView {
                 fetchProductByCat()
             }
         }
+
+        tvHomeAddProd.onClick {
+            tvHomeAddProd.startAnimation(normalClickAnimation())
+
+            startActivity<NewProductActivity>()
+        }
+
+        ivHomeScan.onClick { cs->
+            ivHomeScan.startAnimation(normalClickAnimation())
+
+            if (ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED)
+                ActivityCompat.requestPermissions(requireActivity(),
+                    arrayOf(android.Manifest.permission.CAMERA),CAMERA_PERMISSION
+                )
+            else
+                openScanBarcode()
+        }
+
+        btnHomeScanCancel.onClick {
+            btnHomeScanCancel.startAnimation(normalClickAnimation())
+            cancelScan()
+        }
     }
 
     override fun onStart() {
@@ -189,6 +225,10 @@ class HomeFragment : Fragment() , MainView {
         GlobalScope.launch {
             if (tempProductItems.size == 0 || productItems.size == 0)
                 presenter.retrieveProducts()
+            else{
+                tvHomeAddProd.visibility = View.GONE
+                rvHome.visibility = View.VISIBLE
+            }
 
             presenter.retrieveCategories()
 
@@ -224,6 +264,22 @@ class HomeFragment : Fragment() , MainView {
         active = false
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == CAMERA_PERMISSION){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openScanBarcode()
+            }
+            else
+                toast("Permission Denied")
+        }
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
@@ -236,6 +292,23 @@ class HomeFragment : Fragment() , MainView {
         if (savedInstanceState != null) {
             savedInstanceState.getStringArray("categoryItems")?.let { categoryItems.addAll(it) }
         }
+    }
+
+    private fun openScanBarcode(){
+        isScanning = true
+        layoutHomeScan.visibility = View.VISIBLE
+        mScannerView.setAutoFocus(true)
+        mScannerView.setResultHandler(this@HomeFragment)
+        layoutHomeScanContent.addView(mScannerView)
+        mScannerView.startCamera()
+    }
+
+    private fun cancelScan(){
+        mScannerView.stopCamera();
+        mScannerView.removeAllViewsInLayout()
+        layoutHomeScanContent.removeAllViews()
+        layoutHomeScan.visibility = View.GONE
+        isScanning = false
     }
 
     private fun countQty() : Int{
@@ -297,7 +370,7 @@ class HomeFragment : Fragment() , MainView {
                     tempProductItems.add(productItems[index])
                     tmpProductKeys.add(productKeys[index])
                 }
-                else if (data.PROD_CODE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
+                else if (data.CODE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
                     //|| data.CAT.toString().contains(searchFilter)
                     && (data.CAT.toString() == categoryItems[currentCat]
                             || currentCat == 0)
@@ -332,6 +405,8 @@ class HomeFragment : Fragment() , MainView {
         if (context != null && isEnabled && isVisible && isResumed){
             if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
                 if (dataSnapshot.exists()){
+                    tvHomeAddProd.visibility = View.GONE
+                    rvHome.visibility = View.VISIBLE
                     productKeys.clear()
                     productItems.clear()
                     tempProductItems.clear()
@@ -350,6 +425,9 @@ class HomeFragment : Fragment() , MainView {
                     adapter.notifyDataSetChanged()
                     if (categoryItems.size > 0)
                         fetchProductByCat()
+                }else{
+                    tvHomeAddProd.visibility = View.VISIBLE
+                    rvHome.visibility = View.GONE
                 }
             }
             else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
@@ -378,6 +456,14 @@ class HomeFragment : Fragment() , MainView {
 
     override fun response(message: String) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun handleResult(p0: Result?) {
+        if (p0 != null) {
+            svHomeSearch.setQuery(p0.text,false)
+            fetchProductByCat()
+        }
+        cancelScan()
     }
 
 }

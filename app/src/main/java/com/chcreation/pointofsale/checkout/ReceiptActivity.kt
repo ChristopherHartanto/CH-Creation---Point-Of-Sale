@@ -2,9 +2,7 @@ package com.chcreation.pointofsale.checkout
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -14,33 +12,24 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
-import android.provider.MediaStore
-import android.util.Log
 import android.view.PixelCopy
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.core.view.marginTop
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.GlideDrawable
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.ErrorActivity.Companion.errorMessage
-import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.totalReceived
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transCode
-import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transDate
-import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
-import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
-import com.chcreation.pointofsale.checkout.NoteActivity.Companion.note
-import com.chcreation.pointofsale.home.HomeFragment
-import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
-import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.model.Payment
 import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.presenter.TransactionPresenter
-import com.chcreation.pointofsale.transaction.TransactionFragment
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transCodeItems
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transPosition
 import com.chcreation.pointofsale.view.MainView
@@ -48,7 +37,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.Transaction
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_receipt.*
@@ -97,8 +85,8 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         rvReceiptPaymentList.adapter = adapterPaymentList
         rvReceiptPaymentList.layoutManager = LinearLayoutManager(this)
 
-        tvReceiptMerchantName.text = getMerchant(this).toUpperCase(Locale.ENGLISH)
-        if (getMerchant(this).length >= 18)
+        tvReceiptMerchantName.text = getMerchantCode(this).toUpperCase(Locale.ENGLISH)
+        if (getMerchantCode(this).length >= 18)
             tvReceiptMerchantName.textSize = 20F
         tvReceiptMerchantAddress.text = getMerchantAddress(this)
         tvReceiptMerchantTel.text = getMerchantNoTel(this)
@@ -151,9 +139,9 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
     private fun fetchData(){
         if (getMerchantReceiptImage(this))
-            ivReceiptMerchantImage.visibility = View.VISIBLE
+            layoutReceiptMerchantImage.visibility = View.VISIBLE
         else
-            ivReceiptMerchantImage.visibility = View.GONE
+            layoutReceiptMerchantImage.visibility = View.GONE
 
         layoutReceiptCustomer.visibility = View.GONE
         layoutReceiptCustomerAddress.visibility = View.GONE
@@ -175,9 +163,33 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         rvReceipt.layoutManager = LinearLayoutManager(this)
 
         if (getMerchantImage(this) == "")
-            ivReceiptMerchantImage.visibility = View.GONE
+            layoutReceiptMerchantImage.visibility = View.GONE
         else
-            Glide.with(this).load(getMerchantImage(this)).into(ivReceiptMerchantImage)
+            Glide.with(this).load(getMerchantImage(this)).listener(object :
+                RequestListener<String, GlideDrawable> {
+                override fun onException(
+                    e: java.lang.Exception?,
+                    model: String?,
+                    target: Target<GlideDrawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    pbReceiptMerchantImage.visibility = View.GONE
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: GlideDrawable?,
+                    model: String?,
+                    target: Target<GlideDrawable>?,
+                    isFromMemoryCache: Boolean,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    pbReceiptMerchantImage.visibility = View.GONE
+                    ivReceiptMerchantImage.visibility = View.VISIBLE
+                    return false
+                }
+
+            }).into(ivReceiptMerchantImage)
         tvReceiptCashier.text = mAuth.currentUser?.displayName
 
         val discount = boughtList.DISCOUNT!!
@@ -242,9 +254,9 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
     private fun fetchData2(){
         if (getMerchantReceiptImage(this))
-            ivReceiptMerchantImage.visibility = View.VISIBLE
+            layoutReceiptMerchantImage.visibility = View.VISIBLE
         else
-            ivReceiptMerchantImage.visibility = View.GONE
+            layoutReceiptMerchantImage.visibility = View.GONE
 
         layoutReceiptNote.visibility = View.VISIBLE
 
@@ -292,9 +304,33 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         rvReceipt.layoutManager = LinearLayoutManager(this)
 
         if (getMerchantImage(this) == "")
-            ivReceiptMerchantImage.visibility = View.GONE
+            layoutReceiptMerchantImage.visibility = View.GONE
         else
-            Glide.with(this).load(getMerchantImage(this)).into(ivReceiptMerchantImage)
+            Glide.with(this).load(getMerchantImage(this)).listener(object :
+                RequestListener<String, GlideDrawable> {
+                override fun onException(
+                    e: java.lang.Exception?,
+                    model: String?,
+                    target: Target<GlideDrawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    pbReceiptMerchantImage.visibility = View.GONE
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: GlideDrawable?,
+                    model: String?,
+                    target: Target<GlideDrawable>?,
+                    isFromMemoryCache: Boolean,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    pbReceiptMerchantImage.visibility = View.GONE
+                    ivReceiptMerchantImage.visibility = View.VISIBLE
+                    return false
+                }
+
+            }).into(ivReceiptMerchantImage)
         tvReceiptCashier.text = mAuth.currentUser?.displayName
 
         val discount = boughtList.DISCOUNT!!

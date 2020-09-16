@@ -15,6 +15,7 @@ import com.chcreation.pointofsale.checkout.CartRecyclerViewAdapter
 import com.chcreation.pointofsale.checkout.CheckOutActivity
 import com.chcreation.pointofsale.checkout.ReceiptActivity
 import com.chcreation.pointofsale.home.HomeFragment
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.TransactionPresenter
@@ -63,6 +64,8 @@ class DetailTransactionActivity : AppCompatActivity(), MainView {
                     layoutDetailTransaction.alpha = 0.3F
 
                     presenter.cancelTransaction(transCodeItems[transPosition])
+
+                    presenter.saveActivityLogs(ActivityLogs("Cancel Transaction ${receiptFormat(transCodeItems[transPosition])}",mAuth.currentUser!!.uid,dateFormat().format(Date())))
                 }
                 noButton {
 

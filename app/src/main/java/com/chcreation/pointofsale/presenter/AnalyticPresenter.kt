@@ -14,8 +14,8 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.Exception
-import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference, private val context: Context){
 
@@ -42,7 +42,7 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.PRODUCT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())
@@ -64,7 +64,7 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.TRANSACTION.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())
@@ -153,7 +153,7 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
 
                         database.child(ETable.MERCHANT.toString())
                             .child(getMerchantCredential(context))
-                            .child(getMerchant(context))
+                            .child(getMerchantCode(context))
                             .child(EMerchant.USER_LIST.toString())
                             .setValue(newUserList).addOnFailureListener {
                                 view.response(it.message.toString())
@@ -164,7 +164,7 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.MERCHANT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())
@@ -195,7 +195,8 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
                                 EAvailableMerchant.CREDENTIAL.toString() to item.CREDENTIAL,
                                 EAvailableMerchant.STATUS.toString() to EStatusCode.DELETE.toString(),
                                 EAvailableMerchant.USER_GROUP.toString() to item.USER_GROUP,
-                                EAvailableMerchant.NAME.toString() to item.NAME
+                                EAvailableMerchant.NAME.toString() to item.NAME,
+                                EAvailableMerchant.MERCHANT_CODE.toString() to item.MERCHANT_CODE
                             )
 
                             database.child(ETable.AVAILABLE_MERCHANT.toString())
@@ -219,7 +220,7 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
             database.child(ETable.AVAILABLE_MERCHANT.toString())
                 .child(userCode)
                 .orderByChild(EAvailableMerchant.NAME.toString())
-                .equalTo(getMerchant(context))
+                .equalTo(getMerchantCode(context))
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())
@@ -252,7 +253,7 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
 
                         database.child(ETable.MERCHANT.toString())
                             .child(getMerchantCredential(context))
-                            .child(getMerchant(context))
+                            .child(getMerchantCode(context))
                             .child(EMerchant.USER_LIST.toString())
                             .setValue(newUserList).addOnFailureListener {
                                 view.response(it.message.toString())
@@ -263,7 +264,7 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.MERCHANT.toString())
                 .child(getMerchantCredential(context))
-                .child(getMerchant(context))
+                .child(getMerchantCode(context))
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())
@@ -292,7 +293,8 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
                             EAvailableMerchant.CREDENTIAL.toString() to item.CREDENTIAL,
                             EAvailableMerchant.STATUS.toString() to EStatusCode.ACTIVE.toString(),
                             EAvailableMerchant.USER_GROUP.toString() to userGroup,
-                            EAvailableMerchant.NAME.toString() to item.NAME
+                            EAvailableMerchant.NAME.toString() to item.NAME,
+                            EAvailableMerchant.MERCHANT_CODE.toString() to item.MERCHANT_CODE
                         )
 
                         database.child(ETable.AVAILABLE_MERCHANT.toString())
@@ -311,7 +313,7 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
             database.child(ETable.AVAILABLE_MERCHANT.toString())
                 .child(userCode)
                 .orderByChild(EAvailableMerchant.NAME.toString())
-                .equalTo(getMerchant(context))
+                .equalTo(getMerchantCode(context))
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())

@@ -21,14 +21,26 @@
             android:paddingTop="10dp"
             android:paddingBottom="100dp">
 
-            <de.hdodenhof.circleimageview.CircleImageView
+            <FrameLayout
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:src="@drawable/default_image"
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dp"
-                android:visibility="gone"
-                android:id="@+id/ivReceiptMerchantImage"/>
+                android:id="@+id/layoutReceiptMerchantImage">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:src="@drawable/default_image"
+                    android:visibility="gone"
+                    android:id="@+id/ivReceiptMerchantImage"/>
+
+                <ProgressBar
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:id="@+id/pbReceiptMerchantImage"
+                    android:layout_gravity="center"/>
+            </FrameLayout>
 
             <TextView
                 android:layout_width="match_parent"

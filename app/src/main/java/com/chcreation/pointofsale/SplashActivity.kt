@@ -1,16 +1,13 @@
 package com.chcreation.pointofsale
 
-import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.view.View
 import com.chcreation.pointofsale.login.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_splash.*
 import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.support.v4.ctx
 
 class SplashActivity : AppCompatActivity() {
 
@@ -35,7 +32,7 @@ class SplashActivity : AppCompatActivity() {
 
             override fun onFinish() {
 
-                if (mAuth.currentUser == null || getMerchant(this@SplashActivity) == "")
+                if (mAuth.currentUser == null || getMerchantCode(this@SplashActivity) == "")
                     startActivity<LoginActivity>()
                 else
                     startActivity<MainActivity>()

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -26,13 +25,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.view.size
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Cat
-import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.ProductPresenter
-import com.chcreation.pointofsale.product.NewCategory.Companion.newCategory
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
@@ -45,23 +42,24 @@ import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.UploadTask
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.android.synthetic.main.activity_merchant.*
+import com.google.zxing.Result
 import kotlinx.android.synthetic.main.activity_new_product.*
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.fragment_manage_product_update_product.*
+import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.selector
 import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.toast
 import java.io.File
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
-import java.util.jar.Manifest
-import kotlin.collections.ArrayList
 
 
-class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSelectedListener {
+class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSelectedListener,
+    ZXingScannerView.ResultHandler {
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
@@ -70,6 +68,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
     private lateinit var sharedPreference: SharedPreferences
     private var PICK_IMAGE_CAMERA  = 111
     private var CAMERA_PERMISSION  = 101
+    private var CAMERA_PERMISSION_SCAN  = 102
     private var PICK_IMAGE_GALLERY = 222
     private var READ_PERMISION = 202
     private var filePath: Uri? = null
@@ -80,6 +79,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
     private var positionSpinner = 0
     private lateinit var spAdapter: ArrayAdapter<String>
     private var manageStock = false
+    private lateinit var mScannerView : ZXingScannerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,6 +93,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         storage = FirebaseStorage.getInstance().reference
         presenter = ProductPresenter(this,mAuth,mDatabase,this)
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+        mScannerView = ZXingScannerView(this)
 
         merchant = sharedPreference.getString("merchant","").toString()
         prodCode = generateProdCode()
@@ -151,6 +152,37 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
 
         swProduct.isChecked = !swProduct.isChecked
 
+        ivProductScan.onClick { cs->
+            ivProductScan.startAnimation(normalClickAnimation())
+
+            if (ContextCompat.checkSelfPermission(this@NewProductActivity, android.Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED)
+                ActivityCompat.requestPermissions(this@NewProductActivity,
+                    arrayOf(android.Manifest.permission.CAMERA),CAMERA_PERMISSION_SCAN
+                )
+            else
+                openScanBarcode()
+        }
+
+        btnProductScanCancel.onClick {
+            btnProductScanCancel.startAnimation(normalClickAnimation())
+            cancelScan()
+        }
+    }
+
+    private fun openScanBarcode(){
+        layoutProductScan.visibility = View.VISIBLE
+        mScannerView.setAutoFocus(true)
+        mScannerView.setResultHandler(this)
+        layoutProductScanContent.addView(mScannerView)
+        mScannerView.startCamera()
+    }
+
+    private fun cancelScan(){
+        mScannerView.stopCamera();
+        mScannerView.removeAllViewsInLayout()
+        layoutProductScanContent.removeAllViews()
+        layoutProductScan.visibility = View.GONE
     }
 
     private fun saveProduct(imageUrl: String){
@@ -180,12 +212,15 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         else
             selectedCategory
 
-        if (getMerchant(this) == "")
+        if (getMerchantCode(this) == "")
             toast("You Haven't Set Up Your Merchant")
-        else
+        else{
             presenter.saveProduct(Product(name,price,desc,cost,manageStock,stock,imageUrl,prodCode,uomCode,selectedCategory,code,EStatusCode.ACTIVE.toString(),
                 dateFormat().format(Date()),dateFormat().format(Date()),
                 mAuth.currentUser!!.uid,mAuth.currentUser!!.uid))
+
+            presenter.saveActivityLogs(ActivityLogs("Create Product $name",mAuth.currentUser!!.uid,dateFormat().format(Date())))
+        }
     }
 
     override fun onResume() {
@@ -380,6 +415,13 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
             else
                 toast("Permission Denied")
         }
+        else if (requestCode == CAMERA_PERMISSION_SCAN){
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                openScanBarcode()
+            }
+            else
+                toast("Permission Denied")
+        }
     }
 
     private fun rotateImage(bitmapSource : Bitmap) : Bitmap{
@@ -491,5 +533,9 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         positionSpinner = position
         if (position == 1)
             startActivity<ListCategoryActivity>()
+    }
+    override fun handleResult(p0: Result?) {
+        etProductCode.setText(p0.toString())
+        cancelScan()
     }
 }
