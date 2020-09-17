@@ -45,6 +45,7 @@ class ActivityLogsRecyclerViewAdapter(private val context: Context, private val 
             desc.text = "${log.LOG}\n${parseDateFormatFull(log.CREATED_DATE.toString())}"
 
             itemView.onClick {
+                itemView.startAnimation(normalClickAnimation())
                 listener(position)
             }
         }

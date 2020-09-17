@@ -72,7 +72,9 @@ enum class EMerchant{
     IMAGE,
     USER_LIST,
     ADDRESS,
-    MERCHANT_CODE
+    MERCHANT_CODE,
+    MERCHANT_STATUS,
+    ACTIVE
 }
 
 enum class EAvailableMerchant{
@@ -162,7 +164,19 @@ enum class EUser{
     UPDATED_DATE,
     NAME,
     EMAIL,
-    CODE
+    CODE,
+    MEMBER_STATUS,
+    ACTIVE
+}
+
+enum class EUserMemberStatus{
+    FREE_TRIAL,
+    PREMIUM
+}
+
+enum class EMerchantMemberStatus{
+    FREE_TRIAL,
+    PREMIUM
 }
 
 enum class EUserList{
@@ -226,10 +240,13 @@ enum class EStatusCode{
     ACTIVE
 }
 
-enum class EStatusUser{
+enum class EStatusUser{ // use for user and merchant both
     ACTIVE,
-    DE_ACTIVE
+    DE_ACTIVE,
+    SUSPEND
 }
+
+
 
 enum class EStatusStock{
     INBOUND,
@@ -258,7 +275,8 @@ enum class ESharedPreference{
     CUSTOMER_NO_TEL,
     CUSTOMER_ADDRESS,
     RECEIPT_MERCHANT_ICON,
-    CUSTOM_RECEIPT
+    CUSTOM_RECEIPT,
+    MERCHANT_MEMBER_STATUS
 }
 
 enum class ECustomReceipt{

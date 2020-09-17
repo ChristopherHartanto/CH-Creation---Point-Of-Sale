@@ -5,6 +5,7 @@ import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.custom_receipt.Sincere
 import com.chcreation.pointofsale.model.About
 import com.chcreation.pointofsale.model.ActivityLogs
+import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
@@ -64,7 +65,7 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
             database.child(ETable.ACTIVITY_LOGS.toString())
                 .child(getMerchantCredential(context))
                 .child(getMerchantCode(context))
-                .limitToFirst(1000)
+                .limitToFirst(200)
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())
@@ -158,6 +159,65 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
                 .child(userCode)
                 .addListenerForSingleValueEvent(postListener)
         }catch (e:java.lang.Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun getUserActiveStatus(userCode : String, callBack:(status:String) -> Unit){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        val item = p0.getValue(User::class.java)
+
+                        if (item != null) {
+                            callBack(item.ACTIVE.toString())
+                        }
+                    }
+
+                }
+
+            }
+            database.child(ETable.USER.toString())
+                .child(userCode)
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e:java.lang.Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun getMerchant(callback:(success: Boolean,merchant: Merchant)->Unit){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        val item = p0.getValue(Merchant::class.java)
+                        if (item != null) {
+                            callback(true, item)
+                        }
+                        else
+                            callback(false,Merchant())
+                    }
+                    else
+                        callback(false,Merchant())
+                }
+
+            }
+            database.child(ETable.MERCHANT.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchantCode(context))
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e: Exception){
             showError(context,e.message.toString())
             e.printStackTrace()
         }

@@ -203,9 +203,12 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
     override fun onStart() {
         super.onStart()
 
+        pbManageProduct.visibility = View.VISIBLE
+
         GlobalScope.launch {
-            if (tempProductItems.size == 0)
-                presenter.retrieveProducts()
+//            if (tempProductItems.size == 0)
+//                presenter.retrieveProducts()
+            presenter.retrieveProducts()
             presenter.retrieveCategories()
         }
 
@@ -243,6 +246,7 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
     }
 
     private fun openScanBarcode(){
+        cancelScan()
         isScanning = true
         layoutManageProductScan.visibility = View.VISIBLE
         mScannerView.setAutoFocus(true)
@@ -358,7 +362,6 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
                 }
                 svManageProduct.visibility = View.VISIBLE
                 pbManageProduct.visibility = View.GONE
-                srManageProduct.visibility = View.VISIBLE
             }
         }
 

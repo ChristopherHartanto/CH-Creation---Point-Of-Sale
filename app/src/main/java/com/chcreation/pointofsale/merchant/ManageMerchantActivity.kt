@@ -64,13 +64,13 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
     private var downloadUri: Uri? = null
     private var currentPhotoPath = ""
     private var bitmap: Bitmap? = null
+    private var merchantCode = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_manage_merchant)
 
         supportActionBar?.title = "Set Up Merchant"
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -175,9 +175,10 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                 yesButton {
                     btnMerchant.isEnabled = false
                     pbMerchant.visibility = View.VISIBLE
-                    val merchantCode = generateMerchantCode()
+                    merchantCode = generateMerchantCode()
                     presenter.createNewMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,"",null,null,
-                        currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid,merchantCode),
+                        currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid,merchantCode
+                        ,EMerchantMemberStatus.FREE_TRIAL.toString(),EStatusUser.ACTIVE.toString()),
                         AvailableMerchant(merchantName,EUserGroup.MANAGER.toString(),currentDate,currentDate,
                             mAuth.currentUser!!.uid,EStatusUser.ACTIVE.toString(),merchantCode))
 
@@ -196,14 +197,14 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             }
             else{
                 val image = if (imageUrl == "") merchant!!.IMAGE else imageUrl
-                val merchantCode = if (merchant!!.MERCHANT_CODE == "") merchant!!.NAME else merchant!!.MERCHANT_CODE
+                merchantCode = if (merchant!!.MERCHANT_CODE == "") merchant!!.NAME.toString() else merchant!!.MERCHANT_CODE.toString()
 
                 btnMerchant.isEnabled = false
                 pbMerchant.visibility = View.VISIBLE
                 presenter.updateMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,image,
                     merchant!!.USER_LIST,merchant!!.CAT,merchant!!.CREATED_DATE,
                     dateFormat().format(Date()),merchant!!.CREATED_BY,
-                    mAuth.currentUser!!.uid,merchantCode),merchantName)
+                    mAuth.currentUser!!.uid,merchantCode,merchant!!.MEMBER_STATUS,merchant!!.ACTIVE),merchantName)
 
                 presenter.saveActivityLogs(ActivityLogs("Update Merchant",mAuth.currentUser!!.uid,dateFormat().format(Date())))
             }
@@ -411,6 +412,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             btnMerchant.text = "Save"
 
             supportActionBar?.title = "Update Merchant"
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
             etMerchantAddress.setText(merchant!!.ADDRESS)
             etMerchantBusinessInfo.setText(merchant!!.BUSINESS_INFO)
@@ -451,11 +453,13 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
         if (message == EMessageResult.SUCCESS.toString())
         {
             editor = sharedPreference.edit()
-            editor.putString(ESharedPreference.MERCHANT_CODE.toString(),etMerchantName.text.toString())
+            editor.putString(ESharedPreference.MERCHANT_CODE.toString(),merchantCode)
+            editor.putString(ESharedPreference.MERCHANT_NAME.toString(),etMerchantName.text.toString())
             editor.putString(ESharedPreference.USER_GROUP.toString(),EUserGroup.MANAGER.toString())
             editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(), mAuth.currentUser?.uid)
             editor.putString(ESharedPreference.ADDRESS.toString(),etMerchantAddress.text.toString())
             editor.putString(ESharedPreference.NO_TELP.toString(),etMerchantNoTelp.text.toString())
+            editor.putString(ESharedPreference.MERCHANT_MEMBER_STATUS.toString(),EMerchantMemberStatus.FREE_TRIAL.toString())
             editor.apply()
 
             toast("Create Merchant Success")
@@ -475,6 +479,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             editor.putString(ESharedPreference.NO_TELP.toString(),etMerchantNoTelp.text.toString())
             editor.putString(ESharedPreference.MERCHANT_NAME.toString(),etMerchantName.text.toString())
             editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(),image)
+            editor.putString(ESharedPreference.MERCHANT_CODE.toString(),merchantCode)
             editor.apply()
 
             toast("Update Success")

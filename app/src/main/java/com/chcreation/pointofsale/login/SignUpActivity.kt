@@ -81,6 +81,7 @@ class SignUpActivity : AppCompatActivity(), MainView {
                 if (task.isSuccessful) {
                     val editor = sharedPreference.edit()
                     editor.putString(ESharedPreference.NAME.toString(),name)
+                    editor.putString(ESharedPreference.EMAIL.toString(), email)
                     editor.apply()
                     presenter.saveUser(name,email)
                 }else {

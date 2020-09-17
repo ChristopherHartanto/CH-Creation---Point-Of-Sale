@@ -99,7 +99,9 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
                 EUser.NAME.toString() to user.NAME,
                 EUser.EMAIL.toString() to user.EMAIL,
                 EUser.CREATED_DATE.toString() to user.CREATED_DATE,
-                EUser.UPDATED_DATE.toString() to user.UPDATED_DATE
+                EUser.UPDATED_DATE.toString() to user.UPDATED_DATE,
+                EUser.ACTIVE.toString() to user.ACTIVE,
+                EUser.MEMBER_STATUS.toString() to user.MEMBER_STATUS
             )
             database.child(ETable.USER.toString())
                 .child(auth.currentUser!!.uid)
@@ -141,7 +143,7 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
 
                         val gson = Gson()
                         val arrayUserListType = object : TypeToken<MutableList<UserList>>() {}.type
-                        val userListItems : MutableList<UserList> = gson.fromJson(item!!.USER_LIST.toString(),arrayUserListType)
+                        val userListItems : MutableList<UserList> = gson.fromJson(item?.USER_LIST.toString(),arrayUserListType)
 
                         for((index,data) in userListItems.withIndex()){
                             if (data.USER_CODE == userCode){
@@ -187,6 +189,68 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
                             for(data in p0.children){
                                 key = data.key.toString().toInt()
                                 item = data.getValue(AvailableMerchant::class.java)!!
+                                break
+                            }
+                            if (item.CREDENTIAL != ""){
+                                val values = hashMapOf(
+                                    EAvailableMerchant.CREATED_DATE.toString() to item.CREATED_DATE,
+                                    EAvailableMerchant.UPDATED_DATE.toString() to dateFormat().format(Date()),
+                                    EAvailableMerchant.CREDENTIAL.toString() to item.CREDENTIAL,
+                                    EAvailableMerchant.STATUS.toString() to EStatusCode.DELETE.toString(),
+                                    EAvailableMerchant.USER_GROUP.toString() to item.USER_GROUP,
+                                    EAvailableMerchant.NAME.toString() to item.NAME,
+                                    EAvailableMerchant.MERCHANT_CODE.toString() to item.MERCHANT_CODE
+                                )
+
+                                database.child(ETable.AVAILABLE_MERCHANT.toString())
+                                    .child(userCode)
+                                    .child(key.toString())
+                                    .setValue(values).addOnFailureListener {
+                                        view.response(it.message.toString())
+                                    }
+                                    .addOnSuccessListener {
+                                        view.response(EMessageResult.SUCCESS.toString())
+                                    }
+                            }else
+                                view.response("Please Contact Your Administrator!! -- Call Remove Available Merchant")
+
+                        }catch (e: Exception){
+                            showError(context,e.message.toString())
+                            e.printStackTrace()
+                        }
+
+                    }else
+                        removeAvailableMerchantByName(userCode)
+                }
+
+            }
+            database.child(ETable.AVAILABLE_MERCHANT.toString())
+                .child(userCode)
+                .orderByChild(EAvailableMerchant.MERCHANT_CODE.toString())
+                .equalTo(getMerchantCode(context))
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun removeAvailableMerchantByName(userCode: String){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        try{
+                            var key = 0
+                            var item = AvailableMerchant()
+                            for(data in p0.children){
+                                key = data.key.toString().toInt()
+                                item = data.getValue(AvailableMerchant::class.java)!!
+                                break
                             }
 
                             val values = hashMapOf(
@@ -196,7 +260,7 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
                                 EAvailableMerchant.STATUS.toString() to EStatusCode.DELETE.toString(),
                                 EAvailableMerchant.USER_GROUP.toString() to item.USER_GROUP,
                                 EAvailableMerchant.NAME.toString() to item.NAME,
-                                EAvailableMerchant.MERCHANT_CODE.toString() to item.MERCHANT_CODE
+                                EAvailableMerchant.MERCHANT_CODE.toString() to getMerchantCode(context)
                             )
 
                             database.child(ETable.AVAILABLE_MERCHANT.toString())
@@ -213,7 +277,9 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
                             e.printStackTrace()
                         }
 
-                    }
+                    }else
+                        view.response("Please Contact Your Administrator -- Call Delete Available Merchant")
+
                 }
 
             }
@@ -286,27 +352,87 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
                         for(data in p0.children){
                             key = data.key.toString().toInt()
                             item = data.getValue(AvailableMerchant::class.java)!!
+                            break
                         }
-                        val values = hashMapOf(
-                            EAvailableMerchant.CREATED_DATE.toString() to item.CREATED_DATE,
-                            EAvailableMerchant.UPDATED_DATE.toString() to dateFormat().format(Date()),
-                            EAvailableMerchant.CREDENTIAL.toString() to item.CREDENTIAL,
-                            EAvailableMerchant.STATUS.toString() to EStatusCode.ACTIVE.toString(),
-                            EAvailableMerchant.USER_GROUP.toString() to userGroup,
-                            EAvailableMerchant.NAME.toString() to item.NAME,
-                            EAvailableMerchant.MERCHANT_CODE.toString() to item.MERCHANT_CODE
-                        )
+                        if (item.CREDENTIAL != ""){
+                            val values = hashMapOf(
+                                EAvailableMerchant.CREATED_DATE.toString() to item.CREATED_DATE,
+                                EAvailableMerchant.UPDATED_DATE.toString() to dateFormat().format(Date()),
+                                EAvailableMerchant.CREDENTIAL.toString() to item.CREDENTIAL,
+                                EAvailableMerchant.STATUS.toString() to EStatusCode.ACTIVE.toString(),
+                                EAvailableMerchant.USER_GROUP.toString() to userGroup,
+                                EAvailableMerchant.NAME.toString() to item.NAME,
+                                EAvailableMerchant.MERCHANT_CODE.toString() to item.MERCHANT_CODE
+                            )
 
-                        database.child(ETable.AVAILABLE_MERCHANT.toString())
-                            .child(userCode)
-                            .child(key.toString())
-                            .setValue(values).addOnFailureListener {
-                                view.response(it.message.toString())
-                            }
-                            .addOnSuccessListener {
-                                view.response(EMessageResult.UPDATE.toString())
-                            }
-                    }
+                            database.child(ETable.AVAILABLE_MERCHANT.toString())
+                                .child(userCode)
+                                .child(key.toString())
+                                .setValue(values).addOnFailureListener {
+                                    view.response(it.message.toString())
+                                }
+                                .addOnSuccessListener {
+                                    view.response(EMessageResult.UPDATE.toString())
+                                }
+                        }else
+                            view.response("Please Contact Your Administrator!! -- Call Update User Available Merchant")
+                    }else
+                        updateUserAvailableMerchantByName(userCode,userGroup)
+                }
+
+            }
+            database.child(ETable.AVAILABLE_MERCHANT.toString())
+                .child(userCode)
+                .orderByChild(EAvailableMerchant.MERCHANT_CODE.toString())
+                .equalTo(getMerchantCode(context))
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun updateUserAvailableMerchantByName(userCode: String, userGroup: String){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        var key = 0
+                        var item = AvailableMerchant()
+                        for(data in p0.children){
+                            key = data.key.toString().toInt()
+                            item = data.getValue(AvailableMerchant::class.java)!!
+                            break
+                        }
+                        if (item.CREATED_DATE != ""){
+
+                            val values = hashMapOf(
+                                EAvailableMerchant.CREATED_DATE.toString() to item.CREATED_DATE,
+                                EAvailableMerchant.UPDATED_DATE.toString() to dateFormat().format(Date()),
+                                EAvailableMerchant.CREDENTIAL.toString() to item.CREDENTIAL,
+                                EAvailableMerchant.STATUS.toString() to EStatusCode.ACTIVE.toString(),
+                                EAvailableMerchant.USER_GROUP.toString() to userGroup,
+                                EAvailableMerchant.NAME.toString() to item.NAME,
+                                EAvailableMerchant.MERCHANT_CODE.toString() to getMerchantCode(context)
+                            )
+
+                            database.child(ETable.AVAILABLE_MERCHANT.toString())
+                                .child(userCode)
+                                .child(key.toString())
+                                .setValue(values).addOnFailureListener {
+                                    view.response(it.message.toString())
+                                }
+                                .addOnSuccessListener {
+                                    view.response(EMessageResult.UPDATE.toString())
+                                }
+                        }else
+                            view.response("Please Contact Your Administrator!! -- Call Available Merchant")
+                    }else
+                        view.response("Please Contact Your Administrator!! -- Call Available Merchant")
                 }
 
             }
@@ -316,6 +442,53 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
                 .equalTo(getMerchantCode(context))
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun saveActivityLogs(logs: ActivityLogs){
+        try{
+            var key = 0
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        for (data in p0.children){
+                            try {
+                                key = data.key.toString().toInt() + 1
+                            } catch (e: NumberFormatException) {
+                                key = -99
+                            }
+                            break
+                        }
+                    }
+                    if (key != -99){
+                        val values  = hashMapOf(
+                            EActivityLogs.LOG.toString() to logs.LOG,
+                            EActivityLogs.CREATED_BY.toString() to logs.CREATED_BY,
+                            EActivityLogs.CREATED_DATE.toString() to logs.CREATED_DATE
+                        )
+
+                        database.child(ETable.ACTIVITY_LOGS.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchantCode(context))
+                            .child(key.toString())
+                            .setValue(values)
+                    }
+                }
+
+            }
+            database.child(ETable.ACTIVITY_LOGS.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchantCode(context))
+                .orderByKey()
+                .limitToLast(1)
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e:java.lang.Exception){
             showError(context,e.message.toString())
             e.printStackTrace()
         }

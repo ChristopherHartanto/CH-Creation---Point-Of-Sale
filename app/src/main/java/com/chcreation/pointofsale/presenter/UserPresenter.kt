@@ -4,6 +4,7 @@ import android.content.Context
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Customer
+import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.model.UserAcceptance
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
@@ -32,7 +33,9 @@ class UserPresenter(private val view: MainView, private val auth: FirebaseAuth, 
                 EUser.NAME.toString() to name,
                 EUser.EMAIL.toString() to email,
                 EUser.CREATED_DATE.toString() to dateFormat().format(Date()),
-                EUser.UPDATED_DATE.toString() to dateFormat().format(Date())
+                EUser.UPDATED_DATE.toString() to dateFormat().format(Date()),
+                EUser.MEMBER_STATUS.toString() to EUserMemberStatus.FREE_TRIAL.toString(),
+                EUser.ACTIVE.toString() to EStatusCode.ACTIVE.toString()
             )
             database.child(ETable.USER.toString())
                 .child(auth.currentUser!!.uid)
@@ -145,6 +148,29 @@ class UserPresenter(private val view: MainView, private val auth: FirebaseAuth, 
 
             override fun onDataChange(p0: DataSnapshot) {
                 view.loadData(p0, EMessageResult.FETCH_USER_SUCCESS.toString())
+            }
+
+        }
+        database.child(ETable.USER.toString())
+            .child(userId)
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun retrieveUser(userId: String,key:Int,callback:(success:Boolean,key:Int,user:User)->Unit){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if (p0.exists()){
+                    val item = p0.getValue(User::class.java)
+                    if (item != null) {
+                        callback(true,key,item)
+                    }else
+                        callback(false,key, User())
+                }else
+                    callback(false,key,User())
             }
 
         }

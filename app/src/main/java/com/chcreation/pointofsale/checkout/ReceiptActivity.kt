@@ -85,7 +85,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         rvReceiptPaymentList.adapter = adapterPaymentList
         rvReceiptPaymentList.layoutManager = LinearLayoutManager(this)
 
-        tvReceiptMerchantName.text = getMerchantCode(this).toUpperCase(Locale.ENGLISH)
+        tvReceiptMerchantName.text = getMerchantName(this).toUpperCase(Locale.ENGLISH)
         if (getMerchantCode(this).length >= 18)
             tvReceiptMerchantName.textSize = 20F
         tvReceiptMerchantAddress.text = getMerchantAddress(this)

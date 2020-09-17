@@ -73,6 +73,39 @@ class ProductPresenter(private val view: MainView,
         }
     }
 
+    fun checkProductSize(callback:(size:Int) -> Unit){
+        try {
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        val listProduct = mutableListOf<Product>()
+                        for (data in p0.children){
+                            val item = data.getValue(Product::class.java)
+                            if (item != null) {
+                                listProduct.add(item)
+                            }
+                        }
+                        callback(listProduct.size)
+                    }else
+                        callback(0)
+                }
+
+            }
+            database.child(ETable.PRODUCT.toString())
+                .child(getMerchantCredential(context))
+                .child(getMerchantCode(context))
+                .addListenerForSingleValueEvent(postListener)
+
+        }catch (e:java.lang.Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
     private fun getProductPrimaryKey(product: Product){
         try{
             postListener = object : ValueEventListener {

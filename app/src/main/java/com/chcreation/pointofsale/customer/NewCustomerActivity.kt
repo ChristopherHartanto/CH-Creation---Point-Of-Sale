@@ -33,9 +33,8 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import kotlinx.android.synthetic.main.activity_new_customer.*
 import kotlinx.android.synthetic.main.activity_new_product.*
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.selector
-import org.jetbrains.anko.toast
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -74,35 +73,51 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
             btnCustomerSave.startAnimation(normalClickAnimation())
             loading()
 
-            val email = etCustomerEmail.text.toString()
-            val name = etCustomerName.text.toString()
-            val phone = etCustomerPhone.text.toString()
-            val address = etCustomerAddress.text.toString()
-            val note = etCustomerNote.text.toString()
+            presenter.checkCustomerSize(){
+                if (it >= 5 && getMerchantMemberStatus(this@NewCustomerActivity) == EMerchantMemberStatus.FREE_TRIAL.toString()){
+                    alert ("Upgrade to Premium for Unlimited Customer"){
+                        title = "Oops!"
+                        yesButton {
+                            sendEmail("Upgrade Premium",
+                                "Merchant: ${getMerchantName(this@NewCustomerActivity)}",this@NewCustomerActivity)
+                        }
 
-            if (name == ""){
-                etCustomerName.error = "Please Fill the Field"
-                endLoading()
-                return@onClick
-            }
+                        noButton {  }
+                    }.show()
+                    endLoading()
+                }else{
+                    val email = etCustomerEmail.text.toString()
+                    val name = etCustomerName.text.toString()
+                    val phone = etCustomerPhone.text.toString()
+                    val address = etCustomerAddress.text.toString()
+                    val note = etCustomerNote.text.toString()
 
-            presenter.saveCustomer(Customer(name,email,"","",phone,address,note)){key,success->
-                if (success){
-                    toast("Save Success")
-                    presenter.saveActivityLogs(ActivityLogs("Create New Customer: $name",
-                        mAuth.currentUser?.uid,
-                        dateFormat().format(Date())))
-                    val checkOut = intent.extras?.getBoolean("checkOut",false)
-                    if (checkOut!!){
-                        selectCustomerName = name
-                        selectCustomerCode = key
+                    if (name == ""){
+                        etCustomerName.error = "Please Fill the Field"
+                        endLoading()
+                        return@checkCustomerSize
                     }
-                    finish()
-                }else
-                    toast("Failed")
 
-                endLoading()
+                    presenter.saveCustomer(Customer(name,email,"","",phone,address,note)){key,success->
+                        if (success){
+                            toast("Save Success")
+                            presenter.saveActivityLogs(ActivityLogs("Create New Customer: $name",
+                                mAuth.currentUser?.uid,
+                                dateFormat().format(Date())))
+                            val checkOut = intent.extras?.getBoolean("checkOut",false)
+                            if (checkOut!!){
+                                selectCustomerName = name
+                                selectCustomerCode = key
+                            }
+                            finish()
+                        }else
+                            toast("Failed")
+
+                        endLoading()
+                    }
+                }
             }
+
         }
 
         etCustomerName.doOnTextChanged { text, start, before, count ->
@@ -274,12 +289,12 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
     }
 
     private fun loading(){
-        pbCustomer.visibility = View.GONE
+        pbCustomer.visibility = View.VISIBLE
         btnCustomerSave.isEnabled = false
     }
 
     private fun endLoading(){
-        pbCustomer.visibility = View.VISIBLE
+        pbCustomer.visibility = View.GONE
         btnCustomerSave.isEnabled = true
     }
 

@@ -34,6 +34,7 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
     private var selectedMerchant = 0
     private var merchantItems : MutableList<AvailableMerchant> = mutableListOf()
     private var merchantNameItems : MutableList<String> = mutableListOf()
+    private var merchantUserGroupItems : MutableList<String> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,10 +81,11 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
         if (response == EMessageResult.FETCH_AVAIL_MERCHANT_SUCCESS.toString()){
             if (dataSnapshot.exists()){
                 merchantItems.clear()
+                merchantUserGroupItems.clear()
+                merchantNameItems.clear()
                 for (data in dataSnapshot.children) {
                     val item = data.getValue(AvailableMerchant::class.java)
                     if (item!!.STATUS == EStatusCode.ACTIVE.toString())
-                        presenter
                         merchantItems.add(item)
                 }
                 for (data in merchantItems){
@@ -106,7 +108,7 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
                         if (success){
                             if (merchantName != merchantItems[key].NAME){
                                 merchantItems[key].NAME = merchantName
-                                merchantNameItems[key] = merchantName
+                                merchantNameItems[key] = "$merchantName / ${merchantItems[key].USER_GROUP}"
                                 spAdapter.notifyDataSetChanged()
                             }
                         }
@@ -130,6 +132,7 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
                 editor.putString(ESharedPreference.MERCHANT_NAME.toString(), item.NAME)
                 editor.putString(ESharedPreference.ADDRESS.toString(), item.ADDRESS)
                 editor.putString(ESharedPreference.NO_TELP.toString(), item.NO_TELP)
+                editor.putString(ESharedPreference.MERCHANT_MEMBER_STATUS.toString(),item.MEMBER_STATUS.toString())
                 editor.apply()
 
                 startActivity<MainActivity>()

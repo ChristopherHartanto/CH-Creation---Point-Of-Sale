@@ -36,7 +36,7 @@ class CustomReceiptActivity : AppCompatActivity(), MainView {
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         sharedPreference =  getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
-        presenter = Homepresenter(this,mAuth,mDatabase,ctx)
+        presenter = Homepresenter(this,mAuth,mDatabase,this)
         supportActionBar?.title = "Receipt Template"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 

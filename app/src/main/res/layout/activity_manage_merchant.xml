@@ -22,8 +22,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Set Up Your First Merchant"
-                android:textSize="24sp"
+                android:text="Create Merchant"
+                android:textSize="18sp"
                 android:textColor="@color/colorBlack"
                 android:layout_marginBottom="30dp"
                 android:gravity="center"

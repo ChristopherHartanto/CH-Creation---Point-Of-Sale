@@ -79,12 +79,12 @@ class NewCategory : AppCompatActivity(), MainView {
                     categoryItems.add(Cat(newCategory, dateFormat().format(Date()),dateFormat().format(Date()),
                         mAuth.currentUser!!.uid,EStatusCode.ACTIVE.toString()))
 
-                    val log = "Create Category ${newCategory}"
-                    presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
-
                     val gson = Gson()
                     val categoryItem = gson.toJson(categoryItems)
                     presenter.saveNewCategory(categoryItem)
+                    val log = "Create Category ${newCategory}"
+                    presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+
                 }
             }
         }

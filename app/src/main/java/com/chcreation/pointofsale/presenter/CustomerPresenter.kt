@@ -135,6 +135,34 @@ class CustomerPresenter(private val view: MainView,
             .addListenerForSingleValueEvent(postListener)
     }
 
+    fun checkCustomerSize(callback:(size:Int) -> Unit){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if (p0.exists()){
+                    val listCustomer = mutableListOf<Customer>()
+                    for (data in p0.children){
+                        val item = data.getValue(Customer::class.java)
+                        if (item != null) {
+                            listCustomer.add(item)
+                        }
+                    }
+                    callback(listCustomer.size)
+                }else
+                    callback(0)
+            }
+
+        }
+        database.child(ETable.CUSTOMER.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchantCode(context))
+            .orderByChild(ECustomer.NAME.toString())
+            .addListenerForSingleValueEvent(postListener)
+    }
+
     fun retrieveCustomerByCustCode(custCode: String){
         postListener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {

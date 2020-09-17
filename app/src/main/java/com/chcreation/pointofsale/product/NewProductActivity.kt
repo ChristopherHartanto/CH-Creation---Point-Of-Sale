@@ -1,6 +1,7 @@
 package com.chcreation.pointofsale.product
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -47,12 +48,10 @@ import kotlinx.android.synthetic.main.activity_new_product.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_manage_product_update_product.*
 import me.dm7.barcodescanner.zxing.ZXingScannerView
+import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.selector
-import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.toast
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -122,17 +121,39 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
 
         btnProductSave.onClick {
             btnProductSave.isEnabled = false
+            loading()
             btnProductSave.startAnimation(normalClickAnimation())
 
-            if (positionSpinner == 0)
-                toast("Please Select Category")
-            else{
-                if (filePath == null)
-                    saveProduct("")
-                else
-                    uploadImage()
+            presenter.checkProductSize(){
+                if (it >= 10 && getMerchantMemberStatus(this@NewProductActivity) == EMerchantMemberStatus.FREE_TRIAL.toString()){
+                    alert ("Upgrade to Premium for Unlimited Product"){
+                        title = "Oops!"
+                        yesButton {
+                            sendEmail("Upgrade Premium",
+                                "Merchant: ${getMerchantName(this@NewProductActivity)}",this@NewProductActivity)
+                        }
+
+                        noButton {  }
+                    }.show()
+                    endLoading()
+                }else{
+                    if (positionSpinner == 0){
+                        endLoading()
+                        toast("Please Select Category")
+                    }
+                    else if (etProductName.text.toString() == ""){
+                        endLoading()
+                        etProductName.error = "Please Fill Product Name!"
+                    }
+                    else{
+                        if (filePath == null)
+                            saveProduct("")
+                        else
+                            uploadImage()
+                    }
+                }
             }
-            btnProductSave.isEnabled = true
+
         }
 
         ivProductImage.onClick{
@@ -170,7 +191,9 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         }
     }
 
+
     private fun openScanBarcode(){
+        cancelScan()
         layoutProductScan.visibility = View.VISIBLE
         mScannerView.setAutoFocus(true)
         mScannerView.setResultHandler(this)
@@ -212,8 +235,10 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         else
             selectedCategory
 
-        if (getMerchantCode(this) == "")
+        if (getMerchantCode(this) == ""){
+            endLoading()
             toast("You Haven't Set Up Your Merchant")
+        }
         else{
             presenter.saveProduct(Product(name,price,desc,cost,manageStock,stock,imageUrl,prodCode,uomCode,selectedCategory,code,EStatusCode.ACTIVE.toString(),
                 dateFormat().format(Date()),dateFormat().format(Date()),
@@ -491,10 +516,20 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         return cursor.getString(column_index);
     }
 
+    private fun loading(){
+        pbProduct.visibility = View.VISIBLE
+        btnProductSave.isEnabled = false
+    }
+
+    private fun endLoading(){
+        pbProduct.visibility = View.GONE
+        btnProductSave.isEnabled = true
+    }
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()) {
             categoryItems.clear()
-            categoryItems.add("")
+            categoryItems.add("Select Category")
             categoryItems.add("Create Category")
 
             if (dataSnapshot.exists()  && dataSnapshot.value != ""){
@@ -518,10 +553,10 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         if (message == EMessageResult.SUCCESS.toString()) {
             toast("success")
             layoutProduct.alpha = 1F
-            pbProduct.visibility = View.GONE
             finish()
         }else
             toast("" + message)
+        endLoading()
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {

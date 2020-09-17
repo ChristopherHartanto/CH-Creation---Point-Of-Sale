@@ -207,7 +207,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                             , Payment("", totalReceived,paymentMethod, note,
                                 mAuth.currentUser!!.uid,EStatusCode.DONE.toString()), cartItems){
 
-                            val log = if (custName != "") "Receive ${indonesiaCurrencyFormat().format(totalReceived)}  from $custName"
+                            val log = if (custName != "-") "Receive ${indonesiaCurrencyFormat().format(totalReceived)}  from $custName"
                             else
                                 "Receive ${indonesiaCurrencyFormat().format(totalReceived)}  from Receipt ${receiptFormat(it.toInt())}"
                             presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))

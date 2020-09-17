@@ -1,12 +1,16 @@
 package com.chcreation.pointofsale
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.TranslateAnimation
 import androidx.core.view.marginBottom
 import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.toast
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -28,6 +32,7 @@ fun removeAllSharedPreference(context: Context){
     editor.putString(ESharedPreference.ADDRESS.toString(),"")
     editor.putString(ESharedPreference.CUSTOM_RECEIPT.toString(),ECustomReceipt.RECEIPT1.toString())
     editor.putString(ESharedPreference.SINCERE.toString(),"Thank You")
+    editor.putString(ESharedPreference.MERCHANT_MEMBER_STATUS.toString(),EMerchantMemberStatus.FREE_TRIAL.toString())
     editor.putBoolean(ESharedPreference.CUSTOMER_ADDRESS.toString(),false)
     editor.putBoolean(ESharedPreference.CUSTOMER_NO_TEL.toString(),false)
     editor.putBoolean(ESharedPreference.CUSTOMER_NAME.toString(),false)
@@ -123,6 +128,13 @@ fun getMerchantReceiptTemplate(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
     return sharedPreference.getString(ESharedPreference.CUSTOM_RECEIPT.toString(),ECustomReceipt.RECEIPT1.toString()).toString()
+}
+
+fun getMerchantMemberStatus(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.MERCHANT_MEMBER_STATUS.toString()
+        ,EMerchantMemberStatus.FREE_TRIAL.toString()).toString()
 }
 
 fun normalClickAnimation() : AlphaAnimation = AlphaAnimation(10F,0.5F)
@@ -231,6 +243,23 @@ fun showError(context: Context,message: String)
 {
     ErrorActivity.errorMessage = message
     context.startActivity<ErrorActivity>()
+}
+
+
+fun sendEmail(subject: String,text: String,context: Context){
+    val mIntent = Intent(Intent.ACTION_SEND)
+    mIntent.data = Uri.parse("mailto:")
+    mIntent.type = "text/plain"
+    mIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf("ch.creation1608@gmail.com"))
+    mIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
+    mIntent.putExtra(Intent.EXTRA_TEXT, text)
+    try {
+        context.startActivity(Intent.createChooser(mIntent, "Choose Email Application !!"))
+    }
+    catch (e: Exception){
+        context.toast(e.message.toString())
+        e.printStackTrace()
+    }
 }
 
 fun encodeEmail(email:String): String{

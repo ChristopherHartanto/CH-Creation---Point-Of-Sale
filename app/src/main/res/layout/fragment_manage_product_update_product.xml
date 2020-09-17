@@ -95,7 +95,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:maxLines="5"
-                            android:lines="2"
+                            android:lines="1"
+                            android:inputType="textMultiLine"
                             android:gravity="top"
                             android:id="@+id/etManageProductDescription"
                             android:hint="Description"/>

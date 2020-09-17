@@ -1,6 +1,8 @@
 package com.chcreation.pointofsale.model
 
+import com.chcreation.pointofsale.EMerchantMemberStatus
 import com.chcreation.pointofsale.EStatusCode
+import com.chcreation.pointofsale.EStatusUser
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -17,7 +19,9 @@ data class Merchant(
     var UPDATED_DATE: String? = "",
     var CREATED_BY: String? = "",
     var UPDATED_BY: String? = "",
-    var MERCHANT_CODE: String? = ""
+    var MERCHANT_CODE: String? = "",
+    var MEMBER_STATUS: String? = EMerchantMemberStatus.FREE_TRIAL.toString(),
+    var ACTIVE: String? = EStatusUser.ACTIVE.toString()
 )
 
 data class Cat(

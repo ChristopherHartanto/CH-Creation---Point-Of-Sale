@@ -33,7 +33,7 @@ class UserListRecyclerViewAdapter(private val context: Context,
         holder.bindItem(userNames[position],userGroups[position],listener, position)
     }
 
-    override fun getItemCount(): Int = userNames.size
+    override fun getItemCount(): Int = userGroups.size
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
 
@@ -42,8 +42,15 @@ class UserListRecyclerViewAdapter(private val context: Context,
         private val group = view.findViewById<TextView>(R.id.tvRowUserListGroup)
 
         fun bindItem(userName: String, userGroup: UserList, listener: (position: Int) -> Unit, position: Int) {
-            firstName.text = userName.first().toString().toUpperCase(Locale.getDefault())
-            name.text = userName
+            if (userName != ""){
+                firstName.text = userName.first().toString().toUpperCase(Locale.getDefault())
+                name.text = userName
+            }
+            else{
+                firstName.text = ""
+                name.text = ""
+            }
+
             group.text = userGroup.USER_GROUP
 
             itemView.onClick {

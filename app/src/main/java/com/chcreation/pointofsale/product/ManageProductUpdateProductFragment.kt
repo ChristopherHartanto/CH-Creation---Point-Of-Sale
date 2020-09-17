@@ -252,6 +252,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
     }
 
     private fun openScanBarcode(){
+        cancelScan()
         layoutManageProductScan.visibility = View.VISIBLE
         mScannerView.setAutoFocus(true)
         mScannerView.setResultHandler(this)

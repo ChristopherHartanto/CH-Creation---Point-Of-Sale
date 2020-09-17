@@ -29,6 +29,7 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_user_list.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.*
@@ -61,11 +62,13 @@ class UserListFragment : Fragment(), MainView{
         adapter = UserListRecyclerViewAdapter(ctx,userNames,userGroups){ rvIt ->
             user = userGroups[rvIt]
             userName = userNames[rvIt]
-            for (data in userGroups){
-                if (data.USER_GROUP == EUserGroup.MANAGER.toString())
-                    size++
+            if (userName != ""){
+                for (data in userGroups){
+                    if (data.USER_GROUP == EUserGroup.MANAGER.toString())
+                        size++
+                }
+                startActivity<UserDetailActivity>()
             }
-            startActivity<UserDetailActivity>()
         }
 
         srUserList.onRefresh {
@@ -76,8 +79,17 @@ class UserListFragment : Fragment(), MainView{
             if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString())
                 toast("Only Manager Can Invite User")
             else{
-                if (userGroups.size > 8)
-                    toast("Maximum User 8, Need Contact Administrator to Continue Proceed !!")
+                if (userGroups.size > 3){
+                    alert ("Upgrade to Premium for Unlimited User"){
+                        title = "Oops!"
+                        yesButton {
+                            sendEmail("Upgrade Premium",
+                                "Merchant: ${getMerchantName(ctx)}",ctx)
+                        }
+
+                        noButton {  }
+                    }.show()
+                }
                 else if (userGroups.size > 0)
                     startActivity<AddUserActivity>()
             }
@@ -99,17 +111,10 @@ class UserListFragment : Fragment(), MainView{
                 }
             }.show()
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-
         rvUserList.adapter = adapter
         rvUserList.layoutManager = LinearLayoutManager(ctx)
-
         presenter.retrieveUserLists()
     }
-
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (isVisible && isResumed){
@@ -126,25 +131,25 @@ class UserListFragment : Fragment(), MainView{
                     for (data in items){
                         if (data.STATUS_CODE == EStatusCode.ACTIVE.toString()){
                             userGroups.add(data)
+                            userNames.add("")
                         }
                     }
-                    GlobalScope.launch {
-                        for (data in userGroups){
-                            presenter.retrieveUser(data.USER_CODE.toString())
+                    for ((index,data) in userGroups.withIndex()){
+                        presenter.retrieveUser(data.USER_CODE.toString(),index){success, key, user ->
+                            if (success){
+                                userNames.add(key,user.NAME.toString())
+                                adapter.notifyDataSetChanged()
+                                pbUserList.visibility = View.GONE
+                                srUserList.isRefreshing = false
+//                                if (userGroups.size == userNames.size){
+//                                    adapter.notifyDataSetChanged()
+//                                    pbUserList.visibility = View.GONE
+//                                    srUserList.isRefreshing = false
+//                                }
+                            }
                         }
                     }
                 }
-            }
-            if (response == EMessageResult.FETCH_USER_SUCCESS.toString()){
-                if(dataSnapshot.exists()){
-                    val item = dataSnapshot.getValue(User::class.java)
-                    userNames.add(item!!.NAME.toString())
-                }
-            }
-            if (userGroups.size == userNames.size){
-                adapter.notifyDataSetChanged()
-                pbUserList.visibility = View.GONE
-                srUserList.isRefreshing = false
             }
         }
     }

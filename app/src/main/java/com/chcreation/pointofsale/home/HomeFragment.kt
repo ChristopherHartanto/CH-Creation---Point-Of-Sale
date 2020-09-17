@@ -170,7 +170,6 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
         srHome.onRefresh {
             GlobalScope.launch {
                 presenter.retrieveProducts()
-                srHome.isRefreshing = false
             }
         }
 
@@ -222,20 +221,17 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
     override fun onStart() {
         super.onStart()
         isEnabled = true
+        loading()
         GlobalScope.launch {
-            if (tempProductItems.size == 0 || productItems.size == 0)
-                presenter.retrieveProducts()
-            else{
-                tvHomeAddProd.visibility = View.GONE
-                rvHome.visibility = View.VISIBLE
-            }
-
+//            if (tempProductItems.size == 0 || productItems.size == 0)
+//                presenter.retrieveProducts()
+//            else{
+//                tvHomeAddProd.visibility = View.GONE
+//                rvHome.visibility = View.VISIBLE
+//            }
+            presenter.retrieveProducts()
             presenter.retrieveCategories()
 
-            svHomeSearch.visibility = View.VISIBLE
-            pbHome.visibility = View.GONE
-            srHome.visibility = View.VISIBLE
-            srHome.isRefreshing = false
         }
 
         btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
@@ -295,6 +291,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
     }
 
     private fun openScanBarcode(){
+        cancelScan()
         isScanning = true
         layoutHomeScan.visibility = View.VISIBLE
         mScannerView.setAutoFocus(true)
@@ -401,6 +398,18 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
         srHome.isRefreshing = false
     }
 
+    private fun loading(){
+        svHomeSearch.visibility = View.INVISIBLE
+        pbHome.visibility = View.VISIBLE
+    }
+
+    private fun endLoading(){
+        svHomeSearch.visibility = View.VISIBLE
+        pbHome.visibility = View.GONE
+        srHome.isRefreshing = false
+        srHome.visibility = View.VISIBLE
+    }
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (context != null && isEnabled && isVisible && isResumed){
             if (response == EMessageResult.FETCH_PROD_SUCCESS.toString()){
@@ -429,6 +438,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                     tvHomeAddProd.visibility = View.VISIBLE
                     rvHome.visibility = View.GONE
                 }
+                endLoading()
             }
             else if (response == EMessageResult.FETCH_CATEGORY_SUCCESS.toString()){
                 categoryItems.clear()

@@ -111,7 +111,7 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
 
                         database.child(ETable.MERCHANT.toString())
                             .child(userAcceptance.CREDENTIAL.toString())
-                            .child(userAcceptance.NAME.toString())
+                            .child(userAcceptance.MERCHANT_CODE.toString())
                             .child(EMerchant.USER_LIST.toString())
                             .setValue(newUserList).addOnFailureListener {
                                 view.response(it.message.toString())
@@ -122,7 +122,7 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
             }
             database.child(ETable.MERCHANT.toString())
                 .child(userAcceptance.CREDENTIAL.toString())
-                .child(userAcceptance.NAME.toString())
+                .child(userAcceptance.MERCHANT_CODE.toString())
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())
@@ -251,12 +251,14 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                 EMerchant.UPDATED_DATE.toString() to merchant.CREATED_DATE,
                 EMerchant.IMAGE.toString() to merchant.IMAGE,
                 EMerchant.MERCHANT_CODE.toString() to merchant.MERCHANT_CODE,
+                EMerchant.MERCHANT_STATUS.toString() to merchant.MEMBER_STATUS,
+                EMerchant.ACTIVE.toString() to merchant.ACTIVE,
                 EMerchant.USER_LIST.toString() to userList
             )
 
             database.child(ETable.MERCHANT.toString())
                 .child(auth.currentUser!!.uid)
-                .child(merchant.NAME.toString())
+                .child(merchant.MERCHANT_CODE.toString())
                 .setValue(values).addOnFailureListener {
                     view.response(it.message.toString())
                 }
@@ -289,12 +291,14 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                     EMerchant.IMAGE.toString() to merchant.IMAGE,
                     EMerchant.USER_LIST.toString() to merchant.USER_LIST,
                     EMerchant.CAT.toString() to merchant.CAT,
-                    EMerchant.MERCHANT_CODE.toString() to merchant.MERCHANT_CODE
+                    EMerchant.MERCHANT_CODE.toString() to merchant.MERCHANT_CODE,
+                    EMerchant.MERCHANT_STATUS.toString() to merchant.MEMBER_STATUS,
+                    EMerchant.ACTIVE.toString() to merchant.ACTIVE
                 )
 
                 database.child(ETable.MERCHANT.toString())
                     .child(getMerchantCredential(context))
-                    .child(merchant.NAME.toString())
+                    .child(getMerchantCode(context))
                     .setValue(values).addOnFailureListener {
                         view.response(it.message.toString())
                     }
@@ -346,52 +350,116 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
     }
 
     fun createNewMerchantList(availableMerchant: AvailableMerchant){
-        try {
-            var key = 1
-
+        try{
             postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
                     database.removeEventListener(this)
                 }
 
                 override fun onDataChange(p0: DataSnapshot) {
-                    if (p0.exists()) {
-                        for (data in p0.children) {
-                            key = data.key.toString().toInt() + 1
+                    if (p0.exists()){
+                        var key = 0
+                        var createdDate = ""
+                        for(data in p0.children){
+                            key = data.key.toString().toInt()
+
+                            try {
+                                val item = data.getValue(AvailableMerchant::class.java)
+                                if (item != null) {
+                                    createdDate = item.CREATED_DATE.toString()
+                                }
+                            }catch (e:Exception){
+                                e.printStackTrace()
+                            }
                             break
                         }
-                    }
-                    val values = hashMapOf(
-                        EAvailableMerchant.CREATED_DATE.toString() to availableMerchant.CREATED_DATE,
-                        EAvailableMerchant.UPDATED_DATE.toString() to availableMerchant.UPDATED_DATE,
-                        EAvailableMerchant.CREDENTIAL.toString() to availableMerchant.CREDENTIAL,
-                        EAvailableMerchant.STATUS.toString() to availableMerchant.STATUS,
-                        EAvailableMerchant.USER_GROUP.toString() to availableMerchant.USER_GROUP,
-                        EAvailableMerchant.NAME.toString() to availableMerchant.NAME,
-                        EAvailableMerchant.MERCHANT_CODE.toString() to availableMerchant.MERCHANT_CODE
-                    )
+                        if (availableMerchant.CREDENTIAL != ""){
+                            val values = hashMapOf(
+                                EAvailableMerchant.CREATED_DATE.toString() to if (createdDate != "") createdDate else availableMerchant.CREATED_DATE,
+                                EAvailableMerchant.UPDATED_DATE.toString() to availableMerchant.UPDATED_DATE,
+                                EAvailableMerchant.CREDENTIAL.toString() to availableMerchant.CREDENTIAL,
+                                EAvailableMerchant.STATUS.toString() to availableMerchant.STATUS,
+                                EAvailableMerchant.USER_GROUP.toString() to availableMerchant.USER_GROUP,
+                                EAvailableMerchant.NAME.toString() to availableMerchant.NAME,
+                                EAvailableMerchant.MERCHANT_CODE.toString() to availableMerchant.MERCHANT_CODE
+                            )
 
-                    database.child(ETable.AVAILABLE_MERCHANT.toString())
-                        .child(auth.currentUser!!.uid)
-                        .child(key.toString())
-                        .setValue(values).addOnFailureListener {
-                            view.response(it.message.toString())
+                            database.child(ETable.AVAILABLE_MERCHANT.toString())
+                                .child(auth.currentUser!!.uid)
+                                .child(key.toString())
+                                .setValue(values).addOnFailureListener {
+                                    view.response(it.message.toString())
+                                }
+                                .addOnSuccessListener {
+                                    view.response(EMessageResult.SUCCESS.toString())
+                                }
+                        }else
+                            view.response("Please Contact Your Administrator -- Call Create New Merchant")
+                    }else{
+
+                        try {
+                            var key = 1
+
+                            postListener = object : ValueEventListener {
+                                override fun onCancelled(p0: DatabaseError) {
+                                    database.removeEventListener(this)
+                                }
+
+                                override fun onDataChange(p0: DataSnapshot) {
+                                    if (p0.exists()) {
+                                        for (data in p0.children) {
+                                            key = data.key.toString().toInt() + 1
+                                            break
+                                        }
+                                    }
+                                    if (availableMerchant.CREDENTIAL != ""){
+                                        val values = hashMapOf(
+                                            EAvailableMerchant.CREATED_DATE.toString() to availableMerchant.CREATED_DATE,
+                                            EAvailableMerchant.UPDATED_DATE.toString() to availableMerchant.UPDATED_DATE,
+                                            EAvailableMerchant.CREDENTIAL.toString() to availableMerchant.CREDENTIAL,
+                                            EAvailableMerchant.STATUS.toString() to availableMerchant.STATUS,
+                                            EAvailableMerchant.USER_GROUP.toString() to availableMerchant.USER_GROUP,
+                                            EAvailableMerchant.NAME.toString() to availableMerchant.NAME,
+                                            EAvailableMerchant.MERCHANT_CODE.toString() to availableMerchant.MERCHANT_CODE
+                                        )
+
+                                        database.child(ETable.AVAILABLE_MERCHANT.toString())
+                                            .child(auth.currentUser!!.uid)
+                                            .child(key.toString())
+                                            .setValue(values).addOnFailureListener {
+                                                view.response(it.message.toString())
+                                            }
+                                            .addOnSuccessListener {
+                                                view.response(EMessageResult.SUCCESS.toString())
+                                            }
+                                    }else
+                                        view.response("Please Contact Your Administrator -- Call Create New Merchant")
+                                }
+
+                            }
+                            database.child(ETable.AVAILABLE_MERCHANT.toString())
+                                .child(auth.currentUser!!.uid)
+                                .orderByKey()
+                                .limitToLast(1)
+                                .addListenerForSingleValueEvent(postListener)
+                        }catch (e: Exception){
+                            showError(context,e.message.toString())
+                            e.printStackTrace()
                         }
-                        .addOnSuccessListener {
-                            view.response(EMessageResult.SUCCESS.toString())
-                        }
+                    }
                 }
 
             }
             database.child(ETable.AVAILABLE_MERCHANT.toString())
                 .child(auth.currentUser!!.uid)
-                .orderByKey()
-                .limitToLast(1)
+                .orderByChild(EAvailableMerchant.MERCHANT_CODE.toString())
+                .equalTo(availableMerchant.MERCHANT_CODE)
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())
             e.printStackTrace()
         }
+
     }
 
     fun saveActivityLogs(logs: ActivityLogs){

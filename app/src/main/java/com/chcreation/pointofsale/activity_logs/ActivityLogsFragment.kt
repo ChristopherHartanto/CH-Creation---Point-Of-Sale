@@ -24,6 +24,7 @@ import kotlinx.android.synthetic.main.fragment_activity_logs.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.ctx
+import org.jetbrains.anko.support.v4.onRefresh
 import org.jetbrains.anko.yesButton
 
 /**
@@ -66,6 +67,10 @@ class ActivityLogsFragment : Fragment(), MainView {
             adapter = this@ActivityLogsFragment.adapter
             layoutManager = LinearLayoutManager(ctx)
         }
+
+        srActivityLogs.onRefresh {
+            presenter.retrieveActivityLogs()
+        }
     }
 
     override fun onStart() {
@@ -77,6 +82,8 @@ class ActivityLogsFragment : Fragment(), MainView {
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (isVisible && isResumed){
             if (dataSnapshot.exists()){
+                logItems.clear()
+
                 for (data in dataSnapshot.children){
                     val item = data.getValue(ActivityLogs::class.java)
                     if (item != null){
@@ -87,6 +94,7 @@ class ActivityLogsFragment : Fragment(), MainView {
                 adapter.notifyDataSetChanged()
             }
             pbActivityLogs.visibility = View.GONE
+            srActivityLogs.isRefreshing = false
         }
     }
 

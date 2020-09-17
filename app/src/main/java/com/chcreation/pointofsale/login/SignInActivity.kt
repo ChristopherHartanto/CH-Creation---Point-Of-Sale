@@ -1,20 +1,22 @@
 package com.chcreation.pointofsale.login
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.chcreation.pointofsale.*
-import com.chcreation.pointofsale.merchant.MerchantActivity
 import com.chcreation.pointofsale.merchant.ManageMerchantActivity
+import com.chcreation.pointofsale.merchant.MerchantActivity
 import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.model.UserAcceptance
 import com.chcreation.pointofsale.presenter.MerchantPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
@@ -25,6 +27,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+
 
 class SignInActivity : AppCompatActivity(), MainView {
 
@@ -97,7 +100,6 @@ class SignInActivity : AppCompatActivity(), MainView {
                 if (task.isSuccessful) {
                     GlobalScope.launch(Dispatchers.Main) {
                         presenter.retrieveUserName()
-                        presenter.retrieveInvitation(encodeEmail(email))
                     }
                     Toast.makeText(this, "Login Success ", Toast.LENGTH_LONG).show()
                 }else {
@@ -160,6 +162,37 @@ class SignInActivity : AppCompatActivity(), MainView {
                 editor.putString(ESharedPreference.NAME.toString(), item?.NAME)
                 editor.putString(ESharedPreference.EMAIL.toString(), item?.EMAIL)
                 editor.apply()
+
+                if (item != null) {
+                    if (item.ACTIVE == EStatusUser.SUSPEND.toString() || item.ACTIVE == EStatusUser.DE_ACTIVE.toString()){
+                        val status = if (item.ACTIVE == EStatusUser.SUSPEND.toString()) "Your Account Has Been Suspended"
+                        else "Your Account Was Disable by Admin"
+                        alert ("$status!\nPlease Contact Administrator for Further Information!"){
+                            title = "Error"
+
+                            yesButton {
+                                mAuth.signOut()
+                                sendEmail("$status - $email","",this@SignInActivity)
+                            }
+                            noButton { mAuth.signOut() }
+                        }.show()
+                        pbSignIn.visibility = View.GONE
+                        btnSignIn.isEnabled = true
+                    }
+                    else if (item.ACTIVE == EStatusUser.ACTIVE.toString()){
+                        GlobalScope.launch {
+                            presenter.retrieveInvitation(encodeEmail(email))
+                        }
+                    }
+                }
+            }else{
+                alert ("Failed to Retrieve User Data\nPlease Try Again"){
+                    title = "Error"
+
+                    yesButton {
+                        mAuth.signOut()
+                    }
+                }.show()
             }
         }
 
@@ -169,6 +202,7 @@ class SignInActivity : AppCompatActivity(), MainView {
         if (message == EMessageResult.SUCCESS.toString()){
             startActivity<MerchantActivity>()
             finish()
-        }
+        }else
+            toast(message)
     }
 }

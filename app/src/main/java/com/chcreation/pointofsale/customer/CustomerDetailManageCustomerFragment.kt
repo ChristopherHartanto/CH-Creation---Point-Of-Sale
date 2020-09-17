@@ -130,6 +130,11 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
         ivManageCustomerImage.onClick {
             selectImage()
         }
+
+        ivCustomerWhatsapp.onClick {
+            ivCustomerWhatsapp.startAnimation(normalClickAnimation())
+            intentWhatsapp(etManageCustomerPhone.text.toString())
+        }
     }
 
     private fun uploadImage(){
@@ -415,6 +420,13 @@ class CustomerDetailManageCustomerFragment : Fragment(), MainView {
             }
 
         }
+    }
+
+    private fun intentWhatsapp(number: String){
+        val url = "https://api.whatsapp.com/send?phone=$number"
+        val i = Intent(Intent.ACTION_VIEW)
+        i.data = Uri.parse(url)
+        startActivity(i)
     }
 
     fun clearData(){

@@ -20,7 +20,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.bumptech.glide.Glide
+import com.chcreation.pointofsale.checkout.PostCheckOutActivity
 import com.chcreation.pointofsale.home.HomeFragment.Companion.active
+import com.chcreation.pointofsale.login.LoginActivity
 import com.chcreation.pointofsale.merchant.ManageMerchantActivity
 import com.chcreation.pointofsale.model.Merchant
 import com.chcreation.pointofsale.model.UserAcceptance
@@ -37,6 +39,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.startActivity
 import java.util.*
 
 class MainActivity : AppCompatActivity(), MainView {
@@ -91,14 +94,34 @@ class MainActivity : AppCompatActivity(), MainView {
         presenter = Homepresenter(this,mAuth,mDatabase,this)
         merchantPresenter = MerchantPresenter(this,mAuth,mDatabase,this)
 
+        if (mAuth.currentUser == null || getMerchantCredential(this) == "" || getMerchantCode(this) == ""){
+            logOut()
+        }
+
         presenter.retrieveSincere(){
             val editor = sharedPreference.edit()
             editor.putString(ESharedPreference.SINCERE.toString(),it.SINCERE)
             editor.apply()
         }
+
         GlobalScope.launch {
             //presenter.retrieveUserLists()
             merchantPresenter.retrieveInvitation(encodeEmail(getEmail(this@MainActivity)))
+        }
+
+        presenter.getMerchant(){success, merchant ->
+            if (!success)
+                logOut()
+            else{
+                if (merchant.NAME != getMerchantName(this) || merchant.IMAGE != getMerchantImage(this)
+                    || merchant.NO_TELP != getMerchantNoTel(this))
+                    logOut()
+            }
+        }
+        presenter.getUserActiveStatus(mAuth.currentUser!!.uid){
+            if (it != EStatusUser.ACTIVE.toString()){
+                logOut()
+            }
         }
 
         view = navView.getHeaderView(0)
@@ -109,10 +132,11 @@ class MainActivity : AppCompatActivity(), MainView {
         layoutNavHeaderDefaultImage = view.findViewById<FrameLayout>(R.id.layoutNavHeaderDefaultImage)
         layoutNavHeader = view.findViewById<LinearLayout>(R.id.layoutNavHeader)
 
-        tvNavHeaderMerchantName.text = getMerchantCode(this)
+        tvNavHeaderMerchantName.text = getMerchantName(this)
         tvUserName.text = "${getName(this)} (${getMerchantUserGroup(this)})"
 
         layoutNavHeader.onClick {
+            tvNavHeaderMerchantName.text = getMerchantName(this@MainActivity)
             layoutNavHeader.startAnimation(normalClickAnimation())
             startActivity<ManageMerchantActivity>()
         }
@@ -162,6 +186,15 @@ class MainActivity : AppCompatActivity(), MainView {
         false
     }
 
+    private fun logOut(){
+        mAuth.signOut()
+        toast("Session End")
+        removeAllSharedPreference(this)
+        PostCheckOutActivity().clearCartData()
+        startActivity<LoginActivity>()
+        finish()
+    }
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_MERCHANT_SUCCESS.toString()){
             if (dataSnapshot.exists()){
@@ -176,7 +209,11 @@ class MainActivity : AppCompatActivity(), MainView {
                         layoutNavHeaderDefaultImage.visibility = View.VISIBLE
                         ivNavHeader.visibility = View.GONE
 
-                        tvNavHeaderFirstName.text = item.NAME!!.first().toString().toUpperCase(Locale.getDefault())
+                        try {
+                            tvNavHeaderFirstName.text = item.NAME!!.first().toString().toUpperCase(Locale.getDefault())
+                        }catch (e:Exception){
+                            e.printStackTrace()
+                        }
                     }
 
                 }
@@ -224,7 +261,8 @@ class MainActivity : AppCompatActivity(), MainView {
     override fun response(message: String) {
         if (message == EMessageResult.SUCCESS.toString()){ // for invitation
             toast("Accept Success")
-        }
+        }else
+            toast(message)
     }
 }
 //https://www.websitepolicies.com/policies/view/mjijhUBA

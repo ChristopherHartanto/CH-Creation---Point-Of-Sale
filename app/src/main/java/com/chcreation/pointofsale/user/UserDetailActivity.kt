@@ -65,7 +65,6 @@ class UserDetailActivity : AppCompatActivity(), MainView {
         etUserDetailName.isEnabled = false
         etUserDetailEmail.isEnabled = false
 
-
         userGroupItems = arrayListOf<String>(EUserGroup.MANAGER.toString(), EUserGroup.WAITER.toString())
 
         spAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,userGroupItems)
@@ -119,7 +118,8 @@ class UserDetailActivity : AppCompatActivity(), MainView {
             btnUserDetailEdit.startAnimation(normalClickAnimation())
 
 
-            if (selectedUserGroup == 1 && size == 1){
+            if (selectedUserGroup == 1 && size == 1
+                && getMerchantUserGroup(this@UserDetailActivity) == EUserGroup.MANAGER.toString()){
                 toast("Manager Must be at Least 1 Person !!")
                 spUserDetail.setSelection(0)
             }
@@ -140,7 +140,7 @@ class UserDetailActivity : AppCompatActivity(), MainView {
 
                             if (user.USER_CODE == mAuth.currentUser!!.uid)
                                 presenter.updateUser(User(etUserDetailName.text.toString(),currentUser.EMAIL,currentUser.CREATED_DATE,
-                                    dateFormat().format(Date()))){
+                                    dateFormat().format(Date()),currentUser.MEMBER_STATUS,currentUser.ACTIVE)){
                                     if (it){
                                         val editor = sharedPreference.edit()
                                         editor.putString(ESharedPreference.NAME.toString(), etUserDetailName.text.toString())
@@ -152,8 +152,13 @@ class UserDetailActivity : AppCompatActivity(), MainView {
                                     }
                                 }
 
-                            if (getMerchantUserGroup(this@UserDetailActivity) == EUserGroup.MANAGER.toString()  && (size > 1 || userGroupItems[selectedUserGroup] == EUserGroup.MANAGER.toString()))
+                            if (getMerchantUserGroup(this@UserDetailActivity) == EUserGroup.MANAGER.toString()  && (size > 1 || userGroupItems[selectedUserGroup] == EUserGroup.MANAGER.toString())){
                                 presenter.updateUserList(user.USER_CODE.toString(),userGroupItems[selectedUserGroup])
+                                presenter.saveActivityLogs(
+                                    ActivityLogs("Changed ${currentUser.NAME} Status to ${userGroupItems[selectedUserGroup]}",
+                                        mAuth.currentUser!!.uid,dateFormat().format(Date()))
+                                    )
+                            }
 
                         }
                     }
@@ -178,8 +183,18 @@ class UserDetailActivity : AppCompatActivity(), MainView {
                     yesButton {
                         pbuserDetail.visibility = View.VISIBLE
 
-                        GlobalScope.launch {
-                            presenter.removeUserList(user.USER_CODE.toString())
+                        if (user.USER_CODE == ""){
+                            toast("Please Try Again")
+                            finish()
+                        }else
+                        {
+                            GlobalScope.launch {
+                                presenter.removeUserList(user.USER_CODE.toString())
+                                presenter.saveActivityLogs(
+                                    ActivityLogs("Remove ${currentUser.NAME}",
+                                        mAuth.currentUser!!.uid,dateFormat().format(Date()))
+                                )
+                            }
                         }
                     }
                     noButton {
@@ -227,6 +242,10 @@ class UserDetailActivity : AppCompatActivity(), MainView {
             }
             toast("Update Success")
             finish()
+            pbuserDetail.visibility = View.GONE
+        }
+        else{
+            toast(message)
             pbuserDetail.visibility = View.GONE
         }
     }
