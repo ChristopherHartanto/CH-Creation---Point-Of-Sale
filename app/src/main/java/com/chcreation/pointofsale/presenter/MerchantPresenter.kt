@@ -251,7 +251,7 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                 EMerchant.UPDATED_DATE.toString() to merchant.CREATED_DATE,
                 EMerchant.IMAGE.toString() to merchant.IMAGE,
                 EMerchant.MERCHANT_CODE.toString() to merchant.MERCHANT_CODE,
-                EMerchant.MERCHANT_STATUS.toString() to merchant.MEMBER_STATUS,
+                EMerchant.MEMBER_STATUS.toString() to merchant.MEMBER_STATUS,
                 EMerchant.ACTIVE.toString() to merchant.ACTIVE,
                 EMerchant.USER_LIST.toString() to userList
             )
@@ -292,7 +292,7 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                     EMerchant.USER_LIST.toString() to merchant.USER_LIST,
                     EMerchant.CAT.toString() to merchant.CAT,
                     EMerchant.MERCHANT_CODE.toString() to merchant.MERCHANT_CODE,
-                    EMerchant.MERCHANT_STATUS.toString() to merchant.MEMBER_STATUS,
+                    EMerchant.MEMBER_STATUS.toString() to merchant.MEMBER_STATUS,
                     EMerchant.ACTIVE.toString() to merchant.ACTIVE
                 )
 

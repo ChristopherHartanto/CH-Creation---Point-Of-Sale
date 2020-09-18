@@ -154,10 +154,10 @@ class UserDetailActivity : AppCompatActivity(), MainView {
 
                             if (getMerchantUserGroup(this@UserDetailActivity) == EUserGroup.MANAGER.toString()  && (size > 1 || userGroupItems[selectedUserGroup] == EUserGroup.MANAGER.toString())){
                                 presenter.updateUserList(user.USER_CODE.toString(),userGroupItems[selectedUserGroup])
-                                presenter.saveActivityLogs(
-                                    ActivityLogs("Changed ${currentUser.NAME} Status to ${userGroupItems[selectedUserGroup]}",
-                                        mAuth.currentUser!!.uid,dateFormat().format(Date()))
-                                    )
+//                                presenter.saveActivityLogs(
+//                                    ActivityLogs("Changed ${currentUser.NAME} Status to ${userGroupItems[selectedUserGroup]}",
+//                                        mAuth.currentUser!!.uid,dateFormat().format(Date()))
+//                                )
                             }
 
                         }

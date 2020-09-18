@@ -73,7 +73,7 @@ enum class EMerchant{
     USER_LIST,
     ADDRESS,
     MERCHANT_CODE,
-    MERCHANT_STATUS,
+    MEMBER_STATUS,
     ACTIVE
 }
 

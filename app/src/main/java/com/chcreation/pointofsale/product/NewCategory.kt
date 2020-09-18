@@ -95,7 +95,8 @@ class NewCategory : AppCompatActivity(), MainView {
             if (dataSnapshot.exists()){
                 val gson = Gson()
                 val arrayCartType = object : TypeToken<MutableList<Cat>>() {}.type
-                categoryItems = gson.fromJson(dataSnapshot.value.toString(),arrayCartType)
+                if (dataSnapshot.value.toString() != "")
+                    categoryItems = gson.fromJson(dataSnapshot.value.toString(),arrayCartType)
             }
         }
     }

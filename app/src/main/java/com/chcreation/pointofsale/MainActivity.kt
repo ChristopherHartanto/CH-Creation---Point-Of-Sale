@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 logOut()
             else{
                 if (merchant.NAME != getMerchantName(this) || merchant.IMAGE != getMerchantImage(this)
-                    || merchant.NO_TELP != getMerchantNoTel(this))
+                    || merchant.NO_TELP != getMerchantNoTel(this) || merchant.MEMBER_STATUS != getMerchantMemberStatus(this))
                     logOut()
             }
         }

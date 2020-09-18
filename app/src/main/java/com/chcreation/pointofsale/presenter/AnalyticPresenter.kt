@@ -324,7 +324,8 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
                             .setValue(newUserList).addOnFailureListener {
                                 view.response(it.message.toString())
                             }
-                    }
+                    }else
+                        view.response("Failed to Update Merchant -- Call Update User Merchant")
                 }
 
             }
@@ -458,10 +459,10 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
                 override fun onDataChange(p0: DataSnapshot) {
                     if (p0.exists()){
                         for (data in p0.children){
-                            try {
-                                key = data.key.toString().toInt() + 1
+                            key = try {
+                                data.key.toString().toInt() + 1
                             } catch (e: NumberFormatException) {
-                                key = -99
+                                -99
                             }
                             break
                         }

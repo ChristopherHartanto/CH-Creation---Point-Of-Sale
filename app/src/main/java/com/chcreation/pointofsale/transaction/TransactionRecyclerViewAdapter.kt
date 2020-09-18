@@ -56,14 +56,14 @@ class TransactionRecyclerViewAdapter(private val context: Context,
             code.text = receiptFormat(transCode)
             if (custName != "")
                 customer.text = custName
-            date.text = parseTimeFormat(item.UPDATED_DATE.toString())
+            date.text = parseTimeFormat(item.CREATED_DATE.toString())
             totalPrice.text = indonesiaCurrencyFormat().format(item.TOTAL_PRICE!! - item.DISCOUNT!! + item.TAX!!)
-            header.text = parseDateFormat(item.UPDATED_DATE.toString())
+            header.text = parseDateFormat(item.CREATED_DATE.toString())
 
-            var dateBefore = parseDateFormat(transactionList[position].UPDATED_DATE.toString())
+            var dateBefore = parseDateFormat(transactionList[position].CREATED_DATE.toString())
             if (position > 0)
-                dateBefore = parseDateFormat(transactionList[position - 1].UPDATED_DATE.toString())
-            val currentDate = parseDateFormat(transactionList[position].UPDATED_DATE.toString())
+                dateBefore = parseDateFormat(transactionList[position - 1].CREATED_DATE.toString())
+            val currentDate = parseDateFormat(transactionList[position].CREATED_DATE.toString())
             if (position > 0 && dateBefore == currentDate)
                 header.visibility = View.GONE
             else

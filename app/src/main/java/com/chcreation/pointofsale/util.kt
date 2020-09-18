@@ -254,7 +254,7 @@ fun sendEmail(subject: String,text: String,context: Context){
     mIntent.putExtra(Intent.EXTRA_SUBJECT, subject)
     mIntent.putExtra(Intent.EXTRA_TEXT, text)
     try {
-        context.startActivity(Intent.createChooser(mIntent, "Choose Email Application !!"))
+        context.startActivity(Intent.createChooser(mIntent, "Choose Email Application"))
     }
     catch (e: Exception){
         context.toast(e.message.toString())

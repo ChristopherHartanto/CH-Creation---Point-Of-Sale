@@ -62,12 +62,15 @@ class UserListFragment : Fragment(), MainView{
         adapter = UserListRecyclerViewAdapter(ctx,userNames,userGroups){ rvIt ->
             user = userGroups[rvIt]
             userName = userNames[rvIt]
-            if (userName != ""){
+            if (userName != "" && user.USER_CODE != ""){
                 for (data in userGroups){
                     if (data.USER_GROUP == EUserGroup.MANAGER.toString())
                         size++
                 }
                 startActivity<UserDetailActivity>()
+            }else{
+                srUserList.isRefreshing = true
+                presenter.retrieveUserLists()
             }
         }
 
@@ -79,7 +82,7 @@ class UserListFragment : Fragment(), MainView{
             if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString())
                 toast("Only Manager Can Invite User")
             else{
-                if (userGroups.size > 3){
+                if (userGroups.size > 2){
                     alert ("Upgrade to Premium for Unlimited User"){
                         title = "Oops!"
                         yesButton {
