@@ -34,6 +34,7 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.onRefresh
 import org.jetbrains.anko.support.v4.startActivity
+import org.jetbrains.anko.support.v4.toast
 
 class TransactionFragment : Fragment(), MainView {
 
@@ -218,7 +219,14 @@ class TransactionFragment : Fragment(), MainView {
         clearData()
         adapter = TransactionRecyclerViewAdapter(ctx,requireActivity(), transItems, customerItems, transCodeItems){
             transPosition = it
-            startActivity<DetailTransactionActivity>()
+            if (transItems.size == 0 || customerItems.size == 0 || transCodeItems.size == 0){
+                toast("Refreshing Data")
+                pbTransaction.visibility = View.VISIBLE
+                GlobalScope.launch {
+                    presenter.retrieveTransactions()
+                }
+            }else
+                startActivity<DetailTransactionActivity>()
         }
 
         rvTransaction.adapter = adapter

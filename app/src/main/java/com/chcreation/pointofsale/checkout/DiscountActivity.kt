@@ -50,7 +50,7 @@ class DiscountActivity : AppCompatActivity() {
                         etDiscountCash.setText(totalPrice.toString())
                     }
 
-                    percentageDiscount =  (discount / totalPrice) * 100
+                    percentageDiscount =  discount * 100 / totalPrice
 
                     etDiscountPercentage.setText(percentageDiscount.toString())
                     tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice - discount)
@@ -61,7 +61,7 @@ class DiscountActivity : AppCompatActivity() {
                         etDiscountCash.setText(totalPrice.toString())
                     }
 
-                    percentageDiscount =  tax / totalPrice * 100
+                    percentageDiscount =  tax * 100 / totalPrice
 
                     etDiscountPercentage.setText(percentageDiscount.toString())
                     tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice + tax)
@@ -75,13 +75,13 @@ class DiscountActivity : AppCompatActivity() {
         etDiscountCash.onClick {
             etDiscountCash.setText("")
             etDiscountPercentage.setText("")
-            tvDiscountNewTotalContent.text = totalPrice.toString()
+            tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice)
         }
 
         etDiscountPercentage.onClick {
             etDiscountCash.setText("")
             etDiscountPercentage.setText("")
-            tvDiscountNewTotalContent.text = totalPrice.toString()
+            tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice)
         }
 
         etDiscountPercentage.doOnTextChanged { text, start, before, count ->

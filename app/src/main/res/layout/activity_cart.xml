@@ -11,7 +11,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="5"
+        android:layout_weight="1"
         android:paddingHorizontal="5dp"
         android:id="@+id/rvCart"/>
 
@@ -21,17 +21,20 @@
         android:id="@+id/tvCartSubTotal"
         android:text="Sub Total : 0"
         android:gravity="end"
-        android:padding="10dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
         android:textSize="16sp"
         android:visibility="gone"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="@color/colorBlack"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tvCartDiscount"
         android:gravity="end"
-        android:padding="10dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
         android:textSize="16sp"/>
 
     <TextView
@@ -39,7 +42,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/tvCartTax"
         android:gravity="end"
-        android:padding="10dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
         android:textSize="16sp"/>
 
     <TextView
@@ -47,8 +51,9 @@
         android:layout_height="wrap_content"
         android:id="@+id/tvCartTotal"
         android:gravity="end"
-        android:padding="10dp"
-        android:textSize="18sp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="@color/colorBlack"/>
 
@@ -57,7 +62,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/tvCartNote"
         android:gravity="end"
-        android:padding="10dp"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
         android:textSize="16sp"
         android:textColor="@color/colorGrey"/>
 

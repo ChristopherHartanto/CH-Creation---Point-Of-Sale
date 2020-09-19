@@ -41,10 +41,12 @@ class CustomerRecyclerViewAdapter(private val context: Context, private val item
         private val layoutDefaultImage = view.findViewById<FrameLayout>(R.id.layoutRowCustomerDefaultImage)
         private val firstName = view.findViewById<TextView>(R.id.tvRowCustomerFirstName)
         private val name = view.findViewById<TextView>(R.id.tvRowCustomerName)
+        private val noTel = view.findViewById<TextView>(R.id.tvRowCustomerNoTel)
 
         fun bindItem(customer: Customer, listener: (position: Int) -> Unit, position: Int,context: Context) {
 
             name.text = customer.NAME
+            noTel.text = customer.PHONE
 
             if (customer.IMAGE == "")
             {

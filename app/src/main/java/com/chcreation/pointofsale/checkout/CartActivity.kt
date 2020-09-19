@@ -64,7 +64,10 @@ class CartActivity : AppCompatActivity() {
         tvCartTotal.text = "Total: ${indonesiaCurrencyFormat().format(totalPrice)}"
         btnCart.onClick {
             btnCart.startAnimation(normalClickAnimation())
-            startActivity<CheckOutActivity>()
+            if (cartItems.size != 0)
+                startActivity<CheckOutActivity>()
+            else
+                toast("Error Please Fix Your Cart Items!")
         }
 
         ivCartMoreOptions.onClick {
@@ -147,6 +150,9 @@ class CartActivity : AppCompatActivity() {
 
         val totalPayment = totalPrice - discount + tax
         if (discount != 0 || tax != 0){
+            if (discount != 0) tvCartDiscount.visibility = View.VISIBLE else tvCartDiscount.visibility = View.GONE
+            if (tax != 0) tvCartTax.visibility = View.VISIBLE else tvCartTax.visibility = View.GONE
+
             tvCartDiscount.text = "Discount : ${indonesiaCurrencyFormat().format(discount)}"
             tvCartTax.text = "Tax: ${indonesiaCurrencyFormat().format(tax)}"
 
@@ -156,7 +162,13 @@ class CartActivity : AppCompatActivity() {
 
         tvCartTotal.text = "Total : ${indonesiaCurrencyFormat().format(totalPayment)}"
         if (note != "")
+        {
+            tvCartNote.visibility = View.VISIBLE
             tvCartNote.text = "Note: ${note}"
+        }
+        else
+            tvCartNote.visibility = View.GONE
+
         btnCart.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPayment)}"
     }
 

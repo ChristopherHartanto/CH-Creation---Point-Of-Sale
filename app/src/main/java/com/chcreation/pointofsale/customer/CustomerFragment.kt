@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
 
@@ -23,14 +24,18 @@ import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.intentFor
 import org.jetbrains.anko.support.v4.onRefresh
 import org.jetbrains.anko.support.v4.startActivity
+import java.util.*
+import kotlin.collections.ArrayList
 
 class CustomerFragment : Fragment(), MainView {
 
     private lateinit var adapter: CustomerRecyclerViewAdapter
     private var customerItems : ArrayList<Customer> = arrayListOf()
+    private var filteredCustomerItems : ArrayList<Customer> = arrayListOf()
     private lateinit var presenter: CustomerPresenter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
+    private var searchFilter = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,8 +57,8 @@ class CustomerFragment : Fragment(), MainView {
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = CustomerPresenter(this,mAuth,mDatabase,ctx)
 
-        adapter = CustomerRecyclerViewAdapter(ctx,customerItems){
-            ctx.startActivity(intentFor<CustomerDetailActivity>(ECustomer.CODE.toString() to customerItems[it].CODE))
+        adapter = CustomerRecyclerViewAdapter(ctx,filteredCustomerItems){
+            ctx.startActivity(intentFor<CustomerDetailActivity>(ECustomer.CODE.toString() to filteredCustomerItems[it].CODE))
         }
 
         fbCustomer.onClick {
@@ -65,11 +70,55 @@ class CustomerFragment : Fragment(), MainView {
         srCustomer.onRefresh {
             presenter.retrieveCustomers()
         }
+
+        svCustomerSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                searchFilter = newText
+                fetchData()
+                return false
+            }
+
+            override fun onQueryTextSubmit(query: String): Boolean {
+                return false
+            }
+
+        })
     }
 
     override fun onStart() {
         super.onStart()
         presenter.retrieveCustomers()
+    }
+
+    fun fetchData(){
+        filteredCustomerItems.clear()
+        srCustomer.isRefreshing = true
+
+        for (data in customerItems){
+            if (searchFilter == "")
+                filteredCustomerItems.add(data)
+            else{
+                if (data.NAME.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(
+                        Locale.getDefault()))){
+                    filteredCustomerItems.add(data)
+                }
+                else if (data.EMAIL.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(
+                        Locale.getDefault()))){
+                    filteredCustomerItems.add(data)
+                }
+                else if (data.PHONE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(
+                        Locale.getDefault()))){
+                    filteredCustomerItems.add(data)
+                }
+                else if (data.ADDRESS.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(
+                        Locale.getDefault()))){
+                    filteredCustomerItems.add(data)
+                }
+            }
+        }
+        adapter.notifyDataSetChanged()
+        srCustomer.isRefreshing = false
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
@@ -83,13 +132,11 @@ class CustomerFragment : Fragment(), MainView {
                         val item = data.getValue(Customer::class.java)
                         if (item!!.STATUS_CODE == EStatusCode.ACTIVE.toString()){
                             customerItems.add(item)
-                            adapter.notifyDataSetChanged()
-
                         }
                     }
-                    srCustomer.isRefreshing = false
+                    fetchData()
                 }
-
+                svCustomerSearch.visibility = View.VISIBLE
                 srCustomer.isRefreshing = false
             }
         }

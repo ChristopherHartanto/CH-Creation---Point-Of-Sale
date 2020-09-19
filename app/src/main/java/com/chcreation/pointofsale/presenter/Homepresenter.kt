@@ -3,10 +3,7 @@ package com.chcreation.pointofsale.presenter
 import android.content.Context
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.custom_receipt.Sincere
-import com.chcreation.pointofsale.model.About
-import com.chcreation.pointofsale.model.ActivityLogs
-import com.chcreation.pointofsale.model.Merchant
-import com.chcreation.pointofsale.model.User
+import com.chcreation.pointofsale.model.*
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -292,6 +289,33 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
             database.child(ETable.SINCERE.toString())
                 .child(getMerchantCredential(context))
                 .child(getMerchantCode(context))
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e:java.lang.Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun checkVersion(callBack:(version:Version) -> Unit){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        val item = p0.getValue(Version::class.java)
+
+                        if (item != null) {
+                            callBack(item)
+                        }
+                    }
+
+                }
+
+            }
+            database.child(ETable.VERSION.toString())
                 .addListenerForSingleValueEvent(postListener)
         }catch (e:java.lang.Exception){
             showError(context,e.message.toString())

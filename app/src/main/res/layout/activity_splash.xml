@@ -18,25 +18,33 @@
 <!--        android:textStyle="bold"-->
 <!--        android:id="@+id/tvSplashTitle"/>-->
 
-    <ImageView
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:src="@drawable/icon"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/icon"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CH Creation"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorBlack"
+            android:id="@+id/tvSplashDescription"
+            android:layout_marginVertical="7dp"/>
+    </LinearLayout>
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tvsplashVersion"
         android:textColor="@color/colorBlack"
-        android:layout_marginTop="3dp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="CH Creation"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@color/colorBlack"
-        android:id="@+id/tvSplashDescription"
-        android:layout_marginVertical="10dp"/>
+        android:layout_marginBottom="5dp"/>
 
 </LinearLayout>

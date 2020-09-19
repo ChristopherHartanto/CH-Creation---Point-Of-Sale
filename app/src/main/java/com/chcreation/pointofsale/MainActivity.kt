@@ -104,6 +104,30 @@ class MainActivity : AppCompatActivity(), MainView {
             editor.apply()
         }
 
+        presenter.checkVersion {
+            var currentVersionCode = ""
+            try {
+                currentVersionCode = packageManager.getPackageInfo(packageName,0).versionName.toString()
+            }catch (e: java.lang.Exception){
+                currentVersionCode = ""
+                e.printStackTrace()
+            }
+            if (it.VERSION_NAME != packageManager.getPackageInfo(packageName,0).versionName.toString() && currentVersionCode != ""){
+                alert ("Please Update to Latest Version for Better Performance"){
+                    title = "Update Available!"
+
+                    yesButton {
+                        openGooglePlay(this@MainActivity)
+                    }
+
+                    noButton {
+
+                    }
+                }.show()
+            }
+        }
+
+
         GlobalScope.launch {
             //presenter.retrieveUserLists()
             merchantPresenter.retrieveInvitation(encodeEmail(getEmail(this@MainActivity)))

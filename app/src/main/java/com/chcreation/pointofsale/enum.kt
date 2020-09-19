@@ -15,7 +15,8 @@ enum class ETable{
     USER_ACCEPTANCE,
     ABOUT,
     SINCERE,
-    ACTIVITY_LOGS
+    ACTIVITY_LOGS,
+    VERSION
 }
 
 enum class ESincere{

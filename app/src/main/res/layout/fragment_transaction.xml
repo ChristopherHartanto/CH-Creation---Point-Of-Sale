@@ -174,7 +174,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="10dp"
+                android:paddingVertical="10dp"
+                android:paddingHorizontal="5dp"
                 android:id="@+id/rvTransaction"/>
 
             <ProgressBar

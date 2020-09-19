@@ -8,12 +8,14 @@ import android.net.Uri
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.TranslateAnimation
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.view.marginBottom
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 private lateinit var sharedPreference: SharedPreferences
 
@@ -259,6 +261,26 @@ fun sendEmail(subject: String,text: String,context: Context){
     catch (e: Exception){
         context.toast(e.message.toString())
         e.printStackTrace()
+    }
+}
+
+fun openGooglePlay(context: Context){
+    val appPackageName: String = context.packageName // getPackageName() from Context or Activity object
+
+    try {
+        context.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("market://details?id=$appPackageName")
+            )
+        )
+    } catch (anfe: ActivityNotFoundException) {
+        context.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")
+            )
+        )
     }
 }
 

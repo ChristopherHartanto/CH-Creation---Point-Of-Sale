@@ -446,6 +446,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                 fetchData()
                 btnMerchant.isEnabled = true
             }
+            pbMerchant.visibility = View.GONE
         }
     }
 

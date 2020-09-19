@@ -125,7 +125,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
             btnProductSave.startAnimation(normalClickAnimation())
 
             presenter.checkProductSize(){
-                if (it >= 10 && getMerchantMemberStatus(this@NewProductActivity) == EMerchantMemberStatus.FREE_TRIAL.toString()){
+                if (it > 8 && getMerchantMemberStatus(this@NewProductActivity) == EMerchantMemberStatus.FREE_TRIAL.toString()){
                     alert ("Upgrade to Premium for Unlimited Product"){
                         title = "Oops!"
                         yesButton {
