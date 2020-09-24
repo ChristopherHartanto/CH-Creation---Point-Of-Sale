@@ -20,19 +20,13 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.chcreation.pointofsale.*
-import com.chcreation.pointofsale.checkout.DiscountActivity
-import com.chcreation.pointofsale.checkout.NoteActivity
-import com.chcreation.pointofsale.checkout.PostCheckOutActivity
-import com.chcreation.pointofsale.home.HomeFragment
 import com.chcreation.pointofsale.model.Product
-import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_product_detail.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -128,7 +122,8 @@ class ProductDetailActivity : AppCompatActivity(), MainView {
 
         tvProductDetailName.text = product.NAME.toString()
         tvProductDetailDesc.text = product.DESC.toString()
-        tvProductDetailPrice.text = indonesiaCurrencyFormat().format(product.PRICE)
+        tvProductDetailPrice.text = currencyFormat(getLanguage(this),
+            getCountry(this)).format(product.PRICE)
     }
 
     private fun getBitmapFromView(view: View, activity: Activity, callback: (Bitmap) -> Unit) {

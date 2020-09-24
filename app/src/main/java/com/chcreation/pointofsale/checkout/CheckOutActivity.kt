@@ -1,6 +1,5 @@
 package com.chcreation.pointofsale.checkout
 
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -13,17 +12,13 @@ import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
 import com.chcreation.pointofsale.checkout.NoteActivity.Companion.note
 import com.chcreation.pointofsale.checkout.SelectCustomerActivity.Companion.selectCustomerCode
 import com.chcreation.pointofsale.checkout.SelectCustomerActivity.Companion.selectCustomerName
-import com.chcreation.pointofsale.customer.CustomerFragment
 import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
-import com.chcreation.pointofsale.home.HomeFragment.Companion.totalQty
 import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Payment
 import com.chcreation.pointofsale.model.Transaction
 import com.chcreation.pointofsale.presenter.CheckOutPresenter
-import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.transaction.DetailTransactionActivity.Companion.existPayment
-import com.chcreation.pointofsale.transaction.TransactionFragment
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.customerItems
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transCodeItems
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transItems
@@ -37,7 +32,6 @@ import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_check_out.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.ctx
 import java.util.*
 
 class CheckOutActivity : AppCompatActivity(), MainView {
@@ -167,7 +161,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
 
         totalPayment = totalPrice - discount + tax
         etCheckOutAmountReceived.setText(totalPayment.toString())
-        tvCheckOutTotal.text = indonesiaCurrencyFormat().format(totalPayment)
+        tvCheckOutTotal.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)
     }
 
     private fun newCheckOut(){
@@ -186,7 +180,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             val orderDetail = gson.toJson(cartItems)
             var statusCode = if (totalOutStanding > 0) EStatusCode.PENDING else EStatusCode.DONE
 
-            alert ("Payment Received: ${indonesiaCurrencyFormat().format(totalReceived)}" +
+            alert ("Payment Received: ${currencyFormat(getLanguage(this), getCountry(this)).format(totalReceived)}" +
                     "\nCustomer: $custName" +
                     "\nNote: $note"){
                 title = "Confirmation"
@@ -207,9 +201,11 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                             , Payment("", totalReceived,paymentMethod, note,
                                 mAuth.currentUser!!.uid,EStatusCode.DONE.toString()), cartItems){
 
-                            val log = if (custName != "-") "Receive ${indonesiaCurrencyFormat().format(totalReceived)}  from $custName"
+                            val log = if (custName != "-") "Receive ${currencyFormat(getLanguage(this@CheckOutActivity), 
+                                getCountry(this@CheckOutActivity)).format(totalReceived)} from $custName"
                             else
-                                "Receive ${indonesiaCurrencyFormat().format(totalReceived)}  from Receipt ${receiptFormat(it.toInt())}"
+                                "Receive ${currencyFormat(getLanguage(this@CheckOutActivity),
+                                    getCountry(this@CheckOutActivity)).format(totalReceived)}  from Receipt ${receiptFormat(it.toInt())}"
                             presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
                         }
 
@@ -245,7 +241,8 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             val gson = Gson()
             val orderDetail = gson.toJson(cartItems)
 
-            alert ("Payment Received: ${indonesiaCurrencyFormat().format(totalReceived)}\nCustomer: $custName"){
+            alert ("Payment Received: ${currencyFormat(getLanguage(this@CheckOutActivity),
+                getCountry(this@CheckOutActivity)).format(totalReceived)}\nCustomer: $custName"){
                 title = "Confirmation"
 
                 yesButton {
@@ -257,7 +254,8 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                         Payment("", totalReceived,paymentMethod, note, mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
                         totalOutStanding,transItems[transPosition])
 
-                    val log = "Receive ${indonesiaCurrencyFormat().format(totalReceived)} from Receipt ${receiptFormat(transCodeItems[transPosition])}"
+                    val log = "Receive ${currencyFormat(getLanguage(this@CheckOutActivity),
+                        getCountry(this@CheckOutActivity)).format(totalReceived)} from Receipt ${receiptFormat(transCodeItems[transPosition])}"
                     presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
                 }
 
@@ -275,7 +273,8 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                 if (item != null) {
                     postTotalPayment = item.TOTAL_OUTSTANDING!!.toInt()
                     etCheckOutAmountReceived.setText(postTotalPayment.toString())
-                    tvCheckOutTotal.text = indonesiaCurrencyFormat().format(postTotalPayment)
+                    tvCheckOutTotal.text = currencyFormat(getLanguage(this@CheckOutActivity),
+                        getCountry(this@CheckOutActivity)).format(postTotalPayment)
                 }
             }
         }

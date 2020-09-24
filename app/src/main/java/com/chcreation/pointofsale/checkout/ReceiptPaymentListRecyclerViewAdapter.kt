@@ -4,16 +4,13 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.indonesiaCurrencyFormat
-import com.chcreation.pointofsale.model.Cart
+import com.chcreation.pointofsale.currencyFormat
+import com.chcreation.pointofsale.getCountry
+import com.chcreation.pointofsale.getLanguage
 import com.chcreation.pointofsale.model.Payment
-import com.chcreation.pointofsale.model.Product
-import com.squareup.picasso.Picasso
-import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class ReceiptPaymentListRecyclerViewAdapter(private val context: Context, private val items: List<Payment>)
     : RecyclerView.Adapter<ReceiptPaymentListRecyclerViewAdapter.ViewHolder>() {
@@ -28,7 +25,7 @@ class ReceiptPaymentListRecyclerViewAdapter(private val context: Context, privat
         )
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(items[position])
+        holder.bindItem(context,items[position])
     }
 
     override fun getItemCount(): Int = items.size
@@ -37,9 +34,12 @@ class ReceiptPaymentListRecyclerViewAdapter(private val context: Context, privat
 
         private val price = view.findViewById<TextView>(R.id.tvRowReceiptPaymentListPrice)
 
-        fun bindItem(item: Payment) {
+        fun bindItem(context: Context,item: Payment) {
 
-            price.text = indonesiaCurrencyFormat().format(item.TOTAL_RECEIVED).toString()
+            price.text = currencyFormat(
+                getLanguage(context),
+                getCountry(context)
+            ).format(item.TOTAL_RECEIVED).toString()
 
         }
 

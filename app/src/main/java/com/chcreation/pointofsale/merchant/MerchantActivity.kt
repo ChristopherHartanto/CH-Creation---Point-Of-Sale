@@ -133,6 +133,8 @@ class MerchantActivity : AppCompatActivity() , MainView, AdapterView.OnItemSelec
                 editor.putString(ESharedPreference.ADDRESS.toString(), item.ADDRESS)
                 editor.putString(ESharedPreference.NO_TELP.toString(), item.NO_TELP)
                 editor.putString(ESharedPreference.MERCHANT_MEMBER_STATUS.toString(),item.MEMBER_STATUS.toString())
+                editor.putString(ESharedPreference.COUNTRY.toString(),item.COUNTRY)
+                editor.putString(ESharedPreference.LANGUAGE.toString(),item.LANGUAGE)
                 editor.apply()
 
                 startActivity<MainActivity>()

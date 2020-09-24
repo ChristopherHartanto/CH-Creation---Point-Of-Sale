@@ -200,7 +200,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         val totalPayment = totalPrice - discount + tax
 
         if (discount != 0 || tax != 0){
-            tvReceiptSubTotal.text = indonesiaCurrencyFormat().format(totalPrice)
+            tvReceiptSubTotal.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)
             tvReceiptSubTotalTitle.visibility = View.VISIBLE
             tvReceiptSubTotal.visibility = View.VISIBLE
         }
@@ -218,9 +218,9 @@ class ReceiptActivity : AppCompatActivity(), MainView {
             tvReceiptTaxTitle.visibility = View.GONE
         }
 
-        tvReceiptDiscount.text = indonesiaCurrencyFormat().format(discount)
-        tvReceiptTax.text = indonesiaCurrencyFormat().format(tax)
-        tvReceiptTotal.text = indonesiaCurrencyFormat().format(totalPayment)
+        tvReceiptDiscount.text = currencyFormat(getLanguage(this), getCountry(this)).format(discount)
+        tvReceiptTax.text = currencyFormat(getLanguage(this), getCountry(this)).format(tax)
+        tvReceiptTotal.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)
 //
 //        if (note != "")
 //            tvReceiptNote.text = "$note"
@@ -238,13 +238,13 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
         if (totalOutstanding > 0){
             tvReceiptAmountReceivedTitle.text = "Pending:"
-            tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalOutstanding)
+            tvReceiptChanges.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalOutstanding)
         }else{
             var totalPaid = 0
             for (data in paymentLists){
                 totalPaid += data.TOTAL_RECEIVED!!
             }
-            tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalPaid - totalPayment)
+            tvReceiptChanges.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPaid - totalPayment)
         }
         tvReceiptTransCode.text = "Receipt: ${receiptFormat(receiptCode)}"
         tvReceiptDate.text = parseDateFormatFull(boughtList.UPDATED_DATE.toString())
@@ -341,7 +341,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         val totalPayment = totalPrice - discount + tax
 
         if (discount != 0 || tax != 0){
-            tvReceiptSubTotal.text = indonesiaCurrencyFormat().format(totalPrice)
+            tvReceiptSubTotal.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)
             tvReceiptSubTotalTitle.visibility = View.VISIBLE
             tvReceiptSubTotal.visibility = View.VISIBLE
         }
@@ -359,9 +359,9 @@ class ReceiptActivity : AppCompatActivity(), MainView {
             tvReceiptTaxTitle.visibility = View.GONE
         }
 
-        tvReceiptDiscount.text = indonesiaCurrencyFormat().format(discount)
-        tvReceiptTax.text = indonesiaCurrencyFormat().format(tax)
-        tvReceiptTotal.text = indonesiaCurrencyFormat().format(totalPayment)
+        tvReceiptDiscount.text = currencyFormat(getLanguage(this), getCountry(this)).format(discount)
+        tvReceiptTax.text = currencyFormat(getLanguage(this), getCountry(this)).format(tax)
+        tvReceiptTotal.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)
 //
 //        if (note != "")
 //            tvReceiptNote.text = "$note"
@@ -379,13 +379,13 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
         if (totalOutstanding > 0){
             tvReceiptAmountReceivedTitle.text = "Pending:"
-            tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalOutstanding)
+            tvReceiptChanges.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalOutstanding)
         }else{
             var totalPaid = 0
             for (data in paymentLists){
                 totalPaid += data.TOTAL_RECEIVED!!
             }
-            tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalPaid - totalPayment)
+            tvReceiptChanges.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPaid - totalPayment)
         }
         tvReceiptTransCode.text = "Receipt: ${receiptFormat(receiptCode)}"
         tvReceiptDate.text = parseDateFormatFull(boughtList.UPDATED_DATE.toString())

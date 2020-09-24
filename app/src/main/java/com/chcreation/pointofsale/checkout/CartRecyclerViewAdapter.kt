@@ -4,15 +4,10 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.indonesiaCurrencyFormat
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Cart
-import com.chcreation.pointofsale.model.Product
-import com.chcreation.pointofsale.normalClickAnimation
-import com.squareup.picasso.Picasso
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class CartRecyclerViewAdapter(private val context: Context, private val items: List<Cart>,private val listener: (position: Int) -> Unit)
@@ -28,7 +23,7 @@ class CartRecyclerViewAdapter(private val context: Context, private val items: L
         )
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(items[position],listener, position)
+        holder.bindItem(context,items[position],listener, position)
     }
 
     override fun getItemCount(): Int = items.size
@@ -40,11 +35,11 @@ class CartRecyclerViewAdapter(private val context: Context, private val items: L
         private val price = view.findViewById<TextView>(R.id.tvRowCartPrice)
         private val totalPrice = view.findViewById<TextView>(R.id.tvRowCartTotalPrice)
 
-        fun bindItem(cart: Cart, listener: (position: Int) -> Unit, position: Int) {
+        fun bindItem(context: Context,cart: Cart, listener: (position: Int) -> Unit, position: Int) {
 
             name.text = cart.NAME
-            price.text = indonesiaCurrencyFormat().format(cart.PRICE)
-            totalPrice.text = indonesiaCurrencyFormat().format(cart.PRICE!! * cart.Qty!!)
+            price.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE)
+            totalPrice.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE!! * cart.Qty!!)
             qty.text = "${cart.Qty}x"
 
             itemView.onClick {

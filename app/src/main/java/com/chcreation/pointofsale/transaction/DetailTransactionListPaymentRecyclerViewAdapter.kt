@@ -5,17 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Payment
-import com.chcreation.pointofsale.model.Product
-import com.chcreation.pointofsale.model.Transaction
-import com.squareup.picasso.Picasso
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.textColorResource
 
 class DetailTransactionListPaymentRecyclerViewAdapter(private val context: Context, private val items: MutableList<Payment>,
                                                 private val listener: (position: Int) -> Unit)
@@ -25,7 +20,7 @@ class DetailTransactionListPaymentRecyclerViewAdapter(private val context: Conte
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_payment_list, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(items[position],listener, position)
+        holder.bindItem(context,items[position],listener, position)
     }
 
     override fun getItemCount(): Int = items.size
@@ -38,11 +33,12 @@ class DetailTransactionListPaymentRecyclerViewAdapter(private val context: Conte
         //private val createdBy = view.findViewById<TextView>(R.id.tvRowListPaymentCreatedBy)
         private val paymentMethod = view.findViewById<ImageView>(R.id.ivRowListPayment)
 
-        fun bindItem(item: Payment, listener: (position: Int) -> Unit, position: Int) {
+        fun bindItem(context: Context,item: Payment, listener: (position: Int) -> Unit, position: Int) {
             //createdBy.text = "C : ${name}"
             date.text = parseDateFormatFull(item.CREATED_DATE.toString())
 
-            totalPriceReceived.text = indonesiaCurrencyFormat().format(item.TOTAL_RECEIVED)
+            totalPriceReceived.text = currencyFormat(getLanguage(context),
+                getCountry(context)).format(item.TOTAL_RECEIVED)
 
             if (item.PAYMENT_METHOD == EPaymentMethod.CASH.toString())
                 paymentMethod.imageResource = R.drawable.cash

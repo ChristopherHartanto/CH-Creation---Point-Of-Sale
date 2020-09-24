@@ -32,7 +32,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:text="P"
-                android:textSize="24sp"
+                android:textSize="20sp"
                 android:gravity="center"
                 android:textColor="@color/colorWhite"
                 android:id="@+id/tvRowProductFirstName"/>

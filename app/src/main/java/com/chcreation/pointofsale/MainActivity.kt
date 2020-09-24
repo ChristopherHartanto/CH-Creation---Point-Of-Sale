@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity(), MainView {
     private lateinit var tvNavHeaderMerchantName : TextView
     private lateinit var ivNavHeader : ImageView
     private lateinit var tvNavHeaderFirstName : TextView
+    private lateinit var tvNavHeaderMerchantMemberStatus : TextView
     private lateinit var tvUserName : TextView
     private lateinit var layoutNavHeaderDefaultImage: FrameLayout
     private lateinit var layoutNavHeader: LinearLayout
@@ -138,7 +139,8 @@ class MainActivity : AppCompatActivity(), MainView {
                 logOut()
             else{
                 if (merchant.NAME != getMerchantName(this) || merchant.IMAGE != getMerchantImage(this)
-                    || merchant.NO_TELP != getMerchantNoTel(this) || merchant.MEMBER_STATUS != getMerchantMemberStatus(this))
+                    || merchant.NO_TELP != getMerchantNoTel(this) || merchant.MEMBER_STATUS != getMerchantMemberStatus(this)
+                    || merchant.COUNTRY != getCountry(this) || merchant.LANGUAGE != getLanguage(this))
                     logOut()
             }
         }
@@ -155,7 +157,10 @@ class MainActivity : AppCompatActivity(), MainView {
         ivNavHeader = view.findViewById<ImageView>(R.id.imageView)
         layoutNavHeaderDefaultImage = view.findViewById<FrameLayout>(R.id.layoutNavHeaderDefaultImage)
         layoutNavHeader = view.findViewById<LinearLayout>(R.id.layoutNavHeader)
+        tvNavHeaderMerchantMemberStatus = view.findViewById<TextView>(R.id.tvNavHeaderMerchantMemberStatus)
 
+        tvNavHeaderMerchantMemberStatus.text = if (getMerchantMemberStatus(this) == EMerchantMemberStatus.PREMIUM.toString())
+            "PREMIUM" else "FREE TRIAL"
         tvNavHeaderMerchantName.text = getMerchantName(this)
         tvUserName.text = "${getName(this)} (${getMerchantUserGroup(this)})"
 
@@ -289,6 +294,3 @@ class MainActivity : AppCompatActivity(), MainView {
             toast(message)
     }
 }
-//https://www.websitepolicies.com/policies/view/mjijhUBA
-//ch.creation1608@gmail.com
-//3634315896

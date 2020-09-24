@@ -1,11 +1,9 @@
 package com.chcreation.pointofsale.login
 
-import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Bundle
+import android.os.StrictMode
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +13,7 @@ import com.chcreation.pointofsale.merchant.MerchantActivity
 import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.model.UserAcceptance
 import com.chcreation.pointofsale.presenter.MerchantPresenter
+import com.chcreation.pointofsale.smtp.GMailSender
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
@@ -40,6 +39,10 @@ class SignInActivity : AppCompatActivity(), MainView {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_in)
+
+        val policy =
+            StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
 
         supportActionBar?.hide()
 
@@ -96,11 +99,15 @@ class SignInActivity : AppCompatActivity(), MainView {
 
         if (email.isNotEmpty() && password.isNotEmpty()) {
 
+//            val gMailSender = GMailSender(EMAIL, PASSWORD)
+//            gMailSender.sendMail("Registration Success","Welcome to CH Creation Point of Sale","CHCreation","christopherhartanto999@gmail.com")
+
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->
                 if (task.isSuccessful) {
                     GlobalScope.launch(Dispatchers.Main) {
                         presenter.retrieveUserName()
                     }
+
                     Toast.makeText(this, "Login Success ", Toast.LENGTH_LONG).show()
                 }else {
                     Toast.makeText(this, "Email or Password Wrong", Toast.LENGTH_LONG).show()

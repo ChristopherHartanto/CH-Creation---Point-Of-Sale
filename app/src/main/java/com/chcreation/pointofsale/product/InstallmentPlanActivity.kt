@@ -7,11 +7,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.indonesiaCurrencyFormat
-import com.chcreation.pointofsale.normalClickAnimation
+import com.chcreation.pointofsale.*
 import kotlinx.android.synthetic.main.activity_installment_plan.*
-import kotlinx.android.synthetic.main.activity_new_product.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class InstallmentPlanActivity : AppCompatActivity() {
@@ -34,7 +31,9 @@ class InstallmentPlanActivity : AppCompatActivity() {
 
         var price = intent.extras!!.getInt("price",0)
 
-        tvInstallmentPlanPrice.text = indonesiaCurrencyFormat().format(price)
+        tvInstallmentPlanPrice.text = currencyFormat(  getLanguage(this),
+            getCountry(this)
+        ).format(price)
 
         spMonthAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,monthStringItems)
         spInstallmentPlanMonth.adapter = spMonthAdapter
@@ -81,7 +80,8 @@ class InstallmentPlanActivity : AppCompatActivity() {
             price -= dp
             val totalPerMonth = (price.toFloat() + (price * interestItems[selectedInterest].toString().toFloat() * monthItems[selectedMonth].toFloat() / 100) ) / monthItems[selectedMonth].toFloat()
 
-            tvInstallmentPlanTotalMonth.text = "${indonesiaCurrencyFormat().format(totalPerMonth)} / month"
+            tvInstallmentPlanTotalMonth.text = "${currencyFormat(getLanguage(this@InstallmentPlanActivity),
+                getCountry(this@InstallmentPlanActivity)).format(totalPerMonth)} / month"
         }
     }
 

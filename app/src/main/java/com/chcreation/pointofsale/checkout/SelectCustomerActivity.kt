@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.EMessageResult
 import com.chcreation.pointofsale.EStatusCode
@@ -18,8 +19,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_select_customer.*
+import kotlinx.android.synthetic.main.fragment_customer.*
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import java.util.*
+import kotlin.collections.ArrayList
 
 class SelectCustomerActivity : AppCompatActivity(), MainView {
 
@@ -30,9 +34,11 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
 
     private lateinit var adapter: CustomerRecyclerViewAdapter
     private var customerItems : ArrayList<Customer> = arrayListOf()
+    private var filteredCustomerItems : ArrayList<Customer> = arrayListOf()
     private lateinit var presenter: CustomerPresenter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
+    private var searchFilter = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,15 +51,28 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = CustomerPresenter(this,mAuth,mDatabase,this)
 
-        adapter = CustomerRecyclerViewAdapter(this,customerItems){
-            selectCustomerCode = customerItems[it].CODE.toString()
-            selectCustomerName = customerItems[it].NAME.toString()
+        adapter = CustomerRecyclerViewAdapter(this,filteredCustomerItems){
+            selectCustomerCode = filteredCustomerItems[it].CODE.toString()
+            selectCustomerName = filteredCustomerItems[it].NAME.toString()
             finish()
         }
 
         rvSelectCustomer.adapter = adapter
         rvSelectCustomer.layoutManager = LinearLayoutManager(this)
 
+        svSelectCustomerSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                searchFilter = newText
+                fetchData()
+                return false
+            }
+
+            override fun onQueryTextSubmit(query: String): Boolean {
+                return false
+            }
+
+        })
     }
 
 
@@ -75,6 +94,34 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
         return super.onOptionsItemSelected(item)
     }
 
+    fun fetchData(){
+        filteredCustomerItems.clear()
+
+        for (data in customerItems){
+            if (searchFilter == "")
+                filteredCustomerItems.add(data)
+            else{
+                if (data.NAME.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(
+                        Locale.getDefault()))){
+                    filteredCustomerItems.add(data)
+                }
+                else if (data.EMAIL.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(
+                        Locale.getDefault()))){
+                    filteredCustomerItems.add(data)
+                }
+                else if (data.PHONE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(
+                        Locale.getDefault()))){
+                    filteredCustomerItems.add(data)
+                }
+                else if (data.ADDRESS.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(
+                        Locale.getDefault()))){
+                    filteredCustomerItems.add(data)
+                }
+            }
+        }
+        adapter.notifyDataSetChanged()
+    }
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (response == EMessageResult.FETCH_CUSTOMER_SUCCESS.toString()){
             if (dataSnapshot.exists()){
@@ -84,10 +131,11 @@ class SelectCustomerActivity : AppCompatActivity(), MainView {
                     if(item!!.STATUS_CODE == EStatusCode.ACTIVE.toString()){
 
                         customerItems.add(item)
-                        adapter.notifyDataSetChanged()
                     }
                 }
+                fetchData()
             }
+            svSelectCustomerSearch.visibility = View.VISIBLE
             pbSelectCustomer.visibility = View.GONE
         }
     }

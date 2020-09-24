@@ -160,7 +160,8 @@ class ProductPresenter(private val view: MainView,
                 EProduct.CREATED_DATE.toString() to product.CREATED_DATE,
                 EProduct.CREATED_BY.toString() to product.CREATED_BY,
                 EProduct.UPDATED_DATE.toString() to product.UPDATED_DATE,
-                EProduct.UPDATED_BY.toString() to product.UPDATED_BY
+                EProduct.UPDATED_BY.toString() to product.UPDATED_BY,
+                EProduct.WHOLE_SALE.toString() to product.WHOLE_SALE
             )
             database.child(ETable.PRODUCT.toString())
                 .child(getMerchantCredential(context))

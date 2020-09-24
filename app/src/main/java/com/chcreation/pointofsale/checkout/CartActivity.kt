@@ -6,27 +6,25 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.RESULT_CLOSE_ALL
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
 import com.chcreation.pointofsale.checkout.NoteActivity.Companion.note
-import com.chcreation.pointofsale.home.HomeFragment
 import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
+import com.chcreation.pointofsale.home.HomeFragment.Companion.imageItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalQty
-import com.chcreation.pointofsale.indonesiaCurrencyFormat
-import com.chcreation.pointofsale.normalClickAnimation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_cart.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.ctx
 
 class CartActivity : AppCompatActivity() {
 
-    private lateinit var adapter: CartRecyclerViewAdapter
+    private lateinit var adapter: CheckOutRecyclerViewAdapter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
 
@@ -40,28 +38,48 @@ class CartActivity : AppCompatActivity() {
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
 
-        adapter = CartRecyclerViewAdapter(this, cartItems){
-            alert ("Remove ${cartItems[it].NAME} ${cartItems[it].Qty} Qty?"){
-                title = "Remove"
-                yesButton {a->
-                    cartItems.removeAt(it)
+        adapter = CheckOutRecyclerViewAdapter(this, cartItems, imageItems){ type,it->
+            if (type == 1){
+                if (cartItems[it].Qty == 1){
+                    alert ("Remove ${cartItems[it].NAME} From Cart?"){
+                        title = "Remove"
+                        yesButton {a->
+                            cartItems.removeAt(it)
+
+                            totalPrice = sumPrice()
+                            totalQty = countQty()
+                            sumPriceDetail()
+
+                            if (cartItems.size == 0){
+                                PostCheckOutActivity().clearCartData()
+                                finish()
+                            }
+                            adapter.notifyDataSetChanged()
+                        }
+                        noButton {  }
+                    }.show()
+                }else if (cartItems[it].Qty!! > 1){
+                    cartItems[it].Qty = cartItems[it].Qty!! - 1
+
                     totalPrice = sumPrice()
                     totalQty = countQty()
                     sumPriceDetail()
-
-                    if (cartItems.size == 0){
-                        PostCheckOutActivity().clearCartData()
-                        finish()
-                    }
                     adapter.notifyDataSetChanged()
-                }
-                noButton {  }
-            }.show()
+                }else
+                    toast("Error, Please Clear Your Cart!")
+            }else if (type == 2){
+                cartItems[it].Qty = cartItems[it].Qty!! + 1
+
+                totalPrice = sumPrice()
+                totalQty = countQty()
+                sumPriceDetail()
+                adapter.notifyDataSetChanged()
+            }
         }
         rvCart.adapter = adapter
         rvCart.layoutManager = LinearLayoutManager(this)
 
-        tvCartTotal.text = "Total: ${indonesiaCurrencyFormat().format(totalPrice)}"
+        tvCartTotal.text = "Total: ${currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)}"
         btnCart.onClick {
             btnCart.startAnimation(normalClickAnimation())
             if (cartItems.size != 0)
@@ -91,6 +109,7 @@ class CartActivity : AppCompatActivity() {
                             title = "Delete Cart"
                             yesButton {
                                 cartItems.clear()
+                                imageItems.clear()
                                 totalQty = 0
                                 totalPrice = 0
                                 PostCheckOutActivity().clearCartData()
@@ -148,19 +167,22 @@ class CartActivity : AppCompatActivity() {
 
     private fun sumPriceDetail(){
 
+        if (discount != 0) tvCartDiscount.visibility = View.VISIBLE else tvCartDiscount.visibility = View.GONE
+        if (tax != 0) tvCartTax.visibility = View.VISIBLE else tvCartTax.visibility = View.GONE
+
         val totalPayment = totalPrice - discount + tax
+
         if (discount != 0 || tax != 0){
-            if (discount != 0) tvCartDiscount.visibility = View.VISIBLE else tvCartDiscount.visibility = View.GONE
-            if (tax != 0) tvCartTax.visibility = View.VISIBLE else tvCartTax.visibility = View.GONE
 
-            tvCartDiscount.text = "Discount : ${indonesiaCurrencyFormat().format(discount)}"
-            tvCartTax.text = "Tax: ${indonesiaCurrencyFormat().format(tax)}"
+            tvCartDiscount.text = "Discount : ${currencyFormat(getLanguage(this), getCountry(this)).format(discount)}"
+            tvCartTax.text = "Tax: ${currencyFormat(getLanguage(this), getCountry(this)).format(tax)}"
 
-            tvCartSubTotal.text ="Sub Total : ${indonesiaCurrencyFormat().format(totalPrice)}"
+            tvCartSubTotal.text ="Sub Total : ${currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)}"
             tvCartSubTotal.visibility = View.VISIBLE
-        }
+        }else
+            tvCartSubTotal.visibility = View.GONE
 
-        tvCartTotal.text = "Total : ${indonesiaCurrencyFormat().format(totalPayment)}"
+        tvCartTotal.text = "Total : ${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}"
         if (note != "")
         {
             tvCartNote.visibility = View.VISIBLE
@@ -169,7 +191,7 @@ class CartActivity : AppCompatActivity() {
         else
             tvCartNote.visibility = View.GONE
 
-        btnCart.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPayment)}"
+        btnCart.text = "$totalQty Item = ${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}"
     }
 
     private fun countQty() : Int{

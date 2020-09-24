@@ -8,7 +8,6 @@ import android.net.Uri
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.TranslateAnimation
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.view.marginBottom
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
@@ -35,11 +34,25 @@ fun removeAllSharedPreference(context: Context){
     editor.putString(ESharedPreference.CUSTOM_RECEIPT.toString(),ECustomReceipt.RECEIPT1.toString())
     editor.putString(ESharedPreference.SINCERE.toString(),"Thank You")
     editor.putString(ESharedPreference.MERCHANT_MEMBER_STATUS.toString(),EMerchantMemberStatus.FREE_TRIAL.toString())
+    editor.putString(ESharedPreference.LANGUAGE.toString(),Locale.getDefault().language)
+    editor.putString(ESharedPreference.COUNTRY.toString(),Locale.getDefault().country)
     editor.putBoolean(ESharedPreference.CUSTOMER_ADDRESS.toString(),false)
     editor.putBoolean(ESharedPreference.CUSTOMER_NO_TEL.toString(),false)
     editor.putBoolean(ESharedPreference.CUSTOMER_NAME.toString(),false)
     editor.putBoolean(ESharedPreference.RECEIPT_MERCHANT_ICON.toString(),false)
     editor.apply()
+}
+
+fun getLanguage(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.LANGUAGE.toString(),Locale.getDefault().language).toString()
+}
+
+fun getCountry(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.COUNTRY.toString(),Locale.getDefault().country).toString()
 }
 
 fun getName(context: Context) : String{
@@ -221,12 +234,11 @@ fun parseTimeFormat(date: String) : String {
     return newFormat
 }
 
-fun indonesiaCurrencyFormat() : NumberFormat{  //  ex : indoCurrencyFormat().format(10000)
-    val locale = Locale("in","ID")
-    val format = NumberFormat.getCurrencyInstance(locale)
-//    format.maximumFractionDigits = 0
+fun currencyFormat(language: String, country: String) : NumberFormat{  //  ex : currencyFormat().format(10000)
+    val locale = Locale(language,country)
+    //    format.maximumFractionDigits = 0
 //    format.currency = Currency.getInstance("IDR")
-    return  format
+    return NumberFormat.getCurrencyInstance(locale)
 }
 
 fun receiptFormat(number: Int) : String {
@@ -288,3 +300,7 @@ fun encodeEmail(email:String): String{
     val index = if (email == "") 0 else email.indexOf('.',0)
     return email.substring(0,index)
 }
+
+//https://www.websitepolicies.com/policies/view/mjijhUBA
+//ch.creation1608@gmail.com
+//3634315896

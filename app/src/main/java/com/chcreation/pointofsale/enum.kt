@@ -58,7 +58,8 @@ enum class EProduct{
     CREATED_DATE,
     UPDATED_DATE,
     CREATED_BY,
-    UPDATED_BY
+    UPDATED_BY,
+    WHOLE_SALE
 }
 
 enum class EMerchant{
@@ -75,7 +76,9 @@ enum class EMerchant{
     ADDRESS,
     MERCHANT_CODE,
     MEMBER_STATUS,
-    ACTIVE
+    ACTIVE,
+    LANGUAGE,
+    COUNTRY
 }
 
 enum class EAvailableMerchant{
@@ -270,6 +273,8 @@ enum class ESharedPreference{
     NO_TELP,
     ADDRESS,
     NAME,
+    COUNTRY,
+    LANGUAGE,
     EMAIL,
     SINCERE,
     CUSTOMER_NAME,

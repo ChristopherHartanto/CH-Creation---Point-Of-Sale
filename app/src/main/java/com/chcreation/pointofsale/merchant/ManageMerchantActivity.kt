@@ -17,6 +17,8 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -65,6 +67,12 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
     private var currentPhotoPath = ""
     private var bitmap: Bitmap? = null
     private var merchantCode = ""
+    private var selectedLanguage = Locale.getDefault().language
+    private var selectedCountry = Locale.getDefault().country
+    private lateinit var spCurrencyAdapter: ArrayAdapter<String>
+    private var languageItems = mutableListOf<String>("fr","en","en","ms","zh","in","tai","zh")
+    private var countryItems = mutableListOf<String>("FR","US","GB","MY","SG","ID","TH","CN")
+    private var currencyItems = mutableListOf<String>("Euro","US Dollar","Pound Sterling","Ringgit","SG Dollar","Rupiah","Thai Baht","Yuan")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +85,26 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
         storage = FirebaseStorage.getInstance().reference
         presenter = MerchantPresenter(this,mAuth,mDatabase, this)
         sharedPreference =  this.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+        spMerchantCurrency.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                selectedCountry = countryItems[position]
+                selectedLanguage = languageItems[position]
+            }
+
+        }
+
+        spCurrencyAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,currencyItems)
+        spCurrencyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spMerchantCurrency.adapter = spCurrencyAdapter
 
         btnMerchant.isEnabled = false
         GlobalScope.launch {
@@ -178,7 +206,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                     merchantCode = generateMerchantCode()
                     presenter.createNewMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,"",null,null,
                         currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid,merchantCode
-                        ,EMerchantMemberStatus.FREE_TRIAL.toString(),EStatusUser.ACTIVE.toString()),
+                        ,EMerchantMemberStatus.FREE_TRIAL.toString(),EStatusUser.ACTIVE.toString(),selectedLanguage,selectedCountry),
                         AvailableMerchant(merchantName,EUserGroup.MANAGER.toString(),currentDate,currentDate,
                             mAuth.currentUser!!.uid,EStatusUser.ACTIVE.toString(),merchantCode))
 
@@ -204,7 +232,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                 presenter.updateMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,image,
                     merchant!!.USER_LIST,merchant!!.CAT,merchant!!.CREATED_DATE,
                     dateFormat().format(Date()),merchant!!.CREATED_BY,
-                    mAuth.currentUser!!.uid,merchantCode,merchant!!.MEMBER_STATUS,merchant!!.ACTIVE),merchantName)
+                    mAuth.currentUser!!.uid,merchantCode,merchant!!.MEMBER_STATUS,merchant!!.ACTIVE,selectedLanguage,selectedCountry),merchantName)
 
                 presenter.saveActivityLogs(ActivityLogs("Update Merchant",mAuth.currentUser!!.uid,dateFormat().format(Date())))
             }
@@ -420,6 +448,8 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             //etMerchantName.isEnabled = false
             etMerchantNoTelp.setText(merchant!!.NO_TELP)
 
+            spMerchantCurrency.setSelection(languageItems.indexOf(merchant!!.LANGUAGE))
+
             if (merchant!!.IMAGE == ""){
                 layoutMerchantDefaultImage.visibility = View.VISIBLE
                 ivMerchantImage.visibility = View.GONE
@@ -461,6 +491,8 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             editor.putString(ESharedPreference.ADDRESS.toString(),etMerchantAddress.text.toString())
             editor.putString(ESharedPreference.NO_TELP.toString(),etMerchantNoTelp.text.toString())
             editor.putString(ESharedPreference.MERCHANT_MEMBER_STATUS.toString(),EMerchantMemberStatus.FREE_TRIAL.toString())
+            editor.putString(ESharedPreference.COUNTRY.toString(),selectedCountry)
+            editor.putString(ESharedPreference.LANGUAGE.toString(),selectedLanguage)
             editor.apply()
 
             toast("Create Merchant Success")
@@ -481,6 +513,8 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             editor.putString(ESharedPreference.MERCHANT_NAME.toString(),etMerchantName.text.toString())
             editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(),image)
             editor.putString(ESharedPreference.MERCHANT_CODE.toString(),merchantCode)
+            editor.putString(ESharedPreference.COUNTRY.toString(),selectedCountry)
+            editor.putString(ESharedPreference.LANGUAGE.toString(),selectedLanguage)
             editor.apply()
 
             toast("Update Success")

@@ -16,8 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:id="@+id/layoutProduct"
-            android:padding="10dp">
+            android:id="@+id/layoutProduct">
 
             <ProgressBar
                 android:layout_width="match_parent"
@@ -64,6 +63,28 @@
                             android:inputType="number"
                             android:hint="Selling Price Rupiah"/>
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:id="@+id/layoutProductWholeSale"
+                        android:layout_marginTop="7dp">
+
+                        <ImageView
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:src="@drawable/tag"
+                            android:layout_marginEnd="5dp"/>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="WholeSale Detail"
+                            android:gravity="center_vertical"
+                            android:id="@+id/tvProductWholeSaleTitle"
+                            android:textColor="@color/colorPrimary"/>
+                    </LinearLayout>
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -242,7 +263,7 @@
                 android:background="@drawable/button_border"
                 android:textColor="@color/colorBlack"
                 android:text="Cancel"
-                android:layout_marginVertical="5dp"/>
+                android:layout_margin="5dp"/>
         </LinearLayout>
     </FrameLayout>
 

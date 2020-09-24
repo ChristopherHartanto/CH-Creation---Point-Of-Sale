@@ -264,6 +264,7 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
     }
 
     fun fetchProductByCat(){
+        pbManageProduct.visibility = View.VISIBLE
         tempProductItems.clear()
         tmpProductKeys.clear()
         when (sortBy) {
@@ -307,6 +308,7 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
 
         adapter.notifyDataSetChanged()
 
+        pbManageProduct.visibility = View.GONE
         srManageProduct.isRefreshing = false
     }
 

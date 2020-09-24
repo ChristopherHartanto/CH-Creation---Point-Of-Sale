@@ -21,7 +21,9 @@ data class Merchant(
     var UPDATED_BY: String? = "",
     var MERCHANT_CODE: String? = "",
     var MEMBER_STATUS: String? = EMerchantMemberStatus.FREE_TRIAL.toString(),
-    var ACTIVE: String? = EStatusUser.ACTIVE.toString()
+    var ACTIVE: String? = EStatusUser.ACTIVE.toString(),
+    var LANGUAGE: String? = Locale.getDefault().language,
+    var COUNTRY: String? = Locale.getDefault().country
 )
 
 data class Cat(

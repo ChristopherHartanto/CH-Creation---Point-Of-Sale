@@ -18,5 +18,6 @@ data class Product(
     var CREATED_DATE: String? = "",
     var UPDATED_DATE: String? = "",
     var CREATED_BY: String? = "",
-    var UPDATED_BY: String? = ""
+    var UPDATED_BY: String? = "",
+    var WHOLE_SALE: String? = ""
 )

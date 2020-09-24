@@ -1,21 +1,15 @@
 package com.chcreation.pointofsale.activity_logs
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.chcreation.pointofsale.model.ActivityLogs
-import com.chcreation.pointofsale.model.Cart
-import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.normalClickAnimation
 import com.chcreation.pointofsale.parseDateFormatFull
-import com.squareup.picasso.Picasso
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class ActivityLogsRecyclerViewAdapter(private val context: Context, private val items: List<ActivityLogs>,private val listener: (position: Int) -> Unit)

@@ -9,13 +9,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.indonesiaCurrencyFormat
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Product
-import com.chcreation.pointofsale.normalClickAnimation
-import com.squareup.picasso.Picasso
-import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.textColorResource
 import java.util.*
 
@@ -61,7 +58,10 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
             }
 
             name.text = product.NAME
-            price.text = indonesiaCurrencyFormat().format(product.PRICE)
+            price.text = currencyFormat(
+                getLanguage(context),
+                getCountry(context)
+            ).format(product.PRICE)
             stock.text = "${product.STOCK} qty"
 
             if (product.STOCK!! <= 0 && product.MANAGE_STOCK)

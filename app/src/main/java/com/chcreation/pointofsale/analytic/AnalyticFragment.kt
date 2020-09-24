@@ -1,7 +1,6 @@
 package com.chcreation.pointofsale.analytic
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +12,6 @@ import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.model.Transaction
 import com.chcreation.pointofsale.presenter.AnalyticPresenter
 import com.chcreation.pointofsale.view.MainView
-import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.XAxis.XAxisPosition
 import com.github.mikephil.charting.data.BarData
@@ -365,9 +363,9 @@ class AnalyticFragment : Fragment(), MainView {
 
         }
         hideProgressBar()
-        tvAnalyticTotalGross.text = indonesiaCurrencyFormat().format(totalGross)
-        tvAnalyticTotalProfit.text = indonesiaCurrencyFormat().format(totalProfit)
-        tvAnalyticTodayIncome.text = indonesiaCurrencyFormat().format(todayGross)
+        tvAnalyticTotalGross.text = currencyFormat(getLanguage(ctx), getCountry(ctx)).format(totalGross)
+        tvAnalyticTotalProfit.text = currencyFormat(getLanguage(ctx), getCountry(ctx)).format(totalProfit)
+        tvAnalyticTodayIncome.text = currencyFormat(getLanguage(ctx), getCountry(ctx)).format(todayGross)
 
         val sortBoughtProducts = boughtProducts.sortedBy { it.PROD_CODE }
         var mostBoughtProduct = ""

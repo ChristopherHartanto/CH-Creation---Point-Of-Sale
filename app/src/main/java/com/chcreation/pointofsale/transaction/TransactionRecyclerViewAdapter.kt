@@ -1,6 +1,5 @@
 package com.chcreation.pointofsale.transaction
 
-import android.app.ActionBar
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -12,15 +11,10 @@ import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.customer.CustomerDetailActivity
-import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.model.Transaction
-import com.squareup.picasso.Picasso
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.textColorResource
-import java.text.SimpleDateFormat
 
 class TransactionRecyclerViewAdapter(private val context: Context,
                                      private val fragmentActivity: FragmentActivity,
@@ -36,7 +30,7 @@ class TransactionRecyclerViewAdapter(private val context: Context,
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.row_transaction, parent, false))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(fragmentActivity,items[position],transCodeList[position],customerList[position],listener, position)
+        holder.bindItem(context,fragmentActivity,items[position],transCodeList[position],customerList[position],listener, position)
     }
 
     override fun getItemCount(): Int = items.size
@@ -52,12 +46,13 @@ class TransactionRecyclerViewAdapter(private val context: Context,
         private val ivCustomer = view.findViewById<ImageView>(R.id.ivRowTransactionCustomer)
         private val layoutCustomer = view.findViewById<LinearLayout>(R.id.layoutRowTransactionCustomer)
 
-        fun bindItem(fragmentActivity: FragmentActivity,item: Transaction, transCode: Int, custName: String, listener: (position: Int) -> Unit, position: Int) {
+        fun bindItem(context: Context,fragmentActivity: FragmentActivity,item: Transaction, transCode: Int, custName: String, listener: (position: Int) -> Unit, position: Int) {
             code.text = receiptFormat(transCode)
             if (custName != "")
                 customer.text = custName
             date.text = parseTimeFormat(item.CREATED_DATE.toString())
-            totalPrice.text = indonesiaCurrencyFormat().format(item.TOTAL_PRICE!! - item.DISCOUNT!! + item.TAX!!)
+            totalPrice.text = currencyFormat(getLanguage(context),
+                getCountry(context)).format(item.TOTAL_PRICE!! - item.DISCOUNT!! + item.TAX!!)
             header.text = parseDateFormat(item.CREATED_DATE.toString())
 
             var dateBefore = parseDateFormat(transactionList[position].CREATED_DATE.toString())

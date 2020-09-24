@@ -30,7 +30,9 @@ import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Cat
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.model.WholeSale
 import com.chcreation.pointofsale.presenter.ProductPresenter
+import com.chcreation.pointofsale.product.ProductWholeSaleActivity.Companion.wholeSaleItems
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
@@ -80,6 +82,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
     private var manageStock = false
     private lateinit var mScannerView : ZXingScannerView
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_product)
@@ -104,6 +107,12 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         spProduct.onItemSelectedListener = this
         spProduct.gravity = Gravity.CENTER
 
+        layoutProductWholeSale.onClick {
+            layoutProductWholeSale.startAnimation(normalClickAnimation())
+
+            startActivity<ProductWholeSaleActivity>()
+        }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -118,6 +127,11 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         super.onStart()
 
         spProduct.setSelection(0)
+
+        if (wholeSaleItems.size == 0)
+            tvProductWholeSaleTitle.text = "Set Wholesale"
+        else
+            tvProductWholeSaleTitle.text = "Whole Sale Detail (${wholeSaleItems.size} Items)"
 
         btnProductSave.onClick {
             btnProductSave.isEnabled = false
@@ -191,6 +205,10 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        wholeSaleItems.clear()
+    }
 
     private fun openScanBarcode(){
         cancelScan()
@@ -235,6 +253,9 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         else
             selectedCategory
 
+        val gson = Gson()
+        val wholeSaleItems = gson.toJson(wholeSaleItems)
+
         if (getMerchantCode(this) == ""){
             endLoading()
             toast("You Haven't Set Up Your Merchant")
@@ -242,7 +263,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         else{
             presenter.saveProduct(Product(name,price,desc,cost,manageStock,stock,imageUrl,prodCode,uomCode,selectedCategory,code,EStatusCode.ACTIVE.toString(),
                 dateFormat().format(Date()),dateFormat().format(Date()),
-                mAuth.currentUser!!.uid,mAuth.currentUser!!.uid))
+                mAuth.currentUser!!.uid,mAuth.currentUser!!.uid,wholeSaleItems))
 
             presenter.saveActivityLogs(ActivityLogs("Create Product $name",mAuth.currentUser!!.uid,dateFormat().format(Date())))
         }

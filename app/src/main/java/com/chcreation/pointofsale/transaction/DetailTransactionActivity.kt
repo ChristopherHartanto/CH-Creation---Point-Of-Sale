@@ -2,22 +2,15 @@ package com.chcreation.pointofsale.transaction
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
-import com.chcreation.pointofsale.checkout.CartRecyclerViewAdapter
 import com.chcreation.pointofsale.checkout.CheckOutActivity
 import com.chcreation.pointofsale.checkout.ReceiptActivity
-import com.chcreation.pointofsale.home.HomeFragment
 import com.chcreation.pointofsale.model.ActivityLogs
-import com.chcreation.pointofsale.model.Cart
-import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.presenter.TransactionPresenter
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transCodeItems
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transItems
@@ -27,10 +20,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_detail_transaction.*
-import kotlinx.android.synthetic.main.activity_receipt.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.util.*
@@ -107,7 +97,8 @@ class DetailTransactionActivity : AppCompatActivity(), MainView {
             ivDetailTransactionStatus.imageResource = R.drawable.success
         }else if (transItems[transPosition].TOTAL_OUTSTANDING!! > 0 &&
             transItems[transPosition].STATUS_CODE != EStatusCode.CANCEL.toString()){
-            tvDetailTransactionStatus.text = "Pending : ${indonesiaCurrencyFormat().format(transItems[transPosition].TOTAL_OUTSTANDING)}"
+            tvDetailTransactionStatus.text = "Pending : ${currencyFormat(getLanguage(this),
+                getCountry(this)).format(transItems[transPosition].TOTAL_OUTSTANDING)}"
             ivDetailTransactionStatus.imageResource = R.drawable.pending
             //btnDetailTransactionReceipt.visibility = View.GONE
         }else if (transItems[transPosition].STATUS_CODE == EStatusCode.CANCEL.toString()){
@@ -119,15 +110,19 @@ class DetailTransactionActivity : AppCompatActivity(), MainView {
 
         tvDetailTransactionDate.text = parseDateFormatFull(transItems[transPosition].CREATED_DATE.toString())
         tvDetailTransactionCode.text = receiptFormat(transCodeItems[transPosition].toInt())
-        tvDetailTransactionDiscount.text = indonesiaCurrencyFormat().format(transItems[transPosition].DISCOUNT)
-        tvDetailTransactionTax.text = indonesiaCurrencyFormat().format(transItems[transPosition].TAX)
+        tvDetailTransactionDiscount.text = currencyFormat(getLanguage(this),
+            getCountry(this)).format(transItems[transPosition].DISCOUNT)
+        tvDetailTransactionTax.text = currencyFormat(getLanguage(this),
+            getCountry(this)).format(transItems[transPosition].TAX)
 
         if (transItems[transPosition].TAX == 0 && transItems[transPosition].DISCOUNT == 0)
             layoutDetailTransactionSubTotal.visibility = View.GONE
         else
-            tvDetailTransactionSubTotal.text = indonesiaCurrencyFormat().format(transItems[transPosition].TOTAL_PRICE)
+            tvDetailTransactionSubTotal.text = currencyFormat(getLanguage(this),
+                getCountry(this)).format(transItems[transPosition].TOTAL_PRICE)
 
-        tvDetailTransactionTotalPrice.text = indonesiaCurrencyFormat().format(transItems[transPosition].TOTAL_PRICE!! +
+        tvDetailTransactionTotalPrice.text = currencyFormat(getLanguage(this),
+            getCountry(this)).format(transItems[transPosition].TOTAL_PRICE!! +
                 transItems[transPosition].TAX!! - transItems[transPosition].DISCOUNT!!
         ).toString()
     }

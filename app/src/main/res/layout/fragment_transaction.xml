@@ -10,6 +10,8 @@
     <com.google.android.material.tabs.TabLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:tabTextColor="@color/colorBlack"
+        app:tabSelectedTextColor="@color/colorPrimary"
         android:id="@+id/tlTransaction"/>
 
     <androidx.cardview.widget.CardView

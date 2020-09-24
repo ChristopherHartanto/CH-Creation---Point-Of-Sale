@@ -6,14 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.chcreation.pointofsale.EMessageResult
-import com.chcreation.pointofsale.EStatusCode
+import com.chcreation.pointofsale.*
 
-import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.checkout.CheckOutActivity
 import com.chcreation.pointofsale.checkout.ReceiptActivity
 import com.chcreation.pointofsale.customer.CustomerDetailActivity.Companion.custCode
-import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.chcreation.pointofsale.model.Enquiry
 import com.chcreation.pointofsale.model.Transaction
 import com.chcreation.pointofsale.presenter.CustomerPresenter
@@ -22,7 +19,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.fragment_customer_detail_transaction.*
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.ctx
@@ -62,7 +58,8 @@ class CustomerDetailTransactionFragment : Fragment(), MainView {
 
         rvCustomerDetailTransaction.adapter = adapter
         rvCustomerDetailTransaction.layoutManager = LinearLayoutManager(ctx)
-        tvCustomerDetailTransactionTotalGrossEarning.text = indonesiaCurrencyFormat().format(0)
+        tvCustomerDetailTransactionTotalGrossEarning.text = currencyFormat( getLanguage(ctx),
+            getCountry(ctx)).format(0)
 
         presenter.retrieveCustomerTransaction(custCode)
     }
@@ -109,7 +106,10 @@ class CustomerDetailTransactionFragment : Fragment(), MainView {
                         if (transItem.STATUS_CODE == EStatusCode.PENDING.toString())
                             tvCustomerDetailTransactionTotalGrossEarning.textColorResource = R.color.colorPrimary
 
-                        tvCustomerDetailTransactionTotalGrossEarning.text = indonesiaCurrencyFormat().format(totalGrossEarning)
+                        tvCustomerDetailTransactionTotalGrossEarning.text = currencyFormat(
+                            getLanguage(ctx),
+                            getCountry(ctx)
+                        ).format(totalGrossEarning)
                     }
 
                 }

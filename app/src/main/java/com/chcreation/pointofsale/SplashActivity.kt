@@ -23,7 +23,7 @@ class SplashActivity : AppCompatActivity() {
         supportActionBar!!.hide()
         mAuth = FirebaseAuth.getInstance()
 
-        val version = packageManager.getPackageInfo(packageName,0).versionName
+        val version = "V ${packageManager.getPackageInfo(packageName,0).versionName}"
         tvsplashVersion.text = version
 
         val timer = object: CountDownTimer(1000, 1000) {

@@ -7,14 +7,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AlphaAnimation
-import android.widget.AbsListView
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CartActivity
 import com.chcreation.pointofsale.model.Cart
@@ -32,7 +29,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.google.zxing.Result
 import kotlinx.android.synthetic.main.fragment_home.*
-import kotlinx.android.synthetic.main.fragment_manage_product.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import me.dm7.barcodescanner.zxing.ZXingScannerView
@@ -64,6 +60,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
     companion object{
         var tempProductItems : ArrayList<Product> = arrayListOf()
         var cartItems: ArrayList<Cart> = arrayListOf()
+        var imageItems: ArrayList<String> = arrayListOf()
         var totalQty = 0
         var totalPrice = 0
 
@@ -98,6 +95,8 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                     totalQty = countQty()
                     totalPrice = sumPrice()
 
+                    //cartAnimation(tempProductItems[it].IMAGE.toString())
+
                     if (tempProductItems[it].MANAGE_STOCK)
                         tempProductItems[it] = Product(tempProductItems[it].NAME,tempProductItems[it].PRICE,tempProductItems[it].DESC,tempProductItems[it].COST, tempProductItems[it].MANAGE_STOCK,
                             tempProductItems[it].STOCK!! - 1,tempProductItems[it].IMAGE,tempProductItems[it].PROD_CODE,tempProductItems[it].UOM_CODE,tempProductItems[it].CAT,
@@ -106,7 +105,8 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
 
                     adapter.notifyDataSetChanged()
 
-                    btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
+                    btnHomeAddItem.text = "$totalQty Item = ${currencyFormat(getLanguage(ctx),
+                        getCountry(ctx)).format(totalPrice)}"
                     btnHomeAddItem.startAnimation(normalClickAnimation())
                     btnHomeAddItem.backgroundResource = R.drawable.button_border_fill
                     btnHomeAddItem.textColorResource = R.color.colorWhite
@@ -234,7 +234,8 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
 
         }
 
-        btnHomeAddItem.text = "$totalQty Item = ${indonesiaCurrencyFormat().format(totalPrice)}"
+        btnHomeAddItem.text = "$totalQty Item = ${currencyFormat(getLanguage(ctx),
+            getCountry(ctx)).format(totalPrice)}"
 
         if (totalPrice != 0){
             btnHomeAddItem.backgroundResource = R.drawable.button_border_fill
@@ -308,6 +309,24 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
         isScanning = false
     }
 
+    private fun cartAnimation(image: String){
+        val location = IntArray(2)
+        homeLayout.getLocationOnScreen(location)
+
+//        val layoutParams = FrameLayout.LayoutParams(ivHomeCartAnimation.width, ivHomeCartAnimation.height)
+//        layoutParams.setMargins(0,0,10,location[1])
+//        layoutParams.gravity = Gravity.BOTTOM
+//        ivHomeCartAnimation.layoutParams = layoutParams
+
+//        ivHomeCartAnimation.visibility = View.VISIBLE
+//        if (image != "")
+//            Glide.with(ctx).load(image).into(ivHomeCartAnimation)
+//        else if (image == "")
+//            ivHomeCartAnimation.backgroundResource = R.drawable.default_image
+//
+//        slideDown(ivHomeCartAnimation)
+    }
+
     private fun countQty() : Int{
         var total = 0
         for (data in cartItems){
@@ -326,9 +345,11 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
     }
 
     private fun addCart(position: Int){
-        if (cartItems.size == 0)
+        if (cartItems.size == 0){
+            imageItems.add(tempProductItems[position].IMAGE.toString())
             cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
                 tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1))
+        }
         else{
             var check = false
             for ((i , data) in cartItems.withIndex()){
@@ -341,13 +362,16 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                 }
 
             }
-            if (!check)
+            if (!check){
+                imageItems.add(tempProductItems[position].IMAGE.toString())
                 cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
                     tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1))
+            }
         }
     }
 
     fun fetchProductByCat(){
+        pbHome.visibility = View.VISIBLE
         tempProductItems.clear()
         tmpProductKeys.clear()
 
@@ -394,7 +418,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
         }
 
         adapter.notifyDataSetChanged()
-
+        pbHome.visibility = View.GONE
         srHome.isRefreshing = false
     }
 

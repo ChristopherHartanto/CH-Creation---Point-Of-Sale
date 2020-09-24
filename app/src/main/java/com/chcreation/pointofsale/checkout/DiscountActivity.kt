@@ -1,18 +1,12 @@
 package com.chcreation.pointofsale.checkout
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import androidx.core.widget.doOnTextChanged
-import com.chcreation.pointofsale.R
+import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
-import com.chcreation.pointofsale.indonesiaCurrencyFormat
-import com.chcreation.pointofsale.normalClickAnimation
 import kotlinx.android.synthetic.main.activity_discount.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.sdk27.coroutines.textChangedListener
 
 class DiscountActivity : AppCompatActivity() {
 
@@ -39,7 +33,10 @@ class DiscountActivity : AppCompatActivity() {
             btnDiscount.text = "Apply Tax"
         }
 
-        tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice)
+        tvDiscountNewTotalContent.text = currencyFormat(
+            getLanguage(this),
+            getCountry(this)
+        ).format(totalPrice)
 
         etDiscountCash.doOnTextChanged { text, start, before, count ->
             if (etDiscountCash.hasFocus() && etDiscountCash.text.toString() != ""){
@@ -53,7 +50,8 @@ class DiscountActivity : AppCompatActivity() {
                     percentageDiscount =  discount * 100 / totalPrice
 
                     etDiscountPercentage.setText(percentageDiscount.toString())
-                    tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice - discount)
+                    tvDiscountNewTotalContent.text = currencyFormat( getLanguage(this),
+                        getCountry(this)).format(totalPrice - discount)
                 }else if(action == 2){
                     tax = text.toString().toInt()
                     if (tax > totalPrice){
@@ -64,7 +62,8 @@ class DiscountActivity : AppCompatActivity() {
                     percentageDiscount =  tax * 100 / totalPrice
 
                     etDiscountPercentage.setText(percentageDiscount.toString())
-                    tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice + tax)
+                    tvDiscountNewTotalContent.text = currencyFormat( getLanguage(this),
+                        getCountry(this)).format(totalPrice + tax)
                 }
 
 
@@ -75,13 +74,15 @@ class DiscountActivity : AppCompatActivity() {
         etDiscountCash.onClick {
             etDiscountCash.setText("")
             etDiscountPercentage.setText("")
-            tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice)
+            tvDiscountNewTotalContent.text = currencyFormat(getLanguage(this@DiscountActivity),
+                getCountry(this@DiscountActivity)).format(totalPrice)
         }
 
         etDiscountPercentage.onClick {
             etDiscountCash.setText("")
             etDiscountPercentage.setText("")
-            tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice)
+            tvDiscountNewTotalContent.text = currencyFormat( getLanguage(this@DiscountActivity),
+                getCountry(this@DiscountActivity)).format(totalPrice)
         }
 
         etDiscountPercentage.doOnTextChanged { text, start, before, count ->
@@ -101,9 +102,11 @@ class DiscountActivity : AppCompatActivity() {
                 etDiscountCash.setText(cashDiscount.toString())
 
                 if (action == 1)
-                    tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice - discount)
+                    tvDiscountNewTotalContent.text = currencyFormat(getLanguage(this@DiscountActivity),
+                        getCountry(this@DiscountActivity)).format(totalPrice - discount)
                 else if (action == 2)
-                    tvDiscountNewTotalContent.text = indonesiaCurrencyFormat().format(totalPrice + tax)
+                    tvDiscountNewTotalContent.text = currencyFormat(getLanguage(this@DiscountActivity),
+                        getCountry(this@DiscountActivity)).format(totalPrice + tax)
 
                 etDiscountPercentage.requestFocus()
             }

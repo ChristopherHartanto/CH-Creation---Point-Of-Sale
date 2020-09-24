@@ -253,7 +253,9 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                 EMerchant.MERCHANT_CODE.toString() to merchant.MERCHANT_CODE,
                 EMerchant.MEMBER_STATUS.toString() to merchant.MEMBER_STATUS,
                 EMerchant.ACTIVE.toString() to merchant.ACTIVE,
-                EMerchant.USER_LIST.toString() to userList
+                EMerchant.USER_LIST.toString() to userList,
+                EMerchant.LANGUAGE.toString() to merchant.LANGUAGE,
+                EMerchant.COUNTRY.toString() to merchant.COUNTRY
             )
 
             database.child(ETable.MERCHANT.toString())
@@ -293,7 +295,9 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                     EMerchant.CAT.toString() to merchant.CAT,
                     EMerchant.MERCHANT_CODE.toString() to merchant.MERCHANT_CODE,
                     EMerchant.MEMBER_STATUS.toString() to merchant.MEMBER_STATUS,
-                    EMerchant.ACTIVE.toString() to merchant.ACTIVE
+                    EMerchant.ACTIVE.toString() to merchant.ACTIVE,
+                    EMerchant.LANGUAGE.toString() to merchant.LANGUAGE,
+                    EMerchant.COUNTRY.toString() to merchant.COUNTRY
                 )
 
                 database.child(ETable.MERCHANT.toString())

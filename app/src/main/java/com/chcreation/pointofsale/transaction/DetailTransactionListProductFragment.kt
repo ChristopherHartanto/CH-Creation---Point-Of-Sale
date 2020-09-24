@@ -9,21 +9,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 
 import com.chcreation.pointofsale.R
 import com.chcreation.pointofsale.checkout.CartRecyclerViewAdapter
-import com.chcreation.pointofsale.indonesiaCurrencyFormat
 import com.chcreation.pointofsale.model.Cart
-import com.chcreation.pointofsale.receiptFormat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.android.synthetic.main.activity_detail_transaction.*
 import kotlinx.android.synthetic.main.fragment_detail_transaction_list_product.*
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.noButton
-import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.yesButton
 
 /**
  * A simple [Fragment] subclass.

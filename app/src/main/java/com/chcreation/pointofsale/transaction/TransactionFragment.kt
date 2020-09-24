@@ -215,6 +215,7 @@ class TransactionFragment : Fragment(), MainView {
         userName = ""
         tvTransactionFilterDate.text = "All - All"
         tvTransactionFilterName.text = "All"
+        pbTransaction.visibility = View.VISIBLE
 
         clearData()
         adapter = TransactionRecyclerViewAdapter(ctx,requireActivity(), transItems, customerItems, transCodeItems){

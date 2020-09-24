@@ -66,8 +66,10 @@ class ProductListRecyclerViewAdapter(private val context: Context, private val i
 
                 }).into(image)
             }
-            else
+            else{
                 image.imageResource = R.drawable.default_image
+                progressBar.visibility = View.GONE
+            }
 
             itemView.onClick {
                 itemView.startAnimation(normalClickAnimation())
