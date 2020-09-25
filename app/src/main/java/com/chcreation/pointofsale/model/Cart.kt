@@ -6,5 +6,6 @@ data class Cart(
     var PROD_CODE: String? = "",
     var MANAGE_STOCK : Boolean? = false,
     var PRICE: Int? = 0,
-    var Qty: Int? = 0
+    var Qty: Int? = 0,
+    var WHOLE_SALE_PRICE: Int? = -1
 )

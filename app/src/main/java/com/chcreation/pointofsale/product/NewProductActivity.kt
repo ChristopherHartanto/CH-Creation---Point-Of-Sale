@@ -131,7 +131,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         if (wholeSaleItems.size == 0)
             tvProductWholeSaleTitle.text = "Set Wholesale"
         else
-            tvProductWholeSaleTitle.text = "Whole Sale Detail (${wholeSaleItems.size} Items)"
+            tvProductWholeSaleTitle.text = "Whole Sale (${wholeSaleItems.size} Items)"
 
         btnProductSave.onClick {
             btnProductSave.isEnabled = false

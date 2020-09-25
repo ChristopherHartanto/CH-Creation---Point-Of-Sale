@@ -114,6 +114,7 @@ class PostCheckOutActivity : AppCompatActivity() {
 
         HomeFragment.cartItems.clear()
         tempProductItems.clear()
+        HomeFragment.tempProductQtyItems.clear()
         imageItems.clear()
         NoteActivity.note = ""
         DiscountActivity.discount = 0

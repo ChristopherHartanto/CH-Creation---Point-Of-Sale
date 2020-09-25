@@ -9,5 +9,6 @@ data class User(
     var CREATED_DATE: String? = "",
     var UPDATED_DATE: String? = "",
     var MEMBER_STATUS: String? = EUserMemberStatus.FREE_TRIAL.toString(),
-    var ACTIVE: String? = EStatusUser.ACTIVE.toString()
+    var ACTIVE: String? = EStatusUser.ACTIVE.toString(),
+    var DEVICE_ID: String? = ""
 )

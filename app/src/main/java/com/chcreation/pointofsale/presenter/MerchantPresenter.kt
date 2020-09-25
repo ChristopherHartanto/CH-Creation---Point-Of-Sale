@@ -15,6 +15,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.util.*
+import kotlin.collections.HashMap
 
 class MerchantPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference, private var context: Context){
 
@@ -46,6 +47,17 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
             showError(context,e.message.toString())
             e.printStackTrace()
         }
+    }
+
+    suspend fun setDeviceId(deviceId:String){
+        val values: HashMap<String,Any> = hashMapOf(
+            EUser.DEVICE_ID.toString() to deviceId
+        )
+        database.child(ETable.USER.toString())
+            .child(auth.currentUser!!.uid)
+            .updateChildren(values).addOnFailureListener {
+                view.response(it.message.toString())
+            }
     }
 
     suspend fun retrieveInvitation(email: String){
@@ -212,6 +224,35 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                             callback(false,"",-99)
                     }else
                         callback(false,"",-99)
+                }
+
+            }
+            database.child(ETable.MERCHANT.toString())
+                .child(credential)
+                .child(merchantCode)
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    fun retrieveCurrentMerchant(credential: String, merchantCode: String,key:Int, callback:(success:Boolean, merchant:Merchant?, key: Int) -> Unit){
+        try {
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        val item = p0.getValue(Merchant::class.java)
+                        if (item != null) {
+                            item.NAME?.let { callback(true, item,key) }
+                        }else
+                            callback(false,null,-99)
+                    }else
+                        callback(false,null,-99)
                 }
 
             }

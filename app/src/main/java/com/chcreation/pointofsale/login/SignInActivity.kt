@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.StrictMode
+import android.provider.Settings.Secure
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +14,6 @@ import com.chcreation.pointofsale.merchant.MerchantActivity
 import com.chcreation.pointofsale.model.User
 import com.chcreation.pointofsale.model.UserAcceptance
 import com.chcreation.pointofsale.presenter.MerchantPresenter
-import com.chcreation.pointofsale.smtp.GMailSender
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
@@ -26,6 +26,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import java.security.AccessController.getContext
+import java.util.*
 
 
 class SignInActivity : AppCompatActivity(), MainView {
@@ -35,6 +37,7 @@ class SignInActivity : AppCompatActivity(), MainView {
     private lateinit var sharedPreference: SharedPreferences
     private lateinit var presenter: MerchantPresenter
     private var email = ""
+    private var instanceId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,8 +107,10 @@ class SignInActivity : AppCompatActivity(), MainView {
 
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    instanceId = UUID.randomUUID().toString()
                     GlobalScope.launch(Dispatchers.Main) {
                         presenter.retrieveUserName()
+                        presenter.setDeviceId(instanceId)
                     }
 
                     Toast.makeText(this, "Login Success ", Toast.LENGTH_LONG).show()
@@ -168,6 +173,7 @@ class SignInActivity : AppCompatActivity(), MainView {
                 val editor = sharedPreference.edit()
                 editor.putString(ESharedPreference.NAME.toString(), item?.NAME)
                 editor.putString(ESharedPreference.EMAIL.toString(), item?.EMAIL)
+                editor.putString(ESharedPreference.DEVICE_ID.toString(), instanceId)
                 editor.apply()
 
                 if (item != null) {

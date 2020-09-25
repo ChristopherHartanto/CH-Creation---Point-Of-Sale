@@ -18,6 +18,7 @@ import com.chcreation.pointofsale.presenter.ProductPresenter
 import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.bitmap
 import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.currentPhotoPath
 import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.filePath
+import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.saveWholeSale
 import com.chcreation.pointofsale.transaction.DetailTransactionActivity
 import com.chcreation.pointofsale.transaction.DetailTransactionListPayment
 import com.chcreation.pointofsale.transaction.DetailTransactionListProductFragment
@@ -62,6 +63,8 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
 
         prodCode = ""
         prodName = ""
+        ProductWholeSaleActivity.wholeSaleItems.clear()
+        saveWholeSale = false
     }
 
     override fun onStart() {

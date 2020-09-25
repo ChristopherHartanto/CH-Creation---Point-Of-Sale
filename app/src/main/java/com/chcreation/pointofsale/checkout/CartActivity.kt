@@ -10,13 +10,18 @@ import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
 import com.chcreation.pointofsale.checkout.NoteActivity.Companion.note
+import com.chcreation.pointofsale.home.HomeFragment
 import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.imageItems
+import com.chcreation.pointofsale.home.HomeFragment.Companion.tempProductItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalQty
+import com.chcreation.pointofsale.model.WholeSale
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_cart.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -54,27 +59,39 @@ class CartActivity : AppCompatActivity() {
                                 PostCheckOutActivity().clearCartData()
                                 finish()
                             }
-                            adapter.notifyDataSetChanged()
                         }
                         noButton {  }
                     }.show()
                 }else if (cartItems[it].Qty!! > 1){
                     cartItems[it].Qty = cartItems[it].Qty!! - 1
+                    val wholeSalePrice: Int?
+                    if (tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.WHOLE_SALE != ""){
+                        wholeSalePrice = getWholeSale(cartItems[it].Qty!!
+                            ,tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.WHOLE_SALE.toString())
 
+                        cartItems[it].WHOLE_SALE_PRICE = wholeSalePrice
+                    }
                     totalPrice = sumPrice()
                     totalQty = countQty()
                     sumPriceDetail()
-                    adapter.notifyDataSetChanged()
                 }else
                     toast("Error, Please Clear Your Cart!")
             }else if (type == 2){
                 cartItems[it].Qty = cartItems[it].Qty!! + 1
 
+                val wholeSalePrice: Int?
+                if (tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.WHOLE_SALE != ""){
+                    wholeSalePrice = getWholeSale(cartItems[it].Qty!!
+                        ,tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.WHOLE_SALE.toString())
+
+                    cartItems[it].WHOLE_SALE_PRICE = wholeSalePrice
+                }
+
                 totalPrice = sumPrice()
                 totalQty = countQty()
                 sumPriceDetail()
-                adapter.notifyDataSetChanged()
             }
+            adapter.notifyDataSetChanged()
         }
         rvCart.adapter = adapter
         rvCart.layoutManager = LinearLayoutManager(this)
@@ -160,7 +177,7 @@ class CartActivity : AppCompatActivity() {
         var total = 0
 
         for (data in cartItems){
-            total += (data.PRICE!! * data.Qty!!)
+            total += ((if (data.WHOLE_SALE_PRICE != -1) data.WHOLE_SALE_PRICE!! else data.PRICE!!) * data.Qty!!)
         }
         return total
     }
@@ -200,5 +217,18 @@ class CartActivity : AppCompatActivity() {
             total += data.Qty!!
         }
         return total
+    }
+
+    private fun getWholeSale(qty:Int, wholeSale: String) : Int{
+        val gson = Gson()
+        val arrayWholeSaleType = object : TypeToken<MutableList<WholeSale>>() {}.type
+        val items : MutableList<WholeSale> = gson.fromJson(wholeSale,arrayWholeSaleType)
+
+        for (item in items){
+            if (item.MIN_QTY!! <= qty && item.MAX_QTY!! >= qty){
+                return item.PRICE!!
+            }
+        }
+        return -1
     }
 }

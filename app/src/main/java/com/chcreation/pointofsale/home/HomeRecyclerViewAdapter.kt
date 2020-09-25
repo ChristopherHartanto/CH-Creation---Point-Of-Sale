@@ -11,6 +11,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.model.WholeSale
+import com.chcreation.pointofsale.product.ProductWholeSaleActivity
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.textColorResource
@@ -36,6 +40,7 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
 
+        private val wholeSale = view.findViewById<ImageView>(R.id.ivRowProductWholeSale)
         private val image = view.findViewById<ImageView>(R.id.ivRowProductImage)
         private val name = view.findViewById<TextView>(R.id.tvRowProductName)
         private val price = view.findViewById<TextView>(R.id.tvRowProductPrice)
@@ -55,6 +60,18 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
                 layoutDefaultImage.visibility = View.VISIBLE
 
                 firstName.text = product.NAME!!.first().toString().toUpperCase(Locale.getDefault())
+            }
+            if (product.WHOLE_SALE == ""){
+                wholeSale.visibility = View.GONE
+            }else{
+                val gson = Gson()
+                val arrayWholeSaleType = object : TypeToken<MutableList<WholeSale>>() {}.type
+                val wholeSaleItems : MutableList<WholeSale> = gson.fromJson(product.WHOLE_SALE,arrayWholeSaleType)
+
+                if (wholeSaleItems.size == 0)
+                    wholeSale.visibility = View.GONE
+                else
+                    wholeSale.visibility = View.VISIBLE
             }
 
             name.text = product.NAME

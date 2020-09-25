@@ -15,32 +15,22 @@
         android:gravity="center"
         android:padding="10dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Create Merchant"
-            android:textSize="18sp"
-            android:textColor="@color/colorBlack"
-            android:gravity="center"
-            android:layout_marginBottom="30dp"
-            android:id="@+id/tvMerchant"/>
-
         <FrameLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:layout_gravity="center"
             android:id="@+id/layoutMerchantDefaultImage">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
                 android:src="@color/colorBlack"/>
 
             <TextView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
                 android:text="M"
-                android:textSize="36sp"
+                android:textSize="32sp"
                 android:gravity="center"
                 android:textStyle="bold"
                 android:textColor="@color/colorWhite"
@@ -48,79 +38,162 @@
         </FrameLayout>
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:layout_gravity="center"
             android:id="@+id/ivMerchantImage"
             android:src="@drawable/default_image"
             android:visibility="gone"/>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp">
-            <EditText
-                android:layout_width="match_parent"
+            android:layout_marginTop="40dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:text="Name"
+                android:textSize="14sp"
+                android:gravity="center_vertical"/>
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:text=": "/>
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_weight="7"
+                android:layout_height="40dp"
+                android:gravity="center_vertical"
+                android:textSize="16sp"
+                android:textColor="@color/colorBlack"
+                android:background="@color/colorTransparent"
                 android:id="@+id/etMerchantName"
-                android:hint="Merchant Name"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:hint="Point of Sale"/>
+        </LinearLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <EditText
-                android:layout_width="match_parent"
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:textSize="14sp"
+                android:text="Business Info"
+                android:gravity="center_vertical"/>
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:text=": "/>
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_weight="7"
+                android:layout_height="40dp"
+                android:textSize="16sp"
+                android:textColor="@color/colorBlack"
+                android:background="@color/colorTransparent"
                 android:id="@+id/etMerchantBusinessInfo"
-                android:hint="Business Info"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:hint="Online Shop"/>
+        </LinearLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-            <EditText
-                android:layout_width="match_parent"
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:text="Address"
+                android:textSize="14sp"
+                android:gravity="center_vertical"/>
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:text=": "/>
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_weight="7"
+                android:layout_height="40dp"
+                android:textSize="16sp"
+                android:textColor="@color/colorBlack"
+                android:background="@color/colorTransparent"
                 android:id="@+id/etMerchantAddress"
                 android:inputType="textMultiLine"
                 android:maxLines="2"
-                android:hint="Address"/>
-        </com.google.android.material.textfield.TextInputLayout>
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="No Telp"
-            android:id="@+id/etMerchantNoTelp"
-            android:inputType="phone"/>
+                android:hint="Jakarta, Indonesia"/>
+        </LinearLayout>
 
-        <androidx.cardview.widget.CardView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="10dp">
+            android:layout_height="wrap_content">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:text="Contact No"
+                android:textSize="14sp"
+                android:gravity="center_vertical"/>
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="5dp">
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="3"
-                    android:gravity="center_vertical"
-                    android:layout_height="match_parent"
-                    android:text="Currency :"
-                    android:textColor="@color/colorBlack"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
+                android:textSize="14sp"
+                android:text=": "/>
 
-                <Spinner
-                    android:layout_width="0dp"
-                    android:layout_weight="7"
-                    android:layout_height="40dp"
-                    android:id="@+id/spMerchantCurrency"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+            <EditText
+                android:layout_width="0dp"
+                android:layout_weight="7"
+                android:layout_height="40dp"
+                android:textSize="16sp"
+                android:textColor="@color/colorBlack"
+                android:background="@color/colorTransparent"
+                android:hint="62885121212"
+                android:id="@+id/etMerchantNoTelp"
+                android:inputType="phone"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="3"
+                android:gravity="center_vertical"
+                android:layout_height="match_parent"
+                android:text="Currency"
+                android:textColor="@color/colorBlack"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=": "
+                android:textColor="@color/colorBlack"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <Spinner
+                android:layout_width="0dp"
+                android:layout_weight="7"
+                android:layout_height="40dp"
+                android:id="@+id/spMerchantCurrency"/>
+        </LinearLayout>
     </LinearLayout>
 
     <ProgressBar

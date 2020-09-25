@@ -25,7 +25,12 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.widget.doOnTextChanged
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.GlideDrawable
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.PostCheckOutActivity
+import com.chcreation.pointofsale.login.LoginActivity
 import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.AvailableMerchant
 import com.chcreation.pointofsale.model.Merchant
@@ -45,6 +50,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.startActivity
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -79,6 +85,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_manage_merchant)
 
         supportActionBar?.title = "Set Up Merchant"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -149,10 +156,42 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
     }
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            finish()
+            if (getMerchantCredential(this) == "")
+                alert ("Do You Want to Exit?"){
+                    title = "Exit"
+                    yesButton {
+                        removeAllSharedPreference(this@ManageMerchantActivity)
+                        PostCheckOutActivity().clearCartData()
+                        startActivity<LoginActivity>()
+                        finish()
+                    }
+                    noButton {
+
+                    }
+                }.show()
+            else
+                finish()
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onBackPressed() {
+        if (getMerchantCredential(this) == "")
+            alert ("Do You Want to Exit?"){
+                title = "Exit"
+                yesButton {
+                    removeAllSharedPreference(this@ManageMerchantActivity)
+                    PostCheckOutActivity().clearCartData()
+                    startActivity<LoginActivity>()
+                    super.onBackPressed()
+                }
+                noButton {
+
+                }
+            }.show()
+        else
+            super.onBackPressed()
     }
 
     private fun uploadImage(){
@@ -197,7 +236,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
             pbMerchant.visibility = View.GONE
             btnMerchant.isEnabled = true
         }
-        else if (merchant!!.NAME == ""){
+        else if (merchant!!.NAME == "" && getMerchantCredential(this) == ""){
             alert("Continue to Create Merchant?"){
                 title = "Confirmation!"
                 yesButton {
@@ -436,11 +475,9 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
     private fun fetchData(){
         if (merchant!!.NAME != ""){
 
-            tvMerchant.visibility = View.GONE
             btnMerchant.text = "Save"
 
             supportActionBar?.title = "Update Merchant"
-            supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
             etMerchantAddress.setText(merchant!!.ADDRESS)
             etMerchantBusinessInfo.setText(merchant!!.BUSINESS_INFO)
@@ -458,7 +495,31 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                 layoutMerchantDefaultImage.visibility = View.GONE
                 ivMerchantImage.visibility = View.VISIBLE
 
-                Glide.with(this).load(merchant!!.IMAGE).into(ivMerchantImage)
+                pbMerchant.visibility = View.VISIBLE
+                Glide.with(this).load(merchant!!.IMAGE).listener(object :
+                    RequestListener<String, GlideDrawable> {
+                    override fun onException(
+                        e: java.lang.Exception?,
+                        model: String?,
+                        target: Target<GlideDrawable>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        pbMerchant.visibility = View.GONE
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: GlideDrawable?,
+                        model: String?,
+                        target: Target<GlideDrawable>?,
+                        isFromMemoryCache: Boolean,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        pbMerchant.visibility = View.GONE
+                        return false
+                    }
+
+                }).into(ivMerchantImage)
             }
         }
     }
@@ -473,10 +534,10 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                 val item = dataSnapshot.getValue(Merchant::class.java)
                 merchant = item!!
 
-                fetchData()
-                btnMerchant.isEnabled = true
             }
+            btnMerchant.isEnabled = true
             pbMerchant.visibility = View.GONE
+            fetchData()
         }
     }
 

@@ -27,7 +27,7 @@ class UserPresenter(private val view: MainView, private val auth: FirebaseAuth, 
 
     }
 
-    fun saveUser(name: String, email: String){
+    fun saveUser(name: String, email: String,instanceId: String){
         try {
             val values  = hashMapOf(
                 EUser.NAME.toString() to name,
@@ -35,7 +35,8 @@ class UserPresenter(private val view: MainView, private val auth: FirebaseAuth, 
                 EUser.CREATED_DATE.toString() to dateFormat().format(Date()),
                 EUser.UPDATED_DATE.toString() to dateFormat().format(Date()),
                 EUser.MEMBER_STATUS.toString() to EUserMemberStatus.FREE_TRIAL.toString(),
-                EUser.ACTIVE.toString() to EStatusCode.ACTIVE.toString()
+                EUser.ACTIVE.toString() to EStatusCode.ACTIVE.toString(),
+                EUser.DEVICE_ID.toString() to instanceId
             )
             database.child(ETable.USER.toString())
                 .child(auth.currentUser!!.uid)

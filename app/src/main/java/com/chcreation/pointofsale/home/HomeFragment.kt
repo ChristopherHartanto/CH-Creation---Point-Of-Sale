@@ -17,6 +17,7 @@ import com.chcreation.pointofsale.checkout.CartActivity
 import com.chcreation.pointofsale.model.Cart
 import com.chcreation.pointofsale.model.Cat
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.model.WholeSale
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.product.NewProductActivity
 import com.chcreation.pointofsale.view.MainView
@@ -58,6 +59,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
     private lateinit var mScannerView : ZXingScannerView
 
     companion object{
+        var tempProductQtyItems : ArrayList<Int> = arrayListOf()
         var tempProductItems : ArrayList<Product> = arrayListOf()
         var cartItems: ArrayList<Cart> = arrayListOf()
         var imageItems: ArrayList<String> = arrayListOf()
@@ -98,10 +100,13 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                     //cartAnimation(tempProductItems[it].IMAGE.toString())
 
                     if (tempProductItems[it].MANAGE_STOCK)
-                        tempProductItems[it] = Product(tempProductItems[it].NAME,tempProductItems[it].PRICE,tempProductItems[it].DESC,tempProductItems[it].COST, tempProductItems[it].MANAGE_STOCK,
-                            tempProductItems[it].STOCK!! - 1,tempProductItems[it].IMAGE,tempProductItems[it].PROD_CODE,tempProductItems[it].UOM_CODE,tempProductItems[it].CAT,
-                            tempProductItems[it].CODE,tempProductItems[it].STATUS_CODE,tempProductItems[it].CREATED_DATE,tempProductItems[it].UPDATED_DATE,
-                            tempProductItems[it].CREATED_BY,tempProductItems[it].UPDATED_BY)
+                        tempProductItems[it].STOCK = tempProductQtyItems[it] -
+                            cartItems.single { f -> f.PROD_CODE == tempProductItems[it].PROD_CODE }
+                            .Qty!!
+//                        tempProductItems[it] = Product(tempProductItems[it].NAME,tempProductItems[it].PRICE,tempProductItems[it].DESC,tempProductItems[it].COST, tempProductItems[it].MANAGE_STOCK,
+//                            tempProductItems[it].STOCK!! - 1,tempProductItems[it].IMAGE,tempProductItems[it].PROD_CODE,tempProductItems[it].UOM_CODE,tempProductItems[it].CAT,
+//                            tempProductItems[it].CODE,tempProductItems[it].STATUS_CODE,tempProductItems[it].CREATED_DATE,tempProductItems[it].UPDATED_DATE,
+//                            tempProductItems[it].CREATED_BY,tempProductItems[it].UPDATED_BY,tempProductItems[it].WHOLE_SALE)
 
                     adapter.notifyDataSetChanged()
 
@@ -339,41 +344,78 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
         var total = 0
 
         for (data in cartItems){
-            total += (data.PRICE!! * data.Qty!!)
+            total += ((if (data.WHOLE_SALE_PRICE != -1) data.WHOLE_SALE_PRICE!! else data.PRICE!!) * data.Qty!!)
         }
         return total
     }
 
     private fun addCart(position: Int){
-        if (cartItems.size == 0){
-            imageItems.add(tempProductItems[position].IMAGE.toString())
-            cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
-                tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1))
-        }
-        else{
-            var check = false
-            for ((i , data) in cartItems.withIndex()){
-                if (data.NAME.equals(tempProductItems[position].NAME)){
-                    val lastQty = data.Qty
-                    cartItems[i].Qty = lastQty!! + 1
-
-                    check = true
-                    break
-                }
-
-            }
-            if (!check){
+        try {
+            if (cartItems.size == 0){
                 imageItems.add(tempProductItems[position].IMAGE.toString())
+
+                var wholeSalePrice = -1
+                if (tempProductItems[position].WHOLE_SALE != ""){
+                    wholeSalePrice = getWholeSale(1, tempProductItems[position].WHOLE_SALE.toString())
+                }
                 cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
-                    tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1))
+                    tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1,wholeSalePrice))
+            }
+            else{
+                var check = false
+                for ((i , data) in cartItems.withIndex()){
+                    if (data.NAME.equals(tempProductItems[position].NAME)){
+                        val lastQty = data.Qty
+                        cartItems[i].Qty = lastQty!! + 1
+
+                        val wholeSalePrice: Int?
+                        if (tempProductItems[position].WHOLE_SALE != ""){
+                            wholeSalePrice = getWholeSale(cartItems[i].Qty!!, tempProductItems[position].WHOLE_SALE.toString())
+
+                            cartItems[i].WHOLE_SALE_PRICE = wholeSalePrice
+                        }
+
+                        check = true
+                        break
+                    }
+
+                }
+                if (!check){
+                    imageItems.add(tempProductItems[position].IMAGE.toString())
+
+                    var wholeSalePrice = -1
+                    if (tempProductItems[position].WHOLE_SALE != ""){
+                        wholeSalePrice = getWholeSale(1, tempProductItems[position].WHOLE_SALE.toString())
+                    }
+
+                    cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
+                        tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1,wholeSalePrice))
+                }
+            }
+        }catch (e:java.lang.Exception){
+            showError(ctx,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
+    private fun getWholeSale(qty:Int, wholeSale: String) : Int{
+        val gson = Gson()
+        val arrayWholeSaleType = object : TypeToken<MutableList<WholeSale>>() {}.type
+        val items : MutableList<WholeSale> = gson.fromJson(wholeSale,arrayWholeSaleType)
+
+        for (item in items){
+            if (item.MIN_QTY!! <= qty && item.MAX_QTY!! >= qty){
+                return item.PRICE!!
             }
         }
+        return -1
     }
 
     fun fetchProductByCat(){
         pbHome.visibility = View.VISIBLE
         tempProductItems.clear()
         tmpProductKeys.clear()
+        tempProductQtyItems.clear()
 
         when (sortBy) {
             ESort.PROD_PRICE.toString() -> productItems.sortWith(compareBy {it.PRICE})
@@ -388,38 +430,56 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                     && (data.CAT.toString() == categoryItems[currentCat]
                     || currentCat == 0)
                 ){
-                    tempProductItems.add(productItems[index])
                     tmpProductKeys.add(productKeys[index])
+
+                    tempProductItems.add(productItems[index])
+                    tempProductQtyItems.add(productItems[index].STOCK!!)
                 }
                 else if (data.CODE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
                     //|| data.CAT.toString().contains(searchFilter)
                     && (data.CAT.toString() == categoryItems[currentCat]
                             || currentCat == 0)
                 ){
-                    tempProductItems.add(productItems[index])
                     tmpProductKeys.add(productKeys[index])
+
+                    tempProductItems.add(productItems[index])
+                    tempProductQtyItems.add(productItems[index].STOCK!!)
                 }
                 else if (data.PRICE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
                     //|| data.CAT.toString().contains(searchFilter)
                     && (data.CAT.toString() == categoryItems[currentCat]
                             || currentCat == 0)
                 ){
-                    tempProductItems.add(productItems[index])
                     tmpProductKeys.add(productKeys[index])
+
+                    tempProductItems.add(productItems[index])
+                    tempProductQtyItems.add(productItems[index].STOCK!!)
                 }
             }
         }else{
             for ((index, data) in productItems.withIndex()) {
                 if (currentCat == 0 || data.CAT.toString() == categoryItems[currentCat]){
-                    tempProductItems.add(productItems[index])
                     tmpProductKeys.add(productKeys[index])
+
+                    tempProductItems.add(productItems[index])
+                    tempProductQtyItems.add(productItems[index].STOCK!!)
                 }
             }
         }
 
+        fetchQtyLeft()
         adapter.notifyDataSetChanged()
         pbHome.visibility = View.GONE
         srHome.isRefreshing = false
+    }
+
+    private fun fetchQtyLeft(){
+        for ((index,data) in tempProductItems.withIndex()){
+            for (cart in cartItems){
+                if (data.PROD_CODE == cart.PROD_CODE && data.MANAGE_STOCK)
+                    data.STOCK = tempProductQtyItems[index] - cart.Qty!!
+            }
+        }
     }
 
     private fun loading(){
@@ -443,12 +503,15 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                     productKeys.clear()
                     productItems.clear()
                     tempProductItems.clear()
+                    tempProductQtyItems.clear()
 
-                    for (data in dataSnapshot.children) {
+                    for ((index,data) in dataSnapshot.children.withIndex()) {
                         val item = data.getValue(Product::class.java)!!
 
                         if (item.STATUS_CODE == EStatusCode.ACTIVE.toString()){
                             tempProductItems.add(item)
+                            tempProductQtyItems.add(item.STOCK!!)
+
                             productKeys.add(data.key!!.toInt())
                         }
                     }

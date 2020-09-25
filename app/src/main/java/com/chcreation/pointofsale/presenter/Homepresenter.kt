@@ -161,7 +161,7 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
         }
     }
 
-    fun getUserActiveStatus(userCode : String, callBack:(status:String) -> Unit){
+    fun getUserDetail(userCode : String, callBack:(user:User) -> Unit){
         try{
             postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -173,7 +173,7 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
                         val item = p0.getValue(User::class.java)
 
                         if (item != null) {
-                            callBack(item.ACTIVE.toString())
+                            callBack(item)
                         }
                     }
 

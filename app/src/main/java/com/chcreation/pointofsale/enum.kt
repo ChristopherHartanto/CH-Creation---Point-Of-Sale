@@ -170,7 +170,8 @@ enum class EUser{
     EMAIL,
     CODE,
     MEMBER_STATUS,
-    ACTIVE
+    ACTIVE,
+    DEVICE_ID
 }
 
 enum class EUserMemberStatus{
@@ -265,6 +266,7 @@ enum class EUserGroup{
 }
 
 enum class ESharedPreference{
+    DEVICE_ID,
     MERCHANT_CODE,
     MERCHANT_NAME,
     MERCHANT_CREDENTIAL,

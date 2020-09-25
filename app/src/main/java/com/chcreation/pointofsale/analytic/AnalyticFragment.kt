@@ -155,9 +155,9 @@ class AnalyticFragment : Fragment(), MainView {
 //                            boughtProducts.add(product[0])
 //                            totalPrice += product[0].PRICE!! * cart.Qty!!
 //                            totalCost += product[0].COST!! * cart.Qty!!
-
-                            profit += (product[0].PRICE!! * cart.Qty!!) - (product[0].COST!! * cart.Qty!!)
-                            gross += (product[0].PRICE!! * cart.Qty!!)
+                            val price = (if (cart.WHOLE_SALE_PRICE != -1) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!)
+                            profit += (price * cart.Qty!!) - (product[0].COST!! * cart.Qty!!)
+                            gross += (price * cart.Qty!!)
                         }
                     }
 
@@ -313,8 +313,8 @@ class AnalyticFragment : Fragment(), MainView {
                 val product = products.filter { it.PROD_CODE == cart.PROD_CODE }
                 if (!product.isNullOrEmpty()){
                     boughtProducts.add(product[0])
-                    totalProfit += product[0].PRICE!! * cart.Qty!! - (product[0].COST!! * cart.Qty!!)
-                    totalGross += product[0].PRICE!! * cart.Qty!!
+                    totalProfit += (if (cart.WHOLE_SALE_PRICE != -1) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!! - (product[0].COST!! * cart.Qty!!)
+                    totalGross += (if (cart.WHOLE_SALE_PRICE != -1) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!!
 
                 }
             }
@@ -336,8 +336,8 @@ class AnalyticFragment : Fragment(), MainView {
                 val product = products.filter { it.PROD_CODE == cart.PROD_CODE }
                 if (!product.isNullOrEmpty()){
                     if (todayDate == transactionDate){
-                        todayProfit += product[0].PRICE!! * cart.Qty!! - (product[0].COST!! * cart.Qty!!)
-                        todayGross += product[0].PRICE!! * cart.Qty!!
+                        todayProfit += (if (cart.WHOLE_SALE_PRICE != -1) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!! - (product[0].COST!! * cart.Qty!!)
+                        todayGross += (if (cart.WHOLE_SALE_PRICE != -1) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!!
 
                     }
                 }

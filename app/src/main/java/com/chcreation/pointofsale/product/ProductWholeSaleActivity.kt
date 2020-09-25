@@ -9,6 +9,7 @@ import com.chcreation.pointofsale.home.HomeRecyclerViewAdapter
 import com.chcreation.pointofsale.model.Product
 import com.chcreation.pointofsale.model.WholeSale
 import com.chcreation.pointofsale.normalClickAnimation
+import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.saveWholeSale
 import kotlinx.android.synthetic.main.activity_product_whole_sale.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -35,16 +36,20 @@ class ProductWholeSaleActivity : AppCompatActivity() {
 
         adapter = WholeSaleRecyclerViewAdapter(this,tmpWholeSaleItems,object : onEditTextChanged{
             override fun onTextChanged(position: Int,type:String, text: String) {
-                if (type == "min")
-                    tmpWholeSaleItems[position].MIN_QTY = text.toInt()
-                if (type == "max")
-                    tmpWholeSaleItems[position].MAX_QTY = text.toInt()
-                else if(type == "price")
-                    tmpWholeSaleItems[position].PRICE = text.toInt()
+                if (tmpWholeSaleItems.elementAtOrNull(position) != null){
+                    if (type == "min")
+                        tmpWholeSaleItems[position].MIN_QTY = text.toInt()
+                    if (type == "max")
+                        tmpWholeSaleItems[position].MAX_QTY = text.toInt()
+                    else if(type == "price")
+                        tmpWholeSaleItems[position].PRICE = text.toInt()
+                }
             }
         }){
-            tmpWholeSaleItems.removeAt(it)
-            adapter.notifyDataSetChanged()
+            if (tmpWholeSaleItems.elementAtOrNull(it) != null){
+                tmpWholeSaleItems.removeAt(it)
+                adapter.notifyItemRemoved(it)
+            }
         }
         rvWholeSale.apply {
             adapter = this@ProductWholeSaleActivity.adapter
@@ -69,6 +74,7 @@ class ProductWholeSaleActivity : AppCompatActivity() {
                     }.show()
                 }else
                 {
+                    saveWholeSale = true
                     wholeSaleItems.clear()
                     wholeSaleItems.addAll(tmpWholeSaleItems)
                     finish()
@@ -98,31 +104,27 @@ class ProductWholeSaleActivity : AppCompatActivity() {
 
 
     private fun checkData(callback:(success:Boolean,message:String)-> Unit){
-        if (tmpWholeSaleItems.size == 0)
-            callback(false,"Please Fill Following Fields!")
-        else if (tmpWholeSaleItems.size == 1 && tmpWholeSaleItems[0].MIN_QTY == 0
-            && tmpWholeSaleItems[0].MAX_QTY == 0 && tmpWholeSaleItems[0].PRICE == 0)
-            callback(false,"Please Fill Following Fields!")
-        else{
-            for ((index,data) in tmpWholeSaleItems.withIndex()){
-                for ((i2,i) in tmpWholeSaleItems.withIndex()){
-                    if (data.MIN_QTY!! < i.MAX_QTY!! && index != i2
-                        && index > i2){
-                        callback(false,"Minimal Qty Cannot Bigger Than Other Maximum Qty!")
-                        return
-                    }
-                }
-                if (data.MIN_QTY!! > data.MAX_QTY!!){
-                    callback(false,"Minimal Qty Cannot Bigger Than Maximum Qty!")
-                    return
-                }
-                if (data.MIN_QTY!! == data.MAX_QTY!!){
-                    callback(false,"Minimal Qty Cannot Same with Maximum Qty!")
-                    return
-                }
+//        if (tmpWholeSaleItems.size == 1 && tmpWholeSaleItems[0].MIN_QTY == 0
+//            && tmpWholeSaleItems[0].MAX_QTY == 0 && tmpWholeSaleItems[0].PRICE == 0)
+//            callback(false,"Please Fill Following Fields!")
+        for ((index,data) in tmpWholeSaleItems.withIndex()){
+//                for ((i2,i) in tmpWholeSaleItems.withIndex()){
+//                    if (data.MIN_QTY!! < i.MAX_QTY!! && index != i2
+//                        && index > i2){
+//                        callback(false,"Minimal Qty Cannot Bigger Than Other Maximum Qty!")
+//                        return
+//                    }
+//                }
+            if (data.MIN_QTY!! > data.MAX_QTY!!){
+                callback(false,"Minimal Qty Cannot Bigger Than Maximum Qty!")
+                return
             }
-            callback(true,"")
+            if (data.MIN_QTY!! == data.MAX_QTY!!){
+                callback(false,"Minimal Qty Cannot Same with Maximum Qty!")
+                return
+            }
         }
+        callback(true,"")
     }
 
 }

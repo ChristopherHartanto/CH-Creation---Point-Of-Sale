@@ -50,6 +50,8 @@ class CheckOutRecyclerViewAdapter(private val context: Context,
         private val minus = view.findViewById<ImageView>(R.id.ivRowCheckOutMinus)
         private val add = view.findViewById<ImageView>(R.id.ivRowCheckOutAdd)
         private val layoutDiscount = view.findViewById<FrameLayout>(R.id.layoutRowCheckOutDiscount)
+        private val tvRowCheckOutDiscount = view.findViewById<TextView>(R.id.tvRowCheckOutDiscount)
+        private val tvRowCheckOutDiscountLine = view.findViewById<TextView>(R.id.tvRowCheckOutDiscountLine)
         private val progressBar = view.findViewById<ProgressBar>(R.id.pbRowCheckOut)
 
         fun bindItem(context: Context,cart: Cart, image: String, listener: (type: Int,position: Int) -> Unit, position: Int) {
@@ -85,11 +87,19 @@ class CheckOutRecyclerViewAdapter(private val context: Context,
             }
 
             name.text = cart.NAME
-            price.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE)
-            totalPrice.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE!! * cart.Qty!!)
+            price.text = currencyFormat(getLanguage(context), getCountry(context))
+                .format(if (cart.WHOLE_SALE_PRICE == -1) cart.PRICE else cart.WHOLE_SALE_PRICE)
+            totalPrice.text = currencyFormat(getLanguage(context), getCountry(context))
+                .format(if (cart.WHOLE_SALE_PRICE == -1) cart.PRICE else cart.WHOLE_SALE_PRICE!! * cart.Qty!!)
             qty.text = cart.Qty.toString()
 
-            layoutDiscount.visibility = View.GONE
+            tvRowCheckOutDiscount.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE)
+            tvRowCheckOutDiscountLine.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE)
+            if (cart.WHOLE_SALE_PRICE == -1){
+                layoutDiscount.visibility = View.GONE
+            }else{
+                layoutDiscount.visibility = View.VISIBLE
+            }
 
             minus.onClick {
                 minus.startAnimation(normalClickAnimation())

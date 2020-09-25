@@ -23,6 +23,7 @@ import kotlinx.android.synthetic.main.activity_sign_up.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
+import java.util.*
 
 class SignUpActivity : AppCompatActivity(), MainView {
 
@@ -77,13 +78,15 @@ class SignUpActivity : AppCompatActivity(), MainView {
         }
         else if (email.isNotEmpty() && password.isNotEmpty() && name.isNotEmpty()) {
             pbSignUp.visibility = View.VISIBLE
+            val instanceId = UUID.randomUUID().toString()
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, OnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val editor = sharedPreference.edit()
                     editor.putString(ESharedPreference.NAME.toString(),name)
                     editor.putString(ESharedPreference.EMAIL.toString(), email)
+                    editor.putString(ESharedPreference.DEVICE_ID.toString(), instanceId)
                     editor.apply()
-                    presenter.saveUser(name,email)
+                    presenter.saveUser(name,email,instanceId)
                 }else {
                     btnSignUp.isEnabled = true
                     pbSignUp.visibility = View.GONE

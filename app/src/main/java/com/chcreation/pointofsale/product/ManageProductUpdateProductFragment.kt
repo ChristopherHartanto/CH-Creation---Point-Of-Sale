@@ -33,10 +33,12 @@ import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Cat
 
 import com.chcreation.pointofsale.model.Product
+import com.chcreation.pointofsale.model.WholeSale
 import com.chcreation.pointofsale.presenter.Homepresenter
 import com.chcreation.pointofsale.presenter.ProductPresenter
 import com.chcreation.pointofsale.product.ManageProductDetailActivity.Companion.prodCode
 import com.chcreation.pointofsale.product.ManageProductDetailActivity.Companion.prodName
+import com.chcreation.pointofsale.product.ProductWholeSaleActivity.Companion.wholeSaleItems
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.gms.tasks.Continuation
 import com.google.android.gms.tasks.Task
@@ -60,10 +62,7 @@ import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.selector
-import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.support.v4.*
 import java.io.File
 import java.io.IOException
 import java.lang.Exception
@@ -95,6 +94,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         var productKey = 0
         var product: Product = Product()
         var currentPhotoPath = ""
+        var saveWholeSale = false
     }
 
     override fun onCreateView(
@@ -152,6 +152,11 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
             btnManageProductScanCancel.startAnimation(normalClickAnimation())
             cancelScan()
         }
+
+        layoutManageProductWholeSale.onClick {
+            layoutManageProductWholeSale.startAnimation(normalClickAnimation())
+            ctx.startActivity<ProductWholeSaleActivity>()
+        }
     }
 
     override fun onStart() {
@@ -183,6 +188,11 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
                 }.show()
             }
         }
+
+        if (wholeSaleItems.size == 0)
+            tvManageProductWholeSaleTitle.text = "Set Wholesale"
+        else
+            tvManageProductWholeSaleTitle.text = "Whole Sale (${wholeSaleItems.size} Items)"
     }
 
     private fun updateProduct(imageUri: String?){
@@ -204,10 +214,13 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
 
         prodName = name
 
+        val gson = Gson()
+        val wholeSaleItems = gson.toJson(wholeSaleItems)
+
         presenter.saveProduct(Product(name,price,desc,cost,manageStock,product.STOCK,image,
             product.PROD_CODE,product.UOM_CODE,categoryItems[positionSpinner],prodCode,
             EStatusCode.ACTIVE.toString(),product.CREATED_DATE,
-            dateFormat().format(Date()), product.CREATED_BY,mAuth.currentUser!!.uid),productKey)
+            dateFormat().format(Date()), product.CREATED_BY,mAuth.currentUser!!.uid, wholeSaleItems),productKey)
 
         val log = "Update Product $name"
         presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
@@ -474,6 +487,11 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         etManageProductUpdatedDate.isEnabled = false
         etManageProductUpdatedBy.isEnabled = false
 
+        if (wholeSaleItems.size == 0)
+            tvManageProductWholeSaleTitle.text = "Set Wholesale"
+        else
+            tvManageProductWholeSaleTitle.text = "Whole Sale (${wholeSaleItems.size} Items)"
+
         presenter.getUserName(product.UPDATED_BY.toString()){
             etManageProductUpdatedBy.setText(it)
         }
@@ -537,6 +555,13 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
                             productKey = data.key!!.toInt()
                             val item = data.getValue(Product::class.java)
                             product = item!!
+
+
+                            if (item.WHOLE_SALE != "" && wholeSaleItems.size == 0 && !saveWholeSale){
+                                val gson = Gson()
+                                val arrayWholeSaleType = object : TypeToken<MutableList<WholeSale>>() {}.type
+                                wholeSaleItems = gson.fromJson(item.WHOLE_SALE,arrayWholeSaleType)
+                            }
                         }
                         fetchData()
                     }catch (e: Exception){

@@ -41,6 +41,10 @@
             android:title="User List" />
 
         <item
+            android:id="@+id/nav_merchant_list"
+            android:title="Switch Merchants" />
+
+        <item
             android:id="@+id/nav_about"
             android:title="About Creator" />
 <!--        <item-->

@@ -27,6 +27,29 @@ fun removeAllSharedPreference(context: Context){
     editor.putString(ESharedPreference.EMAIL.toString(),"")
     editor.putString(ESharedPreference.MERCHANT_NAME.toString(),"")
     editor.putString(ESharedPreference.MERCHANT_CODE.toString(),"")
+    editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(),"")
+    editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(),"")
+    editor.putString(ESharedPreference.NO_TELP.toString(),"")
+    editor.putString(ESharedPreference.USER_GROUP.toString(),"")
+    editor.putString(ESharedPreference.ADDRESS.toString(),"")
+    editor.putString(ESharedPreference.CUSTOM_RECEIPT.toString(),ECustomReceipt.RECEIPT1.toString())
+    editor.putString(ESharedPreference.SINCERE.toString(),"Thank You")
+    editor.putString(ESharedPreference.MERCHANT_MEMBER_STATUS.toString(),EMerchantMemberStatus.FREE_TRIAL.toString())
+    editor.putString(ESharedPreference.LANGUAGE.toString(),Locale.getDefault().language)
+    editor.putString(ESharedPreference.COUNTRY.toString(),Locale.getDefault().country)
+    editor.putBoolean(ESharedPreference.CUSTOMER_ADDRESS.toString(),false)
+    editor.putBoolean(ESharedPreference.CUSTOMER_NO_TEL.toString(),false)
+    editor.putBoolean(ESharedPreference.CUSTOMER_NAME.toString(),false)
+    editor.putBoolean(ESharedPreference.RECEIPT_MERCHANT_ICON.toString(),false)
+    editor.apply()
+}
+
+fun removeMerchantSharedPreference(context: Context){
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+    val editor = sharedPreference.edit()
+    editor.putString(ESharedPreference.MERCHANT_NAME.toString(),"")
+    editor.putString(ESharedPreference.MERCHANT_CODE.toString(),"")
+    editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(),"")
     editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(),"")
     editor.putString(ESharedPreference.NO_TELP.toString(),"")
     editor.putString(ESharedPreference.USER_GROUP.toString(),"")
@@ -53,6 +76,12 @@ fun getCountry(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
     return sharedPreference.getString(ESharedPreference.COUNTRY.toString(),Locale.getDefault().country).toString()
+}
+
+fun getDeviceId(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.DEVICE_ID.toString(),"").toString()
 }
 
 fun getName(context: Context) : String{
