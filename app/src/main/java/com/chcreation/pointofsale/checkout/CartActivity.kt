@@ -54,6 +54,7 @@ class CartActivity : AppCompatActivity() {
                             totalPrice = sumPrice()
                             totalQty = countQty()
                             sumPriceDetail()
+                            adapter.notifyDataSetChanged()
 
                             if (cartItems.size == 0){
                                 PostCheckOutActivity().clearCartData()
@@ -74,6 +75,7 @@ class CartActivity : AppCompatActivity() {
                     totalPrice = sumPrice()
                     totalQty = countQty()
                     sumPriceDetail()
+                    adapter.notifyDataSetChanged()
                 }else
                     toast("Error, Please Clear Your Cart!")
             }else if (type == 2){
@@ -90,8 +92,8 @@ class CartActivity : AppCompatActivity() {
                 totalPrice = sumPrice()
                 totalQty = countQty()
                 sumPriceDetail()
+                adapter.notifyDataSetChanged()
             }
-            adapter.notifyDataSetChanged()
         }
         rvCart.adapter = adapter
         rvCart.layoutManager = LinearLayoutManager(this)
