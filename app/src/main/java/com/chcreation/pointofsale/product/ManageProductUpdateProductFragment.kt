@@ -478,7 +478,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         etManageProductCode.setText(product.CODE.toString())
 
         if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString()){
-            etManageProductCost.hint = "Not Authorized"
+            etManageProductCost.setText("*********")
         }else
             etManageProductCost.setText(product.COST.toString())
 

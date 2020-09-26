@@ -29,7 +29,7 @@ class ProductWholeSaleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_whole_sale)
 
-        supportActionBar!!.title = "Set Whole Sale"
+        supportActionBar!!.title = "Set Wholesale"
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
         tmpWholeSaleItems.addAll(wholeSaleItems)

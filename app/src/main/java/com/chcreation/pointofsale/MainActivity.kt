@@ -142,7 +142,7 @@ class MainActivity : AppCompatActivity(), MainView {
                 if (merchant.NAME != getMerchantName(this) || merchant.IMAGE != getMerchantImage(this)
                     || merchant.NO_TELP != getMerchantNoTel(this) || merchant.MEMBER_STATUS != getMerchantMemberStatus(this)
                     || merchant.COUNTRY != getCountry(this) || merchant.LANGUAGE != getLanguage(this))
-                    logOut("Merchant Status Have Been Updated, Please Login Again!")
+                    logOut("Merchant Status Have Been Updated\nPlease Login Again!")
             }
         }
         presenter.getUserDetail(mAuth.currentUser!!.uid){
@@ -152,9 +152,11 @@ class MainActivity : AppCompatActivity(), MainView {
             }
         }
 
-        presenter.getAvailableMerchant(){
-            if (!it)
+        presenter.getAvailableMerchant(){success, availableMerchant ->
+            if (!success)
                 logOut("You Have Been Removed From This Merchant!")
+            else if (availableMerchant != null && availableMerchant.USER_GROUP != getMerchantUserGroup(this))
+                logOut("User Status Changed\nPlease Login Again!")
         }
 
         view = navView.getHeaderView(0)

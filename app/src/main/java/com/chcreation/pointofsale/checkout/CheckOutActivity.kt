@@ -70,7 +70,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             btnCheckOutCard.backgroundResource = R.drawable.button_border_fill
             btnCheckOutCard.textColorResource = R.color.colorWhite
             btnCheckOutCash.backgroundResource = R.drawable.button_border
-            btnCheckOutCard.textColorResource = R.color.colorBlack
+            btnCheckOutCash.textColorResource = R.color.colorBlack
         }
 
         btnCheckOutCash.onClick {
@@ -79,9 +79,9 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             paymentMethod = EPaymentMethod.CASH.toString()
 
             btnCheckOutCard.backgroundResource = R.drawable.button_border
+            btnCheckOutCard.textColorResource = R.color.colorBlack
             btnCheckOutCash.backgroundResource = R.drawable.button_border_fill
             btnCheckOutCash.textColorResource = R.color.colorWhite
-            btnCheckOutCash.textColorResource = R.color.colorBlack
         }
 
         etCheckOutAmountReceived.onClick {
@@ -165,6 +165,8 @@ class CheckOutActivity : AppCompatActivity(), MainView {
     }
 
     private fun newCheckOut(){
+	    totalOutStanding = 0
+
         if (paymentMethod == "")
             toast("Please Select Payment Method !")
         else{

@@ -18,12 +18,6 @@
             android:orientation="vertical"
             android:id="@+id/layoutProduct">
 
-            <ProgressBar
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/pbProduct"
-                android:visibility="gone"/>
-
             <de.hdodenhof.circleimageview.CircleImageView
                 android:layout_width="150dp"
                 android:layout_height="150dp"
@@ -265,6 +259,13 @@
                 android:text="Cancel"
                 android:layout_margin="5dp"/>
         </LinearLayout>
+
+        <ProgressBar
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:id="@+id/pbProduct"
+            android:visibility="gone"/>
     </FrameLayout>
 
 </ScrollView>

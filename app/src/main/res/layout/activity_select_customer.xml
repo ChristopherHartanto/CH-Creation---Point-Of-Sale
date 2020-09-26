@@ -27,15 +27,15 @@
     </LinearLayout>
 
     <ProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_gravity="center"
         android:id="@+id/pbSelectCustomer"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom |end"
+        android:layout_gravity="bottom|end"
         android:layout_margin="30dp"
         android:src="@drawable/plus"
         android:id="@+id/fbSelectCustomer"/>

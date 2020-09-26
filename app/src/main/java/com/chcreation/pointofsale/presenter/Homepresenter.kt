@@ -220,7 +220,7 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
         }
     }
 
-    fun getAvailableMerchant(callback:(success: Boolean)->Unit){
+    fun getAvailableMerchant(callback:(success: Boolean, availableMerchant: AvailableMerchant?)->Unit){
         try{
             postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -233,13 +233,13 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
                         for (data in p0.children){
                             val item = data.getValue(AvailableMerchant::class.java)
                             if (item != null && item.STATUS == EStatusCode.ACTIVE.toString()) {
-                                callback(true)
+                                callback(true,item)
                                 return
                             }else
                                 check = false
                         }
                         if (!check)
-                            callback(false)
+                            callback(false,null)
                     }
                     else{ // merchant haven't keep merchant code, so using merchant name to check
                         try{
@@ -254,16 +254,16 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
                                         for (data in p0.children){
                                             val item = data.getValue(AvailableMerchant::class.java)
                                             if (item != null && item.STATUS == EStatusCode.ACTIVE.toString()) {
-                                                callback(true)
+                                                callback(true,item)
                                                 return
                                             }else
                                                 check = false
                                         }
                                         if (!check)
-                                            callback(false)
+                                            callback(false,null)
                                     }
                                     else
-                                        callback(false)
+                                        callback(false,null)
                                 }
 
                             }

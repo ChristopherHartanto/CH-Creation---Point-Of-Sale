@@ -1,5 +1,6 @@
 package com.chcreation.pointofsale.checkout
 
+import android.animation.ObjectAnimator
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -79,6 +80,9 @@ class PostCheckOutActivity : AppCompatActivity() {
             tvPostCheckOutChange.text = "Pending : " + currencyFormat(getLanguage(this),
                 getCountry(this)).format(totalPayment-totalReceived)
         }
+        val rotate = ObjectAnimator.ofFloat(ivPostCheckOut, "rotation", 180f, 0f)
+        rotate.duration = 500
+        rotate.start()
     }
 
     fun postCheckOutExist(){
