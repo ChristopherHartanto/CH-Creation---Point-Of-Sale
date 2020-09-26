@@ -205,7 +205,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                                 getCountry(this@CheckOutActivity)).format(totalReceived)} from $custName"
                             else
                                 "Receive ${currencyFormat(getLanguage(this@CheckOutActivity),
-                                    getCountry(this@CheckOutActivity)).format(totalReceived)}  from Receipt ${receiptFormat(it.toInt())}"
+                                    getCountry(this@CheckOutActivity)).format(totalReceived)} from Receipt ${receiptFormat(it.toInt())}"
                             presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
                         }
 

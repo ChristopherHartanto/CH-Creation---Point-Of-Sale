@@ -60,16 +60,22 @@ class UserListFragment : Fragment(), MainView{
         presenter = UserPresenter(this,mAuth,mDatabase,ctx)
 
         adapter = UserListRecyclerViewAdapter(ctx,userNames,userGroups){ rvIt ->
-            user = userGroups[rvIt]
-            userName = userNames[rvIt]
-            if (userName != "" && user.USER_CODE != ""){
-                for (data in userGroups){
-                    if (data.USER_GROUP == EUserGroup.MANAGER.toString())
-                        size++
+            if (userGroups.elementAtOrNull(rvIt) != null && userNames.elementAtOrNull(rvIt) != null){
+                user = userGroups[rvIt]
+                userName = userNames[rvIt]
+                if (userName != "" && user.USER_CODE != ""){
+                    for (data in userGroups){
+                        if (data.USER_GROUP == EUserGroup.MANAGER.toString())
+                            size++
+                    }
+                    startActivity<UserDetailActivity>()
+                }else{
+                    srUserList.isRefreshing = true
+                    presenter.retrieveUserLists()
                 }
-                startActivity<UserDetailActivity>()
             }else{
-                srUserList.isRefreshing = true
+                toast("Refreshing Data")
+                pbUserList.visibility = View.VISIBLE
                 presenter.retrieveUserLists()
             }
         }

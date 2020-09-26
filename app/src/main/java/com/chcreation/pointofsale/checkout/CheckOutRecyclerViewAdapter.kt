@@ -90,7 +90,7 @@ class CheckOutRecyclerViewAdapter(private val context: Context,
             price.text = currencyFormat(getLanguage(context), getCountry(context))
                 .format(if (cart.WHOLE_SALE_PRICE == -1) cart.PRICE else cart.WHOLE_SALE_PRICE)
             totalPrice.text = currencyFormat(getLanguage(context), getCountry(context))
-                .format(if (cart.WHOLE_SALE_PRICE == -1) cart.PRICE else cart.WHOLE_SALE_PRICE!! * cart.Qty!!)
+                .format((if (cart.WHOLE_SALE_PRICE == -1) cart.PRICE else cart.WHOLE_SALE_PRICE!!)!! * cart.Qty!!)
             qty.text = cart.Qty.toString()
 
             tvRowCheckOutDiscount.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE)

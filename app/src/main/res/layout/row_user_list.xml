@@ -30,7 +30,7 @@
                 android:textColor="@color/colorWhite"
                 android:gravity="center"
                 android:textStyle="bold"
-                android:textSize="24sp"/>
+                android:textSize="20sp"/>
         </FrameLayout>
 
         <LinearLayout

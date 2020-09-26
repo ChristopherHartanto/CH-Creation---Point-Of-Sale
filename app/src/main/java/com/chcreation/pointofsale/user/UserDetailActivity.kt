@@ -190,10 +190,6 @@ class UserDetailActivity : AppCompatActivity(), MainView {
                         {
                             GlobalScope.launch {
                                 presenter.removeUserList(user.USER_CODE.toString())
-                                presenter.saveActivityLogs(
-                                    ActivityLogs("Remove ${currentUser.NAME}",
-                                        mAuth.currentUser!!.uid,dateFormat().format(Date()))
-                                )
                             }
                         }
                     }
@@ -231,6 +227,10 @@ class UserDetailActivity : AppCompatActivity(), MainView {
     override fun response(message: String) {
         if (message == EMessageResult.SUCCESS.toString()){
             toast("Remove Success")
+            presenter.saveActivityLogs(
+                ActivityLogs("Remove User ${currentUser.NAME}",
+                    mAuth.currentUser!!.uid,dateFormat().format(Date()))
+            )
             finish()
             pbuserDetail.visibility = View.GONE
         }

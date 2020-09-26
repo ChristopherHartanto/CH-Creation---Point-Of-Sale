@@ -220,6 +220,77 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
         }
     }
 
+    fun getAvailableMerchant(callback:(success: Boolean)->Unit){
+        try{
+            postListener = object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {
+                    database.removeEventListener(this)
+                }
+
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()){
+                        var check = false
+                        for (data in p0.children){
+                            val item = data.getValue(AvailableMerchant::class.java)
+                            if (item != null && item.STATUS == EStatusCode.ACTIVE.toString()) {
+                                callback(true)
+                                return
+                            }else
+                                check = false
+                        }
+                        if (!check)
+                            callback(false)
+                    }
+                    else{ // merchant haven't keep merchant code, so using merchant name to check
+                        try{
+                            postListener = object : ValueEventListener {
+                                override fun onCancelled(p0: DatabaseError) {
+                                    database.removeEventListener(this)
+                                }
+
+                                override fun onDataChange(p0: DataSnapshot) {
+                                    if (p0.exists()){
+                                        var check = false
+                                        for (data in p0.children){
+                                            val item = data.getValue(AvailableMerchant::class.java)
+                                            if (item != null && item.STATUS == EStatusCode.ACTIVE.toString()) {
+                                                callback(true)
+                                                return
+                                            }else
+                                                check = false
+                                        }
+                                        if (!check)
+                                            callback(false)
+                                    }
+                                    else
+                                        callback(false)
+                                }
+
+                            }
+                            database.child(ETable.AVAILABLE_MERCHANT.toString())
+                                .child(auth.currentUser!!.uid)
+                                .orderByChild(EAvailableMerchant.NAME.toString())
+                                .equalTo(getMerchantCode(context))
+                                .addListenerForSingleValueEvent(postListener)
+                        }catch (e: Exception){
+                            showError(context,e.message.toString())
+                            e.printStackTrace()
+                        }
+                    }
+                }
+
+            }
+            database.child(ETable.AVAILABLE_MERCHANT.toString())
+                .child(auth.currentUser!!.uid)
+                .orderByChild(EAvailableMerchant.MERCHANT_CODE.toString())
+                .equalTo(getMerchantCode(context))
+                .addListenerForSingleValueEvent(postListener)
+        }catch (e: Exception){
+            showError(context,e.message.toString())
+            e.printStackTrace()
+        }
+    }
+
     fun retrieveAbout(callBack:(userName:About) -> Unit){
         try{
             postListener = object : ValueEventListener {

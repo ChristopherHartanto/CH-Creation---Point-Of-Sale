@@ -131,7 +131,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         if (wholeSaleItems.size == 0)
             tvProductWholeSaleTitle.text = "Set Wholesale"
         else
-            tvProductWholeSaleTitle.text = "Whole Sale (${wholeSaleItems.size} Items)"
+            tvProductWholeSaleTitle.text = "Wholesale (${wholeSaleItems.size} Items)"
 
         btnProductSave.onClick {
             btnProductSave.isEnabled = false
@@ -208,6 +208,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
     override fun onDestroy() {
         super.onDestroy()
         wholeSaleItems.clear()
+        ManageProductUpdateProductFragment.saveWholeSale = false
     }
 
     private fun openScanBarcode(){
@@ -274,6 +275,7 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
 
         presenter.retrieveCategories()
     }
+
     private fun uploadImage(){
         if(filePath != null){
             layoutProduct.alpha = 0.3F

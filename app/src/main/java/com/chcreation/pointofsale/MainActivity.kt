@@ -32,6 +32,7 @@ import com.chcreation.pointofsale.presenter.MerchantPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -96,7 +97,7 @@ class MainActivity : AppCompatActivity(), MainView {
         merchantPresenter = MerchantPresenter(this,mAuth,mDatabase,this)
 
         if (mAuth.currentUser == null || getMerchantCredential(this) == "" || getMerchantCode(this) == ""){
-            logOut()
+            logOut("Session End")
         }
 
         presenter.retrieveSincere(){
@@ -136,19 +137,24 @@ class MainActivity : AppCompatActivity(), MainView {
 
         presenter.getMerchant(){success, merchant ->
             if (!success)
-                logOut()
+                logOut("Session End")
             else{
                 if (merchant.NAME != getMerchantName(this) || merchant.IMAGE != getMerchantImage(this)
                     || merchant.NO_TELP != getMerchantNoTel(this) || merchant.MEMBER_STATUS != getMerchantMemberStatus(this)
                     || merchant.COUNTRY != getCountry(this) || merchant.LANGUAGE != getLanguage(this))
-                    logOut()
+                    logOut("Merchant Status Have Been Updated, Please Login Again!")
             }
         }
         presenter.getUserDetail(mAuth.currentUser!!.uid){
             if (it.ACTIVE != EStatusUser.ACTIVE.toString() || it.DEVICE_ID != getDeviceId(this)
                 || getDeviceId(this) == "" || it.DEVICE_ID == ""){
-                logOut()
+                logOut("Session End")
             }
+        }
+
+        presenter.getAvailableMerchant(){
+            if (!it)
+                logOut("You Have Been Removed From This Merchant!")
         }
 
         view = navView.getHeaderView(0)
@@ -216,9 +222,9 @@ class MainActivity : AppCompatActivity(), MainView {
         false
     }
 
-    private fun logOut(){
+    private fun logOut(message: String){
         mAuth.signOut()
-        toast("Session End")
+        toast(message)
         removeAllSharedPreference(this)
         PostCheckOutActivity().clearCartData()
         startActivity<LoginActivity>()

@@ -177,7 +177,7 @@
                 android:layout_height="match_parent"
                 android:text="Currency"
                 android:textColor="@color/colorBlack"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold"/>
 
             <TextView
@@ -185,7 +185,7 @@
                 android:layout_height="wrap_content"
                 android:text=": "
                 android:textColor="@color/colorBlack"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold"/>
 
             <Spinner

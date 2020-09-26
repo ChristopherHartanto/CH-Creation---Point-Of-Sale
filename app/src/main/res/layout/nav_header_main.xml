@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
     android:background="@drawable/side_nav_bar"
@@ -20,34 +21,47 @@
         android:id="@+id/tvNavHeaderMerchantMemberStatus"/>
 
     <FrameLayout
-        android:layout_width="80dp"
+        android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:layout_gravity="center"
-        android:id="@+id/layoutNavHeaderDefaultImage"
-        android:visibility="gone">
+        android:layout_gravity="center">
+
+        <FrameLayout
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:id="@+id/layoutNavHeaderDefaultImage">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@color/colorBlack"/>
+
+            <TextView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:text="P"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textColor="@color/colorWhite"
+                android:id="@+id/tvNavHeaderFirstName"/>
+        </FrameLayout>
 
         <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imageView"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:src="@color/colorBlack"/>
+            android:layout_gravity="center"
+            android:contentDescription="@string/nav_header_desc"
+            android:src="@drawable/default_image"/>
 
-        <TextView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:text="P"
-            android:textSize="36sp"
-            android:gravity="center"
-            android:textStyle="bold"
-            android:textColor="@color/colorWhite"
-            android:id="@+id/tvNavHeaderFirstName"/>
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="10dp"
+            android:layout_gravity="end|center_vertical"
+            android:src="@drawable/ic_keyboard_arrow_right_black" />
     </FrameLayout>
-
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/imageView"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:contentDescription="@string/nav_header_desc"
-        android:src="@drawable/default_image"/>
 
     <TextView
         android:layout_width="match_parent"

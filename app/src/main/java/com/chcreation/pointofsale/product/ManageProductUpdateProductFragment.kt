@@ -192,7 +192,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         if (wholeSaleItems.size == 0)
             tvManageProductWholeSaleTitle.text = "Set Wholesale"
         else
-            tvManageProductWholeSaleTitle.text = "Whole Sale (${wholeSaleItems.size} Items)"
+            tvManageProductWholeSaleTitle.text = "Wholesale (${wholeSaleItems.size} Items)"
     }
 
     private fun updateProduct(imageUri: String?){
@@ -476,7 +476,12 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
 
     private fun fetchData(){
         etManageProductCode.setText(product.CODE.toString())
-        etManageProductCost.setText(product.COST.toString())
+
+        if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString()){
+            etManageProductCost.hint = "Not Authorized"
+        }else
+            etManageProductCost.setText(product.COST.toString())
+
         etManageProductDescription.setText(product.DESC.toString())
         etManageProductName.setText(product.NAME.toString())
         etManageProductPrice.setText(product.PRICE.toString())
@@ -490,7 +495,7 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         if (wholeSaleItems.size == 0)
             tvManageProductWholeSaleTitle.text = "Set Wholesale"
         else
-            tvManageProductWholeSaleTitle.text = "Whole Sale (${wholeSaleItems.size} Items)"
+            tvManageProductWholeSaleTitle.text = "Wholesale (${wholeSaleItems.size} Items)"
 
         presenter.getUserName(product.UPDATED_BY.toString()){
             etManageProductUpdatedBy.setText(it)
@@ -539,9 +544,6 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
 
         swManageProduct.isChecked = product.MANAGE_STOCK
 
-        if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString()){
-            etManageProductCost.hint = "------------"
-        }
     }
 
 

@@ -66,40 +66,48 @@ class MerchantListFragment : Fragment(), MainView {
         sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
         adapter = MerchantListRecyclerViewAdapter(ctx,merchantItems){
-            if (merchantItems[it].NAME == getMerchantName(ctx) &&
-                availableMerchantItems[it].CREDENTIAL == getMerchantCredential(ctx) )
-                alert ("Cannot Switch to Same Merchant!"){
-                    title = "Switch Merchant"
-                    yesButton {  }
-                }.show()
-            else
-            alert ("Switch to ${merchantItems[it].NAME} ?"){
-                title = "Switch"
-                yesButton {a->
-                    removeMerchantSharedPreference(ctx)
-                    PostCheckOutActivity().clearCartData()
-                    val editor = sharedPreference.edit()
-                    editor.putString(ESharedPreference.USER_GROUP.toString(), availableMerchantItems[it].USER_GROUP.toString())
-                    editor.putString(ESharedPreference.ADDRESS.toString(),merchantItems[it].ADDRESS)
-                    editor.putString(ESharedPreference.NO_TELP.toString(),merchantItems[it].NO_TELP)
-                    editor.putString(ESharedPreference.MERCHANT_NAME.toString(),merchantItems[it].NAME)
-                    editor.putString(ESharedPreference.MERCHANT_MEMBER_STATUS.toString(),merchantItems[it].MEMBER_STATUS)
-                    editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(),availableMerchantItems[it].CREDENTIAL)
-                    editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(),merchantItems[it].IMAGE)
-                    editor.putString(ESharedPreference.MERCHANT_CODE.toString()
-                        ,if(merchantItems[it].MERCHANT_CODE == "") merchantItems[it].NAME else merchantItems[it].MERCHANT_CODE)
-                    editor.putString(ESharedPreference.COUNTRY.toString(),merchantItems[it].COUNTRY)
-                    editor.putString(ESharedPreference.LANGUAGE.toString(),merchantItems[it].LANGUAGE)
-                    editor.apply()
+            if (merchantItems.elementAtOrNull(it) != null){
+                if (merchantItems[it].NAME == getMerchantName(ctx) &&
+                    availableMerchantItems[it].CREDENTIAL == getMerchantCredential(ctx) )
+                    alert ("Cannot Switch to Same Merchant!"){
+                        title = "Switch Merchant"
+                        yesButton {  }
+                    }.show()
+                else
+                    alert ("Switch to ${merchantItems[it].NAME} ?"){
+                        title = "Switch"
+                        yesButton {a->
+                            removeMerchantSharedPreference(ctx)
+                            PostCheckOutActivity().clearCartData()
+                            val editor = sharedPreference.edit()
+                            editor.putString(ESharedPreference.USER_GROUP.toString(), availableMerchantItems[it].USER_GROUP.toString())
+                            editor.putString(ESharedPreference.ADDRESS.toString(),merchantItems[it].ADDRESS)
+                            editor.putString(ESharedPreference.NO_TELP.toString(),merchantItems[it].NO_TELP)
+                            editor.putString(ESharedPreference.MERCHANT_NAME.toString(),merchantItems[it].NAME)
+                            editor.putString(ESharedPreference.MERCHANT_MEMBER_STATUS.toString(),merchantItems[it].MEMBER_STATUS)
+                            editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(),availableMerchantItems[it].CREDENTIAL)
+                            editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(),merchantItems[it].IMAGE)
+                            editor.putString(ESharedPreference.MERCHANT_CODE.toString()
+                                ,if(merchantItems[it].MERCHANT_CODE == "") merchantItems[it].NAME else merchantItems[it].MERCHANT_CODE)
+                            editor.putString(ESharedPreference.COUNTRY.toString(),merchantItems[it].COUNTRY)
+                            editor.putString(ESharedPreference.LANGUAGE.toString(),merchantItems[it].LANGUAGE)
+                            editor.apply()
 
-                    ctx.startActivity<MainActivity>()
-                    requireActivity().finish()
-                    toast("Switched to Merchant ${merchantItems[it].NAME}")
-                }
-                noButton {
+                            ctx.startActivity<MainActivity>()
+                            requireActivity().finish()
+                            toast("Switched to Merchant ${merchantItems[it].NAME}")
+                        }
+                        noButton {
 
+                        }
+                    }.show()
+            }else{
+                toast("Refreshing Data")
+                loading()
+                GlobalScope.launch {
+                    presenter.retrieveMerchants()
                 }
-            }.show()
+            }
         }
 
         rvMerchantList.layoutManager = GridLayoutManager(ctx,2)
@@ -143,6 +151,17 @@ class MerchantListFragment : Fragment(), MainView {
         }
     }
 
+    private fun loading(){
+        srMerchantList.isRefreshing = false
+        pbMerchantList.visibility = View.GONE
+    }
+
+    private fun endLoading(){
+        pbMerchantList.visibility = View.GONE
+        srMerchantList.isRefreshing = false
+    }
+
+
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (isVisible && isResumed){
             if (response == EMessageResult.FETCH_AVAIL_MERCHANT_SUCCESS.toString()){
@@ -164,14 +183,14 @@ class MerchantListFragment : Fragment(), MainView {
                                 adapter.notifyDataSetChanged()
                             }
                             if (key == merchantItems.size-1){
-                                pbMerchantList.visibility = View.GONE
+                                endLoading()
                             }
                         }
                     }
                 }else
-                    pbMerchantList.visibility = View.GONE
+                    endLoading()
             }
-            srMerchantList.isRefreshing = false
+            endLoading()
         }
     }
 

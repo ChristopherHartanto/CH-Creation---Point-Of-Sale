@@ -119,7 +119,11 @@ class SignInActivity : AppCompatActivity(), MainView {
                     btnSignIn.isEnabled = true
                     pbSignIn.visibility = View.GONE
                 }
-            })
+            }).addOnFailureListener {
+                Toast.makeText(this, it.message.toString(), Toast.LENGTH_LONG).show()
+                btnSignIn.isEnabled = true
+                pbSignIn.visibility = View.GONE
+            }
         }else {
             etSignInEmail.setText("")
             etSignInPassword.setText("")
