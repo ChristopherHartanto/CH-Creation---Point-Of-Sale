@@ -87,7 +87,14 @@
             </FrameLayout>
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_border"
+            android:text="0 Item Rp 0,00"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="5dp"
+            android:id="@+id/btnHomeAddItem"/>
     </LinearLayout>
 
 <!--    <de.hdodenhof.circleimageview.CircleImageView-->
@@ -100,22 +107,22 @@
 <!--        android:visibility="invisible"-->
 <!--        android:id="@+id/ivHomeCartAnimation"/>-->
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorWhite"
-        android:layout_gravity="bottom">
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="@color/colorWhite"-->
+<!--        android:layout_gravity="bottom">-->
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_border"
-            android:text="0 Item Rp 0,00"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="5dp"
-            android:id="@+id/btnHomeAddItem"/>
+<!--        <Button-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@drawable/button_border"-->
+<!--            android:text="0 Item Rp 0,00"-->
+<!--            android:layout_marginHorizontal="10dp"-->
+<!--            android:layout_marginVertical="5dp"-->
+<!--            android:id="@+id/btnHomeAddItem"/>-->
 
-    </LinearLayout>
+<!--    </LinearLayout>-->
 
     <LinearLayout
         android:layout_width="match_parent"
