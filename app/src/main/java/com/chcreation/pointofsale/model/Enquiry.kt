@@ -8,7 +8,7 @@ data class Enquiry(
     var PROD_KEY: Int? = 0,
     var PROD_CODE: String? = "",
     var MANAGE_STOCK: Boolean? = false,
-    var STOCK: Int? = 0,
+    var STOCK: Float? = 0F,
     var STATUS_CODE : String? = "",
     var CREATED_DATE: String? = "",
     var UPDATED_DATE: String? = "",

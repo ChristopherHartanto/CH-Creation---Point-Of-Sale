@@ -38,11 +38,11 @@ class ProductWholeSaleActivity : AppCompatActivity() {
             override fun onTextChanged(position: Int,type:String, text: String) {
                 if (tmpWholeSaleItems.elementAtOrNull(position) != null){
                     if (type == "min")
-                        tmpWholeSaleItems[position].MIN_QTY = text.toInt()
+                        tmpWholeSaleItems[position].MIN_QTY = text.toFloat()
                     if (type == "max")
-                        tmpWholeSaleItems[position].MAX_QTY = text.toInt()
+                        tmpWholeSaleItems[position].MAX_QTY = text.toFloat()
                     else if(type == "price")
-                        tmpWholeSaleItems[position].PRICE = text.toInt()
+                        tmpWholeSaleItems[position].PRICE = text.toFloat()
                 }
             }
         }){
@@ -88,7 +88,7 @@ class ProductWholeSaleActivity : AppCompatActivity() {
             if (tmpWholeSaleItems.size > 3)
                 toast("Already Maximum Limits!")
             else{
-                tmpWholeSaleItems.add(WholeSale(0,0,0))
+                tmpWholeSaleItems.add(WholeSale(0F,0F,0F))
                 adapter.notifyDataSetChanged()
             }
         }

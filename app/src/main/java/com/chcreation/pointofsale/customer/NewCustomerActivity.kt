@@ -74,9 +74,13 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
             loading()
 
             presenter.checkCustomerSize(){
-                if (it >= 5 && getMerchantMemberStatus(this@NewCustomerActivity) == EMerchantMemberStatus.FREE_TRIAL.toString()){
+                val currentDate = dateFormat().format(Date())
+
+                if (it >= 5
+                    && getMerchantMemberStatus(this@NewCustomerActivity) == EMerchantMemberStatus.FREE_TRIAL.toString()
+                    || getMerchantMemberDeadline(this@NewCustomerActivity) == ""){
                     alert ("Upgrade to Premium for Unlimited Customer"){
-                        title = "Oops!"
+                        title = "Premium Feature!"
                         yesButton {
                             sendEmail("Upgrade Premium",
                                 "Merchant: ${getMerchantName(this@NewCustomerActivity)}",this@NewCustomerActivity)
@@ -85,7 +89,18 @@ class NewCustomerActivity : AppCompatActivity(), MainView {
                         noButton {  }
                     }.show()
                     endLoading()
-                }else{
+                }else if (compareDate(getMerchantMemberDeadline(this@NewCustomerActivity),currentDate) == 2){
+                    alert ("Your Premium Member Has Ended, Do You Want to Extend?"){
+                        title = "Premium End"
+                        yesButton {
+                            sendEmail("Extend Premium",
+                                "Merchant: ${getMerchantName(this@NewCustomerActivity)}",this@NewCustomerActivity)
+                        }
+
+                        noButton {  }
+                    }.show()
+                    endLoading()
+                } else{
                     val email = etCustomerEmail.text.toString()
                     val name = etCustomerName.text.toString()
                     val phone = etCustomerPhone.text.toString()

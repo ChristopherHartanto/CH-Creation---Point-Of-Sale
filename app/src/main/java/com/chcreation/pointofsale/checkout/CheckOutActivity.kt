@@ -37,18 +37,18 @@ import java.util.*
 class CheckOutActivity : AppCompatActivity(), MainView {
 
     companion object{
-        var isCustomer = 0 // 0 havent select, 1 on select, 2 selected
-        var totalReceived = 0
+        var isCustomer = 0F // 0 havent select, 1 on select, 2 selected
+        var totalReceived = 0F
         var transDate = ""
         var transCode = 0
-        var totalOutStanding = 0
-        var postTotalPayment = 0
+        var totalOutStanding = 0F
+        var postTotalPayment = 0F
     }
     private var paymentMethod = ""
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
     private lateinit var presenter: CheckOutPresenter
-    private var totalPayment = 0
+    private var totalPayment = 0F
     private var custName = "-"
     private var existCheckOutNote = false
 
@@ -138,7 +138,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
         return when (item.itemId) {
             R.id.action_select_customer -> {
                 if (!existPayment){
-                    isCustomer = 1
+                    isCustomer = 1F
                     startActivity<SelectCustomerActivity>()
                 }
                 true
@@ -165,15 +165,15 @@ class CheckOutActivity : AppCompatActivity(), MainView {
     }
 
     private fun newCheckOut(){
-	    totalOutStanding = 0
+	    totalOutStanding = 0F
 
         if (paymentMethod == "")
             toast("Please Select Payment Method !")
         else{
             if (etCheckOutAmountReceived.text.toString() != "")
-                totalReceived = etCheckOutAmountReceived.text.toString().toInt()
+                totalReceived = etCheckOutAmountReceived.text.toString().toFloat()
             else if (etCheckOutAmountReceived.text.toString() == "")
-                totalReceived = 0
+                totalReceived = 0F
 
             if (totalPayment - totalReceived > 0)
                 totalOutStanding = totalPayment - totalReceived
@@ -232,13 +232,13 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             toast("Please Select Payment Method !")
         else{
             if (etCheckOutAmountReceived.text.toString() != "")
-                totalReceived = etCheckOutAmountReceived.text.toString().toInt()
+                totalReceived = etCheckOutAmountReceived.text.toString().toFloat()
             else if (etCheckOutAmountReceived.text.toString() == "")
-                totalReceived = 0
+                totalReceived = 0F
 
             totalOutStanding = postTotalPayment - totalReceived
             if (totalOutStanding < 0)
-                totalOutStanding = 0
+                totalOutStanding = 0F
 
             val gson = Gson()
             val orderDetail = gson.toJson(cartItems)
@@ -273,7 +273,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             if (dataSnapshot.exists()){
                 val item = dataSnapshot.getValue(Transaction::class.java)
                 if (item != null) {
-                    postTotalPayment = item.TOTAL_OUTSTANDING!!.toInt()
+                    postTotalPayment = item.TOTAL_OUTSTANDING!!.toFloat()
                     etCheckOutAmountReceived.setText(postTotalPayment.toString())
                     tvCheckOutTotal.text = currencyFormat(getLanguage(this@CheckOutActivity),
                         getCountry(this@CheckOutActivity)).format(postTotalPayment)

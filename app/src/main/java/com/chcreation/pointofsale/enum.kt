@@ -78,7 +78,9 @@ enum class EMerchant{
     MEMBER_STATUS,
     ACTIVE,
     LANGUAGE,
-    COUNTRY
+    COUNTRY,
+    MEMBER_DEADLINE,
+    OPT_FIELD
 }
 
 enum class EAvailableMerchant{
@@ -269,6 +271,7 @@ enum class ESharedPreference{
     DEVICE_ID,
     MERCHANT_CODE,
     MERCHANT_NAME,
+    MEMBER_DEADLINE,
     MERCHANT_CREDENTIAL,
     MERCHANT_IMAGE,
     USER_GROUP,

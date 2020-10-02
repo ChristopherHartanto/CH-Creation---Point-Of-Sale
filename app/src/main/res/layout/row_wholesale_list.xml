@@ -40,7 +40,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:id="@+id/etRowWholeSaleMinQty"
                 android:gravity="center"/>
         </LinearLayout>
@@ -60,7 +60,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:id="@+id/etRowWholeSaleMaxQty"
                 android:gravity="center"/>
         </LinearLayout>
@@ -79,7 +79,7 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 android:id="@+id/etRowWholeSalePrice"
                 android:gravity="center"/>
         </LinearLayout>

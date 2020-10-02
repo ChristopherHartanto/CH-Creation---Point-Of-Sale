@@ -245,7 +245,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                     merchantCode = generateMerchantCode()
                     presenter.createNewMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,"",null,null,
                         currentDate,currentDate, mAuth.currentUser!!.uid, mAuth.currentUser!!.uid,merchantCode
-                        ,EMerchantMemberStatus.FREE_TRIAL.toString(),EStatusUser.ACTIVE.toString(),selectedLanguage,selectedCountry),
+                        ,EMerchantMemberStatus.FREE_TRIAL.toString(),currentDate,EStatusUser.ACTIVE.toString(),selectedLanguage,selectedCountry,""),
                         AvailableMerchant(merchantName,EUserGroup.MANAGER.toString(),currentDate,currentDate,
                             mAuth.currentUser!!.uid,EStatusUser.ACTIVE.toString(),merchantCode))
 
@@ -271,7 +271,7 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
                 presenter.updateMerchant(Merchant(merchantName,merchantBusinessInfo,merchantAddress,merchantNoTelp,image,
                     merchant!!.USER_LIST,merchant!!.CAT,merchant!!.CREATED_DATE,
                     dateFormat().format(Date()),merchant!!.CREATED_BY,
-                    mAuth.currentUser!!.uid,merchantCode,merchant!!.MEMBER_STATUS,merchant!!.ACTIVE,selectedLanguage,selectedCountry),merchantName)
+                    mAuth.currentUser!!.uid,merchantCode,merchant!!.MEMBER_STATUS,merchant!!.MEMBER_DEADLINE,merchant!!.ACTIVE,selectedLanguage,selectedCountry,""),merchantName)
 
                 presenter.saveActivityLogs(ActivityLogs("Update Merchant",mAuth.currentUser!!.uid,dateFormat().format(Date())))
             }

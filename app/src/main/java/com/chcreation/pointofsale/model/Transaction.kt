@@ -3,10 +3,10 @@ package com.chcreation.pointofsale.model
 import com.chcreation.pointofsale.EStatusCode
 
 data class Transaction(
-    var TOTAL_PRICE: Int? = 0,
-    var TOTAL_OUTSTANDING: Int? = 0,
-    var DISCOUNT: Int? = 0,
-    var TAX: Int? = 0,
+    var TOTAL_PRICE: Float? = 0F,
+    var TOTAL_OUTSTANDING: Float? = 0F,
+    var DISCOUNT: Float? = 0F,
+    var TAX: Float? = 0F,
     var PAYMENT_METHOD: String? = "",
     var DETAIL: String? = "",
     var CUST_CODE: String? = "",

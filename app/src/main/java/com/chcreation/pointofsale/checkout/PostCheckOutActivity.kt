@@ -110,10 +110,10 @@ class PostCheckOutActivity : AppCompatActivity() {
         customerItems.clear()
 
         // Check Out Activity
-        postTotalPayment = 0
-        totalPrice = 0
-        totalReceived = 0
-        totalOutStanding = 0
+        postTotalPayment = 0F
+        totalPrice = 0F
+        totalReceived = 0F
+        totalOutStanding = 0F
         transCode = 0
 
         HomeFragment.cartItems.clear()
@@ -121,9 +121,9 @@ class PostCheckOutActivity : AppCompatActivity() {
         HomeFragment.tempProductQtyItems.clear()
         imageItems.clear()
         NoteActivity.note = ""
-        DiscountActivity.discount = 0
-        tax = 0
-        HomeFragment.totalQty = 0
+        DiscountActivity.discount = 0F
+        tax = 0F
+        HomeFragment.totalQty = 0F
         transDate = ""
         selectCustomerName = ""
         selectCustomerCode = ""

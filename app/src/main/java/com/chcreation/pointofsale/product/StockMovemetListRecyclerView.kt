@@ -35,15 +35,15 @@ class StockMovementListRecyclerView(private val context: Context, private val it
         fun bindItem(item: StockMovement, listener: (position: Int) -> Unit, position: Int, context: Context) {
             if (item.STATUS == EStatusStock.INBOUND.toString() && item.STATUS_CODE != EStatusStock.CANCEL.toString()){
                 image.imageResource = R.drawable.inbound
-                desc.text = "${item.QTY} Qty"
+                desc.text = "${if (isInt(item.QTY!!)) item.QTY!!.toInt() else item.QTY})} Qty"
             }
             else if (item.STATUS == EStatusStock.OUTBOUND.toString() && item.STATUS_CODE != EStatusStock.CANCEL.toString()){
                 image.imageResource = R.drawable.outbound
-                desc.text = "${item.QTY} Qty"
+                desc.text = "${if (isInt(item.QTY!!)) item.QTY!!.toInt() else item.QTY})} Qty"
             }
             else if (item.STATUS == EStatusStock.MISSING.toString() || item.STATUS_CODE == EStatusStock.CANCEL.toString()){
                 image.imageResource = R.drawable.error
-                desc.text = "${item.QTY} Qty"
+                desc.text = "${if (isInt(item.QTY!!)) item.QTY!!.toInt() else item.QTY})} Qty"
             }
             if (item.NOTE != "")
                 note.text = "N : ${item.NOTE}"

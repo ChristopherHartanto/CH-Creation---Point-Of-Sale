@@ -1,16 +1,20 @@
 package com.chcreation.pointofsale.checkout
 
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.GlideDrawable
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
 import com.chcreation.pointofsale.checkout.NoteActivity.Companion.note
-import com.chcreation.pointofsale.home.HomeFragment
 import com.chcreation.pointofsale.home.HomeFragment.Companion.cartItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.imageItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.tempProductItems
@@ -25,13 +29,14 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_cart.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.ctx
+import java.lang.Exception
 
 class CartActivity : AppCompatActivity() {
 
     private lateinit var adapter: CheckOutRecyclerViewAdapter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
+    private var selectedCart = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,27 +50,17 @@ class CartActivity : AppCompatActivity() {
 
         adapter = CheckOutRecyclerViewAdapter(this, cartItems, imageItems){ type,it->
             if (type == 1){
-                if (cartItems[it].Qty == 1){
+                if (cartItems[it].Qty == 1F){
                     alert ("Remove ${cartItems[it].NAME} From Cart?"){
                         title = "Remove"
                         yesButton {a->
-                            cartItems.removeAt(it)
-
-                            totalPrice = sumPrice()
-                            totalQty = countQty()
-                            sumPriceDetail()
-                            adapter.notifyDataSetChanged()
-
-                            if (cartItems.size == 0){
-                                PostCheckOutActivity().clearCartData()
-                                finish()
-                            }
+                            deleteItem(it)
                         }
                         noButton {  }
                     }.show()
                 }else if (cartItems[it].Qty!! > 1){
                     cartItems[it].Qty = cartItems[it].Qty!! - 1
-                    val wholeSalePrice: Int?
+                    val wholeSalePrice: Float?
                     if (tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.WHOLE_SALE != ""){
                         wholeSalePrice = getWholeSale(cartItems[it].Qty!!
                             ,tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.WHOLE_SALE.toString())
@@ -81,7 +76,7 @@ class CartActivity : AppCompatActivity() {
             }else if (type == 2){
                 cartItems[it].Qty = cartItems[it].Qty!! + 1
 
-                val wholeSalePrice: Int?
+                val wholeSalePrice: Float?
                 if (tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.WHOLE_SALE != ""){
                     wholeSalePrice = getWholeSale(cartItems[it].Qty!!
                         ,tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.WHOLE_SALE.toString())
@@ -93,8 +88,93 @@ class CartActivity : AppCompatActivity() {
                 totalQty = countQty()
                 sumPriceDetail()
                 adapter.notifyDataSetChanged()
+            }else if (type == 3){
+                selectedCart = it
+                etCartQty.setText(cartItems[it].Qty.toString())
+                tvCartProdName.text = cartItems[it].NAME.toString()
+
+                if (tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.WHOLE_SALE != ""){
+                    tvCartProdCode.text = tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.CODE.toString()
+                }
+
+                if (imageItems[it] != "")
+                    Glide.with(this).load(imageItems[it]).listener(object : RequestListener<String,GlideDrawable>{
+                        override fun onException(
+                            e: Exception?,
+                            model: String?,
+                            target: Target<GlideDrawable>?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+
+                            pbCart.visibility = View.GONE
+                            return false
+                        }
+
+                        override fun onResourceReady(
+                            resource: GlideDrawable?,
+                            model: String?,
+                            target: Target<GlideDrawable>?,
+                            isFromMemoryCache: Boolean,
+                            isFirstResource: Boolean
+                        ): Boolean {
+
+                            pbCart.visibility = View.GONE
+                            return false
+                        }
+
+                    }).into(ivCartProdImage)
+                else{
+                    pbCart.visibility = View.GONE
+                    ivCartProdImage.imageResource = R.drawable.default_image
+                }
+                cvCartProdDetail.visibility = View.VISIBLE
             }
         }
+
+        btnCartDeleteProd.onClick {
+            btnCartDeleteProd.startAnimation(normalClickAnimation())
+            cvCartProdDetail.visibility = View.GONE
+
+            deleteItem(selectedCart)
+        }
+
+        btnCartDoneProd.onClick {
+            btnCartDeleteProd.startAnimation(normalClickAnimation())
+            cvCartProdDetail.visibility = View.GONE
+
+            val qty = etCartQty.text.toString().toFloat()
+            if (qty <= 0)
+                deleteItem(selectedCart)
+            else{
+                cartItems[selectedCart].Qty = qty
+
+                val wholeSalePrice: Float?
+                if (tempProductItems.single { f -> f.PROD_CODE == cartItems[selectedCart].PROD_CODE }.WHOLE_SALE != ""){
+                    wholeSalePrice = getWholeSale(cartItems[selectedCart].Qty!!
+                        ,tempProductItems.single { f -> f.PROD_CODE == cartItems[selectedCart].PROD_CODE }.WHOLE_SALE.toString())
+
+                    cartItems[selectedCart].WHOLE_SALE_PRICE = wholeSalePrice
+                }
+
+                totalPrice = sumPrice()
+                totalQty = countQty()
+                sumPriceDetail()
+                adapter.notifyDataSetChanged()
+            }
+        }
+
+        btnCartMinQty.onClick {
+            btnCartMinQty.startAnimation(normalClickAnimation())
+            val qty = etCartQty.text.toString().toFloat()
+            etCartQty.setText((qty-1F).toString())
+        }
+
+        btnCartAddQty.onClick {
+            btnCartAddQty.startAnimation(normalClickAnimation())
+            val qty = etCartQty.text.toString().toFloat()
+            etCartQty.setText((qty+1F).toString())
+        }
+
         rvCart.adapter = adapter
         rvCart.layoutManager = LinearLayoutManager(this)
 
@@ -129,8 +209,8 @@ class CartActivity : AppCompatActivity() {
                             yesButton {
                                 cartItems.clear()
                                 imageItems.clear()
-                                totalQty = 0
-                                totalPrice = 0
+                                totalQty = 0F
+                                totalPrice = 0F
                                 PostCheckOutActivity().clearCartData()
                                 finish()
                             }
@@ -174,24 +254,38 @@ class CartActivity : AppCompatActivity() {
         super.onBackPressed()
     }
 
+    private fun deleteItem(position: Int){
 
-    private fun sumPrice() : Int{
-        var total = 0
+        cartItems.removeAt(position)
+
+        totalPrice = sumPrice()
+        totalQty = countQty()
+        sumPriceDetail()
+        adapter.notifyDataSetChanged()
+
+        if (cartItems.size == 0){
+            PostCheckOutActivity().clearCartData()
+            finish()
+        }
+    }
+
+    private fun sumPrice() : Float{
+        var total = 0F
 
         for (data in cartItems){
-            total += ((if (data.WHOLE_SALE_PRICE != -1) data.WHOLE_SALE_PRICE!! else data.PRICE!!) * data.Qty!!)
+            total += ((if (data.WHOLE_SALE_PRICE != -1F) data.WHOLE_SALE_PRICE!! else data.PRICE!!) * data.Qty!!)
         }
         return total
     }
 
     private fun sumPriceDetail(){
 
-        if (discount != 0) tvCartDiscount.visibility = View.VISIBLE else tvCartDiscount.visibility = View.GONE
-        if (tax != 0) tvCartTax.visibility = View.VISIBLE else tvCartTax.visibility = View.GONE
+        if (discount != 0F) tvCartDiscount.visibility = View.VISIBLE else tvCartDiscount.visibility = View.GONE
+        if (tax != 0F) tvCartTax.visibility = View.VISIBLE else tvCartTax.visibility = View.GONE
 
         val totalPayment = totalPrice - discount + tax
 
-        if (discount != 0 || tax != 0){
+        if (discount != 0F || tax != 0F){
 
             tvCartDiscount.text = "Discount : ${currencyFormat(getLanguage(this), getCountry(this)).format(discount)}"
             tvCartTax.text = "Tax: ${currencyFormat(getLanguage(this), getCountry(this)).format(tax)}"
@@ -210,18 +304,18 @@ class CartActivity : AppCompatActivity() {
         else
             tvCartNote.visibility = View.GONE
 
-        btnCart.text = "$totalQty Item = ${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}"
+        btnCart.text = "${if (isInt(totalQty)) totalQty.toInt() else totalQty} Items = ${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}"
     }
 
-    private fun countQty() : Int{
-        var total = 0
+    private fun countQty() : Float{
+        var total = 0F
         for (data in cartItems){
             total += data.Qty!!
         }
         return total
     }
 
-    private fun getWholeSale(qty:Int, wholeSale: String) : Int{
+    private fun getWholeSale(qty:Float, wholeSale: String) : Float{
         val gson = Gson()
         val arrayWholeSaleType = object : TypeToken<MutableList<WholeSale>>() {}.type
         val items : MutableList<WholeSale> = gson.fromJson(wholeSale,arrayWholeSaleType)
@@ -231,6 +325,6 @@ class CartActivity : AppCompatActivity() {
                 return item.PRICE!!
             }
         }
-        return -1
+        return -1F
     }
 }

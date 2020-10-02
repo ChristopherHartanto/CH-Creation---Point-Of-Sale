@@ -93,7 +93,7 @@
                 android:textColor="@color/colorBlack"
                 android:textSize="14sp"
                 android:id="@+id/cbAnalyticFilterTax"
-                android:text="Include Tax"/>
+                android:text="Include Tax Chart"/>
 
             <CheckBox
                 android:layout_width="match_parent"
@@ -102,7 +102,7 @@
                 android:textColor="@color/colorBlack"
                 android:textSize="14sp"
                 android:id="@+id/cbAnalyticFilterDiscount"
-                android:text="Include Discount"/>
+                android:text="Include Discount Chart"/>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

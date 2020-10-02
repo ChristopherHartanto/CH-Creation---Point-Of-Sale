@@ -59,12 +59,12 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
     private lateinit var mScannerView : ZXingScannerView
 
     companion object{
-        var tempProductQtyItems : ArrayList<Int> = arrayListOf()
+        var tempProductQtyItems : ArrayList<Float> = arrayListOf()
         var tempProductItems : ArrayList<Product> = arrayListOf()
         var cartItems: ArrayList<Cart> = arrayListOf()
         var imageItems: ArrayList<String> = arrayListOf()
-        var totalQty = 0
-        var totalPrice = 0
+        var totalQty = 0F
+        var totalPrice = 0F
 
         var active = false // to end application
     }
@@ -87,6 +87,8 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
         presenter = Homepresenter(this,mAuth,mDatabase,ctx)
         mScannerView = ZXingScannerView(ctx)
 
+        btnHomeAddItem.text = "0 Item = ${currencyFormat(getLanguage(ctx), getCountry(ctx)).format(0)}"
+
         adapter = HomeRecyclerViewAdapter(
             ctx,
             tempProductItems
@@ -102,7 +104,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                     if (tempProductItems[it].MANAGE_STOCK)
                         tempProductItems[it].STOCK = tempProductQtyItems[it] -
                             cartItems.single { f -> f.PROD_CODE == tempProductItems[it].PROD_CODE }
-                            .Qty!!
+                            .Qty!!.toFloat()
 //                        tempProductItems[it] = Product(tempProductItems[it].NAME,tempProductItems[it].PRICE,tempProductItems[it].DESC,tempProductItems[it].COST, tempProductItems[it].MANAGE_STOCK,
 //                            tempProductItems[it].STOCK!! - 1,tempProductItems[it].IMAGE,tempProductItems[it].PROD_CODE,tempProductItems[it].UOM_CODE,tempProductItems[it].CAT,
 //                            tempProductItems[it].CODE,tempProductItems[it].STATUS_CODE,tempProductItems[it].CREATED_DATE,tempProductItems[it].UPDATED_DATE,
@@ -110,7 +112,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
 
                     adapter.notifyDataSetChanged()
 
-                    btnHomeAddItem.text = "$totalQty Item = ${currencyFormat(getLanguage(ctx),
+                    btnHomeAddItem.text = "${if (isInt(totalQty)) totalQty.toInt() else totalQty} Items = ${currencyFormat(getLanguage(ctx),
                         getCountry(ctx)).format(totalPrice)}"
                     btnHomeAddItem.startAnimation(normalClickAnimation())
                     btnHomeAddItem.backgroundResource = R.drawable.button_border_fill
@@ -239,10 +241,10 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
 
         }
 
-        btnHomeAddItem.text = "$totalQty Item = ${currencyFormat(getLanguage(ctx),
+        btnHomeAddItem.text = "${if (isInt(totalQty)) totalQty.toInt() else totalQty} Items = ${currencyFormat(getLanguage(ctx),
             getCountry(ctx)).format(totalPrice)}"
 
-        if (totalPrice != 0){
+        if (totalPrice != 0F){
             btnHomeAddItem.backgroundResource = R.drawable.button_border_fill
             btnHomeAddItem.textColorResource = R.color.colorWhite
         }
@@ -332,19 +334,19 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
 //        slideDown(ivHomeCartAnimation)
     }
 
-    private fun countQty() : Int{
-        var total = 0
+    private fun countQty() : Float{
+        var total = 0F
         for (data in cartItems){
             total += data.Qty!!
         }
         return total
     }
 
-    private fun sumPrice() : Int{
-        var total = 0
+    private fun sumPrice() : Float{
+        var total = 0F
 
         for (data in cartItems){
-            total += ((if (data.WHOLE_SALE_PRICE != -1) data.WHOLE_SALE_PRICE!! else data.PRICE!!) * data.Qty!!)
+            total += ((if (data.WHOLE_SALE_PRICE != -1F) data.WHOLE_SALE_PRICE!! else data.PRICE!!) * data.Qty!!)
         }
         return total
     }
@@ -354,12 +356,12 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
             if (cartItems.size == 0){
                 imageItems.add(tempProductItems[position].IMAGE.toString())
 
-                var wholeSalePrice = -1
+                var wholeSalePrice = -1F
                 if (tempProductItems[position].WHOLE_SALE != ""){
-                    wholeSalePrice = getWholeSale(1, tempProductItems[position].WHOLE_SALE.toString())
+                    wholeSalePrice = getWholeSale(1F, tempProductItems[position].WHOLE_SALE.toString())
                 }
                 cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
-                    tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1,wholeSalePrice))
+                    tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1F,wholeSalePrice))
             }
             else{
                 var check = false
@@ -368,7 +370,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                         val lastQty = data.Qty
                         cartItems[i].Qty = lastQty!! + 1
 
-                        val wholeSalePrice: Int?
+                        val wholeSalePrice: Float?
                         if (tempProductItems[position].WHOLE_SALE != ""){
                             wholeSalePrice = getWholeSale(cartItems[i].Qty!!, tempProductItems[position].WHOLE_SALE.toString())
 
@@ -383,13 +385,13 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                 if (!check){
                     imageItems.add(tempProductItems[position].IMAGE.toString())
 
-                    var wholeSalePrice = -1
+                    var wholeSalePrice = -1F
                     if (tempProductItems[position].WHOLE_SALE != ""){
-                        wholeSalePrice = getWholeSale(1, tempProductItems[position].WHOLE_SALE.toString())
+                        wholeSalePrice = getWholeSale(1F, tempProductItems[position].WHOLE_SALE.toString())
                     }
 
                     cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
-                        tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1,wholeSalePrice))
+                        tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1F,wholeSalePrice))
                 }
             }
         }catch (e:java.lang.Exception){
@@ -398,7 +400,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
         }
     }
 
-    private fun getWholeSale(qty:Int, wholeSale: String) : Int{
+    private fun getWholeSale(qty:Float, wholeSale: String) : Float{
         val gson = Gson()
         val arrayWholeSaleType = object : TypeToken<MutableList<WholeSale>>() {}.type
         val items : MutableList<WholeSale> = gson.fromJson(wholeSale,arrayWholeSaleType)
@@ -408,7 +410,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                 return item.PRICE!!
             }
         }
-        return -1
+        return -1F
     }
 
     fun fetchProductByCat(){

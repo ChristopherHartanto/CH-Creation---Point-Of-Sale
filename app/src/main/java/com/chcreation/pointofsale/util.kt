@@ -29,6 +29,7 @@ fun removeAllSharedPreference(context: Context){
     editor.putString(ESharedPreference.MERCHANT_CODE.toString(),"")
     editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(),"")
     editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(),"")
+    editor.putString(ESharedPreference.MEMBER_DEADLINE.toString(),"")
     editor.putString(ESharedPreference.NO_TELP.toString(),"")
     editor.putString(ESharedPreference.USER_GROUP.toString(),"")
     editor.putString(ESharedPreference.ADDRESS.toString(),"")
@@ -51,6 +52,7 @@ fun removeMerchantSharedPreference(context: Context){
     editor.putString(ESharedPreference.MERCHANT_CODE.toString(),"")
     editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(),"")
     editor.putString(ESharedPreference.MERCHANT_CREDENTIAL.toString(),"")
+    editor.putString(ESharedPreference.MEMBER_DEADLINE.toString(),"")
     editor.putString(ESharedPreference.NO_TELP.toString(),"")
     editor.putString(ESharedPreference.USER_GROUP.toString(),"")
     editor.putString(ESharedPreference.ADDRESS.toString(),"")
@@ -181,6 +183,12 @@ fun getMerchantMemberStatus(context: Context) : String{
         ,EMerchantMemberStatus.FREE_TRIAL.toString()).toString()
 }
 
+fun getMerchantMemberDeadline(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getString(ESharedPreference.MEMBER_DEADLINE.toString(),"").toString()
+}
+
 fun normalClickAnimation() : AlphaAnimation = AlphaAnimation(10F,0.5F)
 
 fun slideUp(view: View) {
@@ -216,6 +224,13 @@ fun getYear(convertDate: String): Int {
     val calendar = Calendar.getInstance()
     calendar.time = date
     return calendar.get(Calendar.YEAR)
+}
+
+fun getWeekOfMonth(convertDate: String): Int {
+    val date = dateFormat().parse(convertDate)
+    val calendar = Calendar.getInstance()
+    calendar.time = date
+    return calendar.get(Calendar.WEEK_OF_MONTH)
 }
 
 fun getMonth(convertDate: String): Int {
@@ -263,6 +278,15 @@ fun parseTimeFormat(date: String) : String {
     return newFormat
 }
 
+fun compareDate(firstDate: String,secondDate: String) : Int {
+    val date1 = dateFormat().parse(firstDate)
+    val date2 = dateFormat().parse(secondDate)
+    return if (date1.after(date2))
+        1
+    else
+        2
+}
+
 fun currencyFormat(language: String, country: String) : NumberFormat{  //  ex : currencyFormat().format(10000)
     val locale = Locale(language,country)
     //    format.maximumFractionDigits = 0
@@ -281,6 +305,8 @@ fun receiptFormat(number: Int) : String {
 
     return value
 }
+
+fun isInt(n: Number) = n.toDouble() % 1 == 0.0
 
 fun showError(context: Context,message: String)
 {

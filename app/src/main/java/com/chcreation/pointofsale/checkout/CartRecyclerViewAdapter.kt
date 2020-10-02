@@ -1,6 +1,7 @@
 package com.chcreation.pointofsale.checkout
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,9 +42,9 @@ class CartRecyclerViewAdapter(private val context: Context, private val items: L
 
         fun bindItem(context: Context,cart: Cart, listener: (position: Int) -> Unit, position: Int) {
 
-            if (cart.WHOLE_SALE_PRICE == -1){
+            if (cart.WHOLE_SALE_PRICE == -1F){
                 layoutCart.visibility = View.GONE
-            }else{
+            }else if (cart.WHOLE_SALE_PRICE != -1F){
                 layoutCart.visibility = View.VISIBLE
                 discountPrice.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE)
                 discountPriceLine.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE)
@@ -51,10 +52,10 @@ class CartRecyclerViewAdapter(private val context: Context, private val items: L
 
             name.text = cart.NAME
             price.text = currencyFormat(getLanguage(context), getCountry(context))
-                .format((if (cart.WHOLE_SALE_PRICE == -1) cart.PRICE!! else cart.WHOLE_SALE_PRICE!!) )
+                .format((if (cart.WHOLE_SALE_PRICE == -1F) cart.PRICE!! else cart.WHOLE_SALE_PRICE!!) )
             totalPrice.text = currencyFormat(getLanguage(context), getCountry(context))
-                .format((if (cart.WHOLE_SALE_PRICE == -1) cart.PRICE!! else cart.WHOLE_SALE_PRICE!!) * cart.Qty!!)
-            qty.text = "${cart.Qty}x"
+                .format((if (cart.WHOLE_SALE_PRICE == -1F) cart.PRICE!! else cart.WHOLE_SALE_PRICE!!) * cart.Qty!!)
+            qty.text = "${if(isInt(cart.Qty!!)) cart.Qty!!.toInt() else cart.Qty}x"
 
             itemView.onClick {
                 itemView.startAnimation(normalClickAnimation())

@@ -50,7 +50,7 @@ class ManageProductManageStockActivity : AppCompatActivity(), MainView {
 
             when {
                 etManageProductManageStockQty.text.toString() == "" -> toast("Quantity Must be Fill !!")
-                etManageProductManageStockQty.text.toString().toInt() <= 0 -> toast("Quantity Must be Greater than Zero !!")
+                etManageProductManageStockQty.text.toString().toFloat() <= 0F -> toast("Quantity Must be Greater than Zero !!")
                 etManageProductManageStockNote.text.toString() == "" -> showAlert()
                 else -> save()
             }
@@ -64,7 +64,7 @@ class ManageProductManageStockActivity : AppCompatActivity(), MainView {
 
             when {
                 etManageProductManageStockQty.text.toString() == "" -> toast("Quantity Must be Fill !!")
-                etManageProductManageStockQty.text.toString().toInt() <= 0 -> toast("Quantity Must be Greater than Zero !!")
+                etManageProductManageStockQty.text.toString().toFloat() <= 0F -> toast("Quantity Must be Greater than Zero !!")
                 etManageProductManageStockNote.text.toString() == "" -> showAlert()
                 else -> save()
             }
@@ -101,15 +101,15 @@ class ManageProductManageStockActivity : AppCompatActivity(), MainView {
         val note = etManageProductManageStockNote.text.toString()
 
         if (action == 1)
-            product.STOCK = product.STOCK!! + qty.toInt()
+            product.STOCK = product.STOCK!! + qty.toFloat()
         else if (action == 2)
-            product.STOCK = product.STOCK!! - qty.toInt()
+            product.STOCK = product.STOCK!! - qty.toFloat()
 
         val status = if(action == 1) EStatusStock.INBOUND.toString() else EStatusStock.MISSING.toString()
 
         presenter.saveProduct(product, productKey)
 
-        presenter.addStockMovement(StockMovement(qty.toInt(),status,EStatusCode.DONE.toString(),
+        presenter.addStockMovement(StockMovement(qty.toFloat(),status,EStatusCode.DONE.toString(),
             prodCode,productKey,0,note,
             dateFormat().format(Date()),dateFormat().format(Date()), mAuth.currentUser?.uid
         ))

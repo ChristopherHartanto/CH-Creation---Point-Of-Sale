@@ -90,7 +90,7 @@ class DetailTransactionActivity : AppCompatActivity(), MainView {
         val discount = transItems[transPosition].DISCOUNT
         val note = transItems[transPosition].NOTE
 
-        if (transItems[transPosition].TOTAL_OUTSTANDING == 0 &&
+        if (transItems[transPosition].TOTAL_OUTSTANDING == 0F &&
             transItems[transPosition].STATUS_CODE != EStatusCode.CANCEL.toString()){
             tvDetailTransactionStatus.text = "Status : Done"
             btnDetailTransactionConfirmPayment.visibility = View.GONE
@@ -115,7 +115,7 @@ class DetailTransactionActivity : AppCompatActivity(), MainView {
         tvDetailTransactionTax.text = currencyFormat(getLanguage(this),
             getCountry(this)).format(transItems[transPosition].TAX)
 
-        if (transItems[transPosition].TAX == 0 && transItems[transPosition].DISCOUNT == 0)
+        if (transItems[transPosition].TAX == 0F && transItems[transPosition].DISCOUNT == 0F)
             layoutDetailTransactionSubTotal.visibility = View.GONE
         else
             tvDetailTransactionSubTotal.text = currencyFormat(getLanguage(this),

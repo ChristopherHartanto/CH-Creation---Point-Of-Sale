@@ -200,13 +200,13 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         val desc = etManageProductDescription.text.toString()
         val prodCode = etManageProductCode.text.toString()
 
-        var price = 0
+        var price = 0F
         if (etManageProductPrice.text.toString() != "")
-            price = etManageProductPrice.text.toString().toInt()
+            price = etManageProductPrice.text.toString().toFloat()
 
-        var cost = 0
+        var cost = 0F
         if (etManageProductCost.text.toString() != "")
-            cost =  etManageProductCost.text.toString().toInt()
+            cost =  etManageProductCost.text.toString().toFloat()
 
         var image = product.IMAGE
         if (imageUri != null)

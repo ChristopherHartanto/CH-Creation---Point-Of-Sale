@@ -35,6 +35,7 @@ import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.support.v4.onRefresh
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.yesButton
+import java.util.*
 
 /**
  * A simple [Fragment] subclass.
@@ -115,9 +116,11 @@ class MerchantListFragment : Fragment(), MainView {
 
         fbMerchantList.onClick {
             fbMerchantList.startAnimation(normalClickAnimation())
-            if (getMerchantMemberStatus(ctx) == EMerchantMemberStatus.FREE_TRIAL.toString()){
+            val currentDate = dateFormat().format(Date())
+            if (getMerchantMemberStatus(ctx) == EMerchantMemberStatus.FREE_TRIAL.toString()
+                || getMerchantMemberDeadline(ctx) == ""){
                 alert ("Upgrade to Premium for Unlimited Merchant"){
-                    title = "Oops!"
+                    title = "Premium Feature!"
                     yesButton {
                         sendEmail("Upgrade Premium",
                             "Merchant: ${getMerchantName(ctx)}",ctx)
@@ -125,8 +128,18 @@ class MerchantListFragment : Fragment(), MainView {
 
                     noButton {  }
                 }.show()
-            }
-            else{
+            }else if (compareDate(getMerchantMemberDeadline(ctx),currentDate) == 2){
+                alert ("Your Premium Member Has Ended, Do You Want to Extend?"){
+                    title = "Premium End"
+                    yesButton {
+                        sendEmail("Extend Premium",
+                            "Merchant: ${getMerchantName(ctx)}",ctx)
+                    }
+
+                    noButton {  }
+                }.show()
+                endLoading()
+            } else{
                 alert ("You Will Logout From This Merchant Before Create A New One,Continue?"){
                     title = "Create New Merchant"
                     yesButton {

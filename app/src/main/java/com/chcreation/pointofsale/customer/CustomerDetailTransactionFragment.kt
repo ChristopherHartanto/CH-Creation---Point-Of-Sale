@@ -35,7 +35,7 @@ class CustomerDetailTransactionFragment : Fragment(), MainView {
     private lateinit var mDatabase : DatabaseReference
     private var enquiryItems: MutableList<Enquiry> = mutableListOf()
     private var totalTransaction = 0
-    private var totalGrossEarning = 0
+    private var totalGrossEarning = 0F
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

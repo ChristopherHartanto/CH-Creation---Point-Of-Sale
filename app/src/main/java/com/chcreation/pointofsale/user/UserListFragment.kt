@@ -34,6 +34,7 @@ import org.jetbrains.anko.noButton
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.*
 import org.jetbrains.anko.yesButton
+import java.util.*
 
 class UserListFragment : Fragment(), MainView{
 
@@ -85,12 +86,25 @@ class UserListFragment : Fragment(), MainView{
         }
 
         fbUserList.onClick {
+            val currentDate = dateFormat().format(Date())
+
             if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString())
                 toast("Only Manager Can Invite User")
             else{
-                if (userGroups.size > 2){
+                if (userGroups.size > 2
+                    || getMerchantMemberDeadline(ctx) == ""){
                     alert ("Upgrade to Premium for Unlimited User"){
-                        title = "Oops!"
+                        title = "Premium Feature!"
+                        yesButton {
+                            sendEmail("Upgrade Premium",
+                                "Merchant: ${getMerchantName(ctx)}",ctx)
+                        }
+
+                        noButton {  }
+                    }.show()
+                }else if (getMerchantMemberDeadline(ctx) == ""){
+                    alert ("Upgrade to Premium for Unlimited User"){
+                        title = "Premium Feature!"
                         yesButton {
                             sendEmail("Upgrade Premium",
                                 "Merchant: ${getMerchantName(ctx)}",ctx)
@@ -99,7 +113,17 @@ class UserListFragment : Fragment(), MainView{
                         noButton {  }
                     }.show()
                 }
-                else if (userGroups.size > 0)
+                else if (compareDate(getMerchantMemberDeadline(ctx),currentDate) == 2){
+                    alert ("Your Premium Member Has Ended, Do You Want to Extend?"){
+                        title = "Premium End"
+                        yesButton {
+                            sendEmail("Extend Premium",
+                                "Merchant: ${getMerchantName(ctx)}",ctx)
+                        }
+
+                        noButton {  }
+                    }.show()
+                } else if (userGroups.size > 0)
                     startActivity<AddUserActivity>()
             }
         }

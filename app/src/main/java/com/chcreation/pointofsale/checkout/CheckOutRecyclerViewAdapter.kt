@@ -53,6 +53,7 @@ class CheckOutRecyclerViewAdapter(private val context: Context,
         private val tvRowCheckOutDiscount = view.findViewById<TextView>(R.id.tvRowCheckOutDiscount)
         private val tvRowCheckOutDiscountLine = view.findViewById<TextView>(R.id.tvRowCheckOutDiscountLine)
         private val progressBar = view.findViewById<ProgressBar>(R.id.pbRowCheckOut)
+        private val layoutRowCheckOut = view.findViewById<FrameLayout>(R.id.layoutRowCheckOut)
 
         fun bindItem(context: Context,cart: Cart, image: String, listener: (type: Int,position: Int) -> Unit, position: Int) {
 
@@ -88,14 +89,14 @@ class CheckOutRecyclerViewAdapter(private val context: Context,
 
             name.text = cart.NAME
             price.text = currencyFormat(getLanguage(context), getCountry(context))
-                .format(if (cart.WHOLE_SALE_PRICE == -1) cart.PRICE else cart.WHOLE_SALE_PRICE)
+                .format(if (cart.WHOLE_SALE_PRICE == -1F) cart.PRICE else cart.WHOLE_SALE_PRICE)
             totalPrice.text = currencyFormat(getLanguage(context), getCountry(context))
-                .format((if (cart.WHOLE_SALE_PRICE == -1) cart.PRICE else cart.WHOLE_SALE_PRICE!!)!! * cart.Qty!!)
+                .format((if (cart.WHOLE_SALE_PRICE == -1F) cart.PRICE else cart.WHOLE_SALE_PRICE!!)!! * cart.Qty!!)
             qty.text = cart.Qty.toString()
 
             tvRowCheckOutDiscount.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE)
             tvRowCheckOutDiscountLine.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE)
-            if (cart.WHOLE_SALE_PRICE == -1){
+            if (cart.WHOLE_SALE_PRICE == -1F){
                 layoutDiscount.visibility = View.GONE
             }else{
                 layoutDiscount.visibility = View.VISIBLE
@@ -109,6 +110,11 @@ class CheckOutRecyclerViewAdapter(private val context: Context,
             add.onClick {
                 add.startAnimation(normalClickAnimation())
                 listener(2,position)
+            }
+
+            layoutRowCheckOut.onClick {
+                layoutRowCheckOut.startAnimation(normalClickAnimation())
+                listener(3,position)
             }
         }
 

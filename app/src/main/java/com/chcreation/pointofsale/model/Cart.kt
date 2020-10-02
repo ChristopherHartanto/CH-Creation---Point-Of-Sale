@@ -5,7 +5,7 @@ data class Cart(
     var PROD_KEY: Int? = 0,
     var PROD_CODE: String? = "",
     var MANAGE_STOCK : Boolean? = false,
-    var PRICE: Int? = 0,
-    var Qty: Int? = 0,
-    var WHOLE_SALE_PRICE: Int? = -1
+    var PRICE: Float? = 0F,
+    var Qty: Float? = 0F,
+    var WHOLE_SALE_PRICE: Float? = -1F
 )

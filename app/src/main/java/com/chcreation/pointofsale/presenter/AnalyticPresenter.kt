@@ -12,10 +12,13 @@ import com.google.firebase.database.ValueEventListener
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference, private val context: Context){
 
@@ -47,6 +50,65 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
         }catch (e: Exception){
             showError(context,e.message.toString())
             e.printStackTrace()
+        }
+    }
+
+    suspend fun getProductName(prodCode: String) : String?{
+        return suspendCoroutine {ctx->
+            try{
+                postListener = object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                        database.removeEventListener(this)
+                        ctx.resume("")
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot) {
+                        if (p0.exists())
+                            for(data in p0.children){
+                                ctx.resume(data.getValue(Product::class.java)?.NAME)
+                            }
+                        else
+                            ctx.resume("")
+                    }
+
+                }
+                database.child(ETable.PRODUCT.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchantCode(context))
+                    .orderByChild(EProduct.PROD_CODE.toString())
+                    .equalTo(prodCode)
+                    .addListenerForSingleValueEvent(postListener)
+            }catch (e: Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+                ctx.resume("")
+            }
+        }
+    }
+
+    suspend fun retrieveStockMovements() : DataSnapshot?{
+        return suspendCoroutine {ctx->
+            try{
+                postListener = object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                        database.removeEventListener(this)
+                        ctx.resume(null)
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot) {
+                        ctx.resume(p0)
+                    }
+
+                }
+                database.child(ETable.STOCK_MOVEMENT.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchantCode(context))
+                    .addListenerForSingleValueEvent(postListener)
+            }catch (e: Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+                ctx.resume(null)
+            }
         }
     }
 
@@ -90,6 +152,106 @@ class AnalyticPresenter(private val view: MainView, private val auth: FirebaseAu
         }catch (e: Exception){
             showError(context,e.message.toString())
             e.printStackTrace()
+        }
+    }
+
+    suspend fun getUserName(userCode: String) : String?{
+        return suspendCoroutine { cont->
+            try{
+                postListener = object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                        database.removeEventListener(this)
+                        cont.resume("")
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot) {
+                        if (p0.exists()){
+                            val item = p0.getValue(User::class.java)
+                            if (item != null) {
+                                item.NAME?.let { cont.resume(it) }
+                            }else
+                                cont.resume("")
+                        }else
+                            cont.resume("")
+                    }
+
+                }
+                database.child(ETable.USER.toString())
+                    .child(userCode)
+                    .addListenerForSingleValueEvent(postListener)
+            }catch (e: Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+                cont.resume("")
+            }
+        }
+    }
+
+    fun retrieveCustomer(custCode: String, callBack: (name: String) -> Unit){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                if (p0.exists()){
+                    for (data in p0.children){
+                        val item = data.getValue(Customer::class.java)
+                        callBack(item!!.NAME.toString())
+                    }
+                }
+            }
+
+        }
+        database.child(ETable.CUSTOMER.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchantCode(context))
+            .orderByChild(ECustomer.CODE.toString())
+            .equalTo(custCode)
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    fun retrieveCustomer(callBack: (data: DataSnapshot) -> Unit){
+        postListener = object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+                database.removeEventListener(this)
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                callBack(p0)
+            }
+
+        }
+        database.child(ETable.CUSTOMER.toString())
+            .child(getMerchantCredential(context))
+            .child(getMerchantCode(context))
+            .addListenerForSingleValueEvent(postListener)
+    }
+
+    suspend fun retrieveTransactionListPayments(transactionCode:Int) : DataSnapshot?{
+        return suspendCoroutine {cont ->
+            try{
+                postListener = object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                        database.removeEventListener(this)
+                        cont.resume(null)
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot) {
+                        cont.resume(p0)
+                    }
+
+                }
+                database.child(ETable.PAYMENT.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchantCode(context))
+                    .child(transactionCode.toString())
+                    .addListenerForSingleValueEvent(postListener)
+            }catch (e: Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+                cont.resume(null)
+            }
         }
     }
 

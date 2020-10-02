@@ -11,12 +11,12 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 class DiscountActivity : AppCompatActivity() {
 
     companion object{
-        var discount = 0
-        var tax = 0
+        var discount = 0F
+        var tax = 0F
     }
 
-    private var percentageDiscount = 0
-    private var cashDiscount = 0
+    private var percentageDiscount = 0F
+    private var cashDiscount = 0F
     private var action = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,19 +41,19 @@ class DiscountActivity : AppCompatActivity() {
         etDiscountCash.doOnTextChanged { text, start, before, count ->
             if (etDiscountCash.hasFocus() && etDiscountCash.text.toString() != ""){
                 if (action == 1){
-                    discount = text.toString().toInt()
+                    discount = text.toString().toFloat()
                     if (discount > totalPrice){
                         discount = totalPrice
                         etDiscountCash.setText(totalPrice.toString())
                     }
 
-                    percentageDiscount =  discount * 100 / totalPrice
+                    percentageDiscount =  discount * 100F / totalPrice
 
                     etDiscountPercentage.setText(percentageDiscount.toString())
                     tvDiscountNewTotalContent.text = currencyFormat( getLanguage(this),
                         getCountry(this)).format(totalPrice - discount)
                 }else if(action == 2){
-                    tax = text.toString().toInt()
+                    tax = text.toString().toFloat()
                     if (tax > totalPrice){
                         tax = totalPrice
                         etDiscountCash.setText(totalPrice.toString())
@@ -98,7 +98,7 @@ class DiscountActivity : AppCompatActivity() {
                 else if(action == 2)
                     tax = (totalPrice * value / 100)
 
-                cashDiscount = totalPrice * value / 100
+                cashDiscount = totalPrice * value / 100F
                 etDiscountCash.setText(cashDiscount.toString())
 
                 if (action == 1)

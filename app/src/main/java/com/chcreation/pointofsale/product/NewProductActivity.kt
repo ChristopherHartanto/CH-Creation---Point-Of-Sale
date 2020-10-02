@@ -139,9 +139,12 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
             btnProductSave.startAnimation(normalClickAnimation())
 
             presenter.checkProductSize(){
-                if (it > 8 && getMerchantMemberStatus(this@NewProductActivity) == EMerchantMemberStatus.FREE_TRIAL.toString()){
+                val currentDate = dateFormat().format(Date())
+                if (it > 8
+                    && getMerchantMemberStatus(this@NewProductActivity) == EMerchantMemberStatus.FREE_TRIAL.toString()
+                    || getMerchantMemberDeadline(this@NewProductActivity) == ""){
                     alert ("Upgrade to Premium for Unlimited Product"){
-                        title = "Oops!"
+                        title = "Premium Feature!"
                         yesButton {
                             sendEmail("Upgrade Premium",
                                 "Merchant: ${getMerchantName(this@NewProductActivity)}",this@NewProductActivity)
@@ -150,7 +153,18 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
                         noButton {  }
                     }.show()
                     endLoading()
-                }else{
+                } else if (compareDate(getMerchantMemberDeadline(this@NewProductActivity),currentDate) == 2){
+                    alert ("Your Premium Member Has Ended, Do You Want to Extend?"){
+                        title = "Premium End"
+                        yesButton {
+                            sendEmail("Extend Premium",
+                                "Merchant: ${getMerchantName(this@NewProductActivity)}",this@NewProductActivity)
+                        }
+
+                        noButton {  }
+                    }.show()
+                    endLoading()
+                } else{
                     if (positionSpinner == 0){
                         endLoading()
                         toast("Please Select Category")
@@ -231,20 +245,20 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
         val name = etProductName.text.toString()
         val desc = etProductDescription.text.toString()
 
-        var price = 0
+        var price = 0F
         if (etProductPrice.text.toString() != "")
-            price = etProductPrice.text.toString().toInt()
+            price = etProductPrice.text.toString().toFloat()
 
-        var cost = 0
+        var cost = 0F
         if (etProductCost.text.toString() != "")
-            cost = etProductCost.text.toString().toInt()
+            cost = etProductCost.text.toString().toFloat()
 
-        var stock = 0
+        var stock = 0F
         if (etProductStock.text.toString() != "")
-            stock = etProductStock.text.toString().toInt()
+            stock = etProductStock.text.toString().toFloat()
 
         if (!swProduct.isChecked)
-            stock = 0
+            stock = 0F
 
         val code = etProductCode.text.toString()
         val uomCode = "Unit"

@@ -79,7 +79,7 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
                 getLanguage(context),
                 getCountry(context)
             ).format(product.PRICE)
-            stock.text = "${product.STOCK} qty"
+            stock.text = "${if(isInt(product.STOCK!!)) product.STOCK!!.toInt() else product.STOCK } qty"
 
             if (product.STOCK!! <= 0 && product.MANAGE_STOCK)
                 stock.textColorResource = R.color.colorRed

@@ -4,11 +4,11 @@ import com.chcreation.pointofsale.EStatusCode
 
 data class Product(
     var NAME: String? = "No Data",
-    var PRICE: Int? = 0,
+    var PRICE: Float? = 0F,
     var DESC: String? = "No Data",
-    var COST: Int? = 0,
+    var COST: Float? = 0F,
     var MANAGE_STOCK: Boolean = false,
-    var STOCK: Int? = 0,
+    var STOCK: Float? = 0F,
     var IMAGE: String? = "",
     var PROD_CODE: String? = "",
     var UOM_CODE: String? = "Unit",

@@ -61,7 +61,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:id="@+id/etManageProductPrice"
-                            android:inputType="number"
+                            android:inputType="numberDecimal"
                             android:hint="Selling Price Per Item"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -130,7 +130,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:id="@+id/etManageProductCost"
-                            android:inputType="number"
+                            android:inputType="numberDecimal"
                             android:hint="Buying Price"/>
                     </com.google.android.material.textfield.TextInputLayout>
 

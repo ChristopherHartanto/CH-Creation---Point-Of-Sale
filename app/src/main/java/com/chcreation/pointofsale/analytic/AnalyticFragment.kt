@@ -1,15 +1,19 @@
 package com.chcreation.pointofsale.analytic
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.analytic.AnalyticFilterActivity.Companion.monthItems
-import com.chcreation.pointofsale.model.Cart
-import com.chcreation.pointofsale.model.Product
-import com.chcreation.pointofsale.model.Transaction
+import com.chcreation.pointofsale.model.*
 import com.chcreation.pointofsale.presenter.AnalyticPresenter
 import com.chcreation.pointofsale.view.MainView
 import com.github.mikephil.charting.components.XAxis
@@ -26,12 +30,18 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.fragment_analytic.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.noButton
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.*
 import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.onRefresh
-import org.jetbrains.anko.support.v4.startActivity
+import org.jetbrains.anko.toast
+import org.jetbrains.anko.yesButton
+import java.io.File
+import java.io.FileOutputStream
+import java.time.Year
 import java.util.*
 
 
@@ -45,11 +55,14 @@ class AnalyticFragment : Fragment(), MainView {
     private lateinit var presenter: AnalyticPresenter
     private var products : MutableList<Product> = mutableListOf()
     private var transactions : MutableList<Transaction> = mutableListOf()
+    private var transactionCodeItems : MutableList<Int> = mutableListOf()
     private var boughtProducts : MutableList<Product> = mutableListOf()
-    private var totalProfit = 0
-    private var totalGross = 0
-    private var todayProfit = 0
-    private var todayGross = 0
+    private var totalProfit = 0F
+    private var totalGross = 0F
+    private var todayProfit = 0F
+    private var todayGross = 0F
+    private lateinit var jobReport : Job
+    private lateinit var printCallback: GenerateReport
 
     companion object{
         var month = 99
@@ -75,14 +88,64 @@ class AnalyticFragment : Fragment(), MainView {
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = AnalyticPresenter(this,mAuth,mDatabase,ctx)
+        printCallback = ctx as GenerateReport
 
         cvAnalyticFilter.onClick {
             startActivity<AnalyticFilterActivity>()
         }
+
+        tvAnalyticGenerateReport.onClick {
+            val currentDate = dateFormat().format(Date())
+            tvAnalyticGenerateReport.startAnimation(normalClickAnimation())
+            if (getMerchantMemberDeadline(ctx) == ""){
+                alert ("Upgrade to Premium for Generate Report"){
+                    title = "Premium Feature!"
+                    yesButton {
+                        sendEmail("Upgrade Premium",
+                            "Merchant: ${getMerchantName(ctx)}",ctx)
+                    }
+
+                    noButton {  }
+                }.show()
+            }else if (compareDate(getMerchantMemberDeadline(ctx),currentDate) == 2){
+                alert ("Your Premium Member Has Ended, Do You Want to Extend?"){
+                    title = "Premium End"
+                    yesButton {
+                        sendEmail("Extend Premium",
+                            "Merchant: ${getMerchantName(ctx)}",ctx)
+                    }
+
+                    noButton {  }
+                }.show()
+            }else
+                cvAnalyticSelectReport.visibility = View.VISIBLE
+        }
+
+        btnReceiptSelectReportClose.onClick{
+            btnReceiptSelectReportClose.startAnimation(normalClickAnimation())
+            cvAnalyticSelectReport.visibility = View.GONE
+        }
+
+        layoutReceiptTransReport.onClick {
+            layoutReceiptTransReport.startAnimation(normalClickAnimation())
+            cvAnalyticSelectReport.visibility = View.GONE
+            printCallback.printTransactionReport(transactions,transactionCodeItems, month, year, userCode)
+        }
+
+        layoutReceiptInventoryReport.onClick {
+            layoutReceiptInventoryReport.startAnimation(normalClickAnimation())
+            cvAnalyticSelectReport.visibility = View.GONE
+            printCallback.printInventoryReport(month, year, userCode)
+        }
+
     }
 
     override fun onStart() {
         super.onStart()
+
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         if (month != 99 && year != 99){
             tvAnalyticFilterDate.text = "${monthName} - ${year}"
@@ -101,6 +164,7 @@ class AnalyticFragment : Fragment(), MainView {
 
     }
 
+
     private fun initData(){
         if (getMerchantUserGroup(ctx) == EUserGroup.WAITER.toString()){
             hideProgressBar()
@@ -112,7 +176,6 @@ class AnalyticFragment : Fragment(), MainView {
             clearData()
             GlobalScope.launch {
                 presenter.retrieveProducts()
-                presenter.retrieveTransactions()
             }
         }
     }
@@ -136,6 +199,18 @@ class AnalyticFragment : Fragment(), MainView {
         var thirdGrossWeek = 0F
         var forthGrossWeek = 0F
 
+        var totalSale = 0
+        var totalRevenue = 0F
+        var avgRevenue = 0F
+        var totalTax = 0F
+        var totalDiscount = 0F
+        var totalProfit = 0F
+        var topRevenue = 0F
+        var avgPerSale = 0F
+        var countItems = 0F
+        var cogs = 0F
+        var topCustomer = arrayListOf<String>()
+
         for (date in 1..31){
             for (data in transactions){
 
@@ -144,26 +219,47 @@ class AnalyticFragment : Fragment(), MainView {
                 if (((getMonth(data.CREATED_DATE.toString()) == getCurrentMonth() && month == 99) || (getMonth(data.CREATED_DATE.toString()) == month-1))
                     && getDateOfMonth(data.CREATED_DATE.toString()) == date
                     && ((getYear(data.CREATED_DATE.toString()) == getCurrentYear() && year == 99) || (getYear(data.CREATED_DATE.toString()) == year))
-                    && (data.CREATED_BY.toString() == userCode || userCode == "")){
+                    && (data.CREATED_BY.toString() == userCode || userCode == "")
+                    && data.STATUS_CODE != EStatusCode.CANCEL.toString()){
                     val gson = Gson()
                     val arrayCartType = object : TypeToken<MutableList<Cart>>() {}.type
                     val cartItems : MutableList<Cart> = gson.fromJson(data.DETAIL,arrayCartType)
 
+                    if (data.CUST_CODE != "") topCustomer.add(data.CUST_CODE.toString())
+
                     for (cart in cartItems){
                         val product = products.filter { it.PROD_CODE == cart.PROD_CODE }
                         if (!product.isNullOrEmpty()){
+                            boughtProducts.add(product[0]) // for top products
 //                            boughtProducts.add(product[0])
 //                            totalPrice += product[0].PRICE!! * cart.Qty!!
 //                            totalCost += product[0].COST!! * cart.Qty!!
-                            val price = (if (cart.WHOLE_SALE_PRICE != -1) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!)
+                            cogs += (product[0].COST!! * cart.Qty!!).toFloat()
+                            val price = (if (cart.WHOLE_SALE_PRICE != -1F) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!)
                             profit += (price * cart.Qty!!) - (product[0].COST!! * cart.Qty!!)
                             gross += (price * cart.Qty!!)
+
+                            countItems++
                         }
                     }
 
                     // total pending
                     profit -= data.TOTAL_OUTSTANDING!!
                     gross -= data.TOTAL_OUTSTANDING!!
+
+
+                    //region more analytic
+
+                    if (topRevenue < gross)
+                        topRevenue = gross
+
+                    totalSale++
+                    totalRevenue += gross
+                    totalProfit += profit
+                    totalTax += data.TAX!!
+                    totalDiscount += data.DISCOUNT!!
+
+                    //end region
 
                     // filter
                     if (isDiscount){
@@ -195,6 +291,26 @@ class AnalyticFragment : Fragment(), MainView {
                 }
             }
         }
+
+        avgRevenue = totalRevenue / totalSale
+        avgPerSale = countItems / totalSale
+        tvAnalyticTotalSale.text = totalSale.toString()
+        tvAnalyticRevenue.text = currencyFormat(getLanguage(ctx), getCountry(ctx)).format(totalRevenue)
+        tvAnalyticProfit.text = currencyFormat(getLanguage(ctx), getCountry(ctx)).format(totalProfit)
+        tvAnalyticAvgRevenue.text = currencyFormat(getLanguage(ctx), getCountry(ctx)).format(avgRevenue)
+        tvAnalyticTopRevenue.text = currencyFormat(getLanguage(ctx), getCountry(ctx)).format(topRevenue)
+        tvAnalyticSalesDiscount.text = currencyFormat(getLanguage(ctx), getCountry(ctx)).format(totalDiscount)
+        tvAnalyticSalesTax.text = currencyFormat(getLanguage(ctx), getCountry(ctx)).format(totalTax)
+        tvAnalyticAvgItemsPerSale.text = String.format("%.2f",avgPerSale)
+        tvAnalyticGpm.text = String.format("%.1f",((totalRevenue - cogs - (totalDiscount - totalTax)) / totalRevenue * 100)) +"%"
+        val groupCustomer = topCustomer.groupingBy { it }.eachCount().maxBy { it.value }
+        if (groupCustomer != null) {
+            presenter.retrieveCustomer(groupCustomer.key){
+                tvAnalyticTopCustomer.text = it
+            }
+        }else
+            tvAnalyticTopCustomer.text = "-"
+
 
         profitList.add(BarEntry(1F, firstProfitWeek))
         profitList.add(BarEntry(2F, secondProfitWeek))
@@ -264,7 +380,6 @@ class AnalyticFragment : Fragment(), MainView {
         pbAnalyticTodayIncome.visibility = View.GONE
         pbAnalyticTotalGross.visibility = View.GONE
         pbAnalyticTotalProfit.visibility = View.GONE
-        pbAnalyticMostPurchasedProduct.visibility = View.GONE
 
         tvAnalyticTodayIncome.visibility = View.VISIBLE
         tvAnalyticTotalGross.visibility = View.VISIBLE
@@ -287,10 +402,10 @@ class AnalyticFragment : Fragment(), MainView {
         products.clear()
         transactions.clear()
         boughtProducts.clear()
-        totalProfit = 0
-        totalGross = 0
-        todayGross = 0
-        todayProfit = 0
+        totalProfit = 0F
+        totalGross = 0F
+        todayGross = 0F
+        todayProfit = 0F
     }
 
 
@@ -301,7 +416,13 @@ class AnalyticFragment : Fragment(), MainView {
         var todayCost = 0
         var todayPending = 0
 
-        for (data in transactions){
+        val transactionYearly = arrayListOf<Transaction>()
+            transactions.forEach {
+                if (getYear(it.CREATED_DATE.toString()) == getCurrentYear()
+                    && it.STATUS_CODE != EStatusCode.CANCEL.toString())
+                    transactionYearly.add(it)}
+
+        for (data in transactionYearly){
             val gson = Gson()
             val arrayCartType = object : TypeToken<MutableList<Cart>>() {}.type
             val cartItems : MutableList<Cart> = gson.fromJson(data.DETAIL,arrayCartType)
@@ -312,9 +433,8 @@ class AnalyticFragment : Fragment(), MainView {
             for (cart in cartItems){
                 val product = products.filter { it.PROD_CODE == cart.PROD_CODE }
                 if (!product.isNullOrEmpty()){
-                    boughtProducts.add(product[0])
-                    totalProfit += (if (cart.WHOLE_SALE_PRICE != -1) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!! - (product[0].COST!! * cart.Qty!!)
-                    totalGross += (if (cart.WHOLE_SALE_PRICE != -1) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!!
+                    totalProfit += (if (cart.WHOLE_SALE_PRICE != -1F) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!! - (product[0].COST!!.toInt() * cart.Qty!!.toInt())
+                    totalGross += (if (cart.WHOLE_SALE_PRICE != -1F) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!!
 
                 }
             }
@@ -336,8 +456,8 @@ class AnalyticFragment : Fragment(), MainView {
                 val product = products.filter { it.PROD_CODE == cart.PROD_CODE }
                 if (!product.isNullOrEmpty()){
                     if (todayDate == transactionDate){
-                        todayProfit += (if (cart.WHOLE_SALE_PRICE != -1) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!! - (product[0].COST!! * cart.Qty!!)
-                        todayGross += (if (cart.WHOLE_SALE_PRICE != -1) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!!
+                        todayProfit += (if (cart.WHOLE_SALE_PRICE != -1F) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!! - (product[0].COST!!.toInt() * cart.Qty!!.toInt())
+                        todayGross += (if (cart.WHOLE_SALE_PRICE != -1F) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!) * cart.Qty!!
 
                     }
                 }
@@ -367,6 +487,12 @@ class AnalyticFragment : Fragment(), MainView {
         tvAnalyticTotalProfit.text = currencyFormat(getLanguage(ctx), getCountry(ctx)).format(totalProfit)
         tvAnalyticTodayIncome.text = currencyFormat(getLanguage(ctx), getCountry(ctx)).format(todayGross)
 
+        initChart()
+        calculateMostProduct()
+        srAnalytic.isRefreshing = false
+    }
+
+    private fun calculateMostProduct(){
         val sortBoughtProducts = boughtProducts.sortedBy { it.PROD_CODE }
         var mostBoughtProduct = ""
         var count = 1
@@ -389,10 +515,9 @@ class AnalyticFragment : Fragment(), MainView {
             }
         }
         tvAnalyticMostPurchasedProduct.text = mostBoughtProduct
-
-        initChart()
-        srAnalytic.isRefreshing = false
     }
+
+
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {
         if (isVisible && isResumed){
@@ -406,13 +531,17 @@ class AnalyticFragment : Fragment(), MainView {
                         }
                     }
                 }
+                GlobalScope.launch {
+                    presenter.retrieveTransactions()
+                }
             }
             if (response == EMessageResult.FETCH_TRANS_SUCCESS.toString()){
                 if (dataSnapshot.exists()){
                     for (data in dataSnapshot.children){
                         val item = data.getValue(Transaction::class.java)
 
-                        if (item != null && item.STATUS_CODE != EStatusCode.CANCEL.toString()) {
+                        if (item != null) {
+                            transactionCodeItems.add(data.key!!.toInt())
                             transactions.add(item)
                         }
                     }
@@ -425,4 +554,16 @@ class AnalyticFragment : Fragment(), MainView {
     override fun response(message: String) {
     }
 
+}
+
+interface GenerateReport{
+    fun printTransactionReport(transactionList: MutableList<Transaction>,
+                               transactionCodeItems: MutableList<Int>,
+                               month: Int,
+                               year: Int,
+                               userCode: String)
+    fun printInventoryReport(
+        month: Int,
+        year: Int,
+        userCode: String)
 }

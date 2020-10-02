@@ -338,7 +338,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
         }
     }
 
-    fun savePendingPayment(transactionCode: Int,payment: Payment, newTotalOutstanding: Int, transaction: Transaction){
+    fun savePendingPayment(transactionCode: Int,payment: Payment, newTotalOutstanding: Float, transaction: Transaction){
         try{
             postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
@@ -393,7 +393,7 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
         }
     }
 
-    fun updateTotalOutstanding(transactionCode: Int, newTotalOutstanding: Int, transaction: Transaction){
+    fun updateTotalOutstanding(transactionCode: Int, newTotalOutstanding: Float, transaction: Transaction){
         try{
             var status = EStatusCode.DONE.toString()
             if (newTotalOutstanding > 0)

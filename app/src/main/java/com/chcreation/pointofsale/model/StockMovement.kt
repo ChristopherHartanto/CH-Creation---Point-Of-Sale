@@ -1,7 +1,7 @@
 package com.chcreation.pointofsale.model
 
 data class StockMovement(
-    var QTY: Int? = 0,
+    var QTY: Float? = 0F,
     var STATUS: String? = "",
     var STATUS_CODE: String? = "",
     var PROD_CODE: String? = "",

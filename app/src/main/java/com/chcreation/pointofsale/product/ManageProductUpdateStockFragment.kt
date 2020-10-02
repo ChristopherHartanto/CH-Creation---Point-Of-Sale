@@ -5,11 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.chcreation.pointofsale.EUserGroup
+import com.chcreation.pointofsale.*
 
-import com.chcreation.pointofsale.R
-import com.chcreation.pointofsale.getMerchantUserGroup
-import com.chcreation.pointofsale.normalClickAnimation
 import com.chcreation.pointofsale.product.ManageProductUpdateProductFragment.Companion.product
 import kotlinx.android.synthetic.main.fragment_manage_product_update_stock.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -39,7 +36,9 @@ class ManageProductUpdateStockFragment : Fragment() {
             //btnManageProductManageStock.isEnabled = false
         }
         else{
-            tvManageProductStockMovementStock.text = product.STOCK.toString()
+            tvMProdResCapital.text = currencyFormat(getLanguage(ctx),
+                getCountry(ctx)).format((product.STOCK!! * product.COST!!))
+            tvManageProductStockMovementStock.text = (if (isInt(product.STOCK!!)) product.STOCK!!.toInt() else product.STOCK).toString()
             //layoutManageProductStock.alpha = 1F
             //btnManageProductStockMovement.isEnabled = true
             //btnManageProductManageStock.isEnabled = true
