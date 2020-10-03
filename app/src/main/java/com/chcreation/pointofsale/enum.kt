@@ -299,7 +299,8 @@ enum class ECustomReceipt{
 enum class ESort{
     PROD_NAME,
     PROD_CODE,
-    PROD_PRICE
+    PROD_PRICE,
+    NEWEST
 }
 
 enum class EMonth(var value:Int){

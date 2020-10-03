@@ -219,7 +219,10 @@ class SignInActivity : AppCompatActivity(), MainView {
         if (message == EMessageResult.SUCCESS.toString()){
             startActivity<MerchantActivity>()
             finish()
-        }else
+        }else{
             toast(message)
+            pbSignIn.visibility = View.GONE
+            btnSignIn.isEnabled = true
+        }
     }
 }

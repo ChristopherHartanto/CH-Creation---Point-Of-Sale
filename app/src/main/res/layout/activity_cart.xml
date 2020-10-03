@@ -149,7 +149,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:layout_height="120dp"
                 android:layout_margin="5dp"
                 android:layout_gravity="center">
 
@@ -161,7 +161,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:textSize="20sp"
+                        android:textSize="24sp"
                         android:textColor="@color/colorWhite"
                         android:id="@+id/tvCartFirstName"
                         android:gravity="center"/>
@@ -199,11 +199,13 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="20sp">
+                android:layout_marginTop="10dp"
+                android:layout_marginHorizontal="20sp"
+                android:layout_marginBottom="20sp">
 
                 <Button
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
                     android:background="@drawable/minus"
                     android:id="@+id/btnCartMinQty"/>
                 <EditText
@@ -212,13 +214,12 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:textSize="24sp"
-                    android:text="1.0"
                     android:inputType="numberDecimal"
                     android:backgroundTint="@color/colorTransparent"
                     android:id="@+id/etCartQty"/>
                 <Button
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
                     android:background="@drawable/add"
                     android:id="@+id/btnCartAddQty"/>
             </LinearLayout>

@@ -583,6 +583,10 @@ class ManageMerchantActivity : AppCompatActivity(), MainView {
 
             btnMerchant.isEnabled = true
             pbMerchant.visibility = View.GONE
+        }else{
+            toast(message)
+            btnMerchant.isEnabled = true
+            pbMerchant.visibility = View.GONE
         }
 
     }

@@ -332,7 +332,7 @@ class MerchantPresenter(private val view: MainView, private val auth: FirebaseAu
                     EMerchant.CREATED_BY.toString() to merchant.CREATED_BY,
                     EMerchant.CREATED_DATE.toString() to merchant.CREATED_DATE,
                     EMerchant.UPDATED_BY.toString() to merchant.UPDATED_BY,
-                    EMerchant.UPDATED_DATE.toString() to merchant.CREATED_DATE,
+                    EMerchant.UPDATED_DATE.toString() to merchant.UPDATED_DATE,
                     EMerchant.IMAGE.toString() to merchant.IMAGE,
                     EMerchant.USER_LIST.toString() to merchant.USER_LIST,
                     EMerchant.CAT.toString() to merchant.CAT,

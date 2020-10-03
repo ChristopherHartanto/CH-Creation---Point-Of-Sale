@@ -39,6 +39,7 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.*
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
 
@@ -50,7 +51,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
     private lateinit var sharedPreference: SharedPreferences
     private var categoryItems: ArrayList<String> = arrayListOf()
     private var productKeys: ArrayList<Int> = arrayListOf()
-    private var tmpProductKeys: ArrayList<Int> = arrayListOf()
+    private var productCodes: ArrayList<String> = arrayListOf()
     private var currentCat = 0
     private var searchFilter = ""
     private var isEnabled = true
@@ -183,7 +184,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
         ivHomeSort.onClick{
             ivHomeSort.startAnimation(normalClickAnimation())
 
-            selector("Sort by", arrayListOf("Product Name","Product Code","Product Price")){dialogInterface, i ->
+            selector("Sort by", arrayListOf("Name","Product Code","Price","Newest")){dialogInterface, i ->
                 when(i){
                     0->{
                         sortBy = ESort.PROD_NAME.toString()
@@ -193,6 +194,9 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                     }
                     2->{
                         sortBy = ESort.PROD_PRICE.toString()
+                    }
+                    3->{
+                        sortBy = ESort.NEWEST.toString()
                     }
                 }
                 fetchProductByCat()
@@ -384,7 +388,9 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                 if (tempProductItems[position].WHOLE_SALE != ""){
                     wholeSalePrice = getWholeSale(1F, tempProductItems[position].WHOLE_SALE.toString())
                 }
-                cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
+                val index = productCodes.indexOf(tempProductItems[position].PROD_CODE)
+
+                cartItems.add(Cart(tempProductItems[position].NAME, productKeys[index],tempProductItems[position].PROD_CODE,
                     tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1F,wholeSalePrice))
             }
             else{
@@ -414,7 +420,9 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                         wholeSalePrice = getWholeSale(1F, tempProductItems[position].WHOLE_SALE.toString())
                     }
 
-                    cartItems.add(Cart(tempProductItems[position].NAME, tmpProductKeys[position],tempProductItems[position].PROD_CODE,
+                    val index = productCodes.indexOf(tempProductItems[position].PROD_CODE)
+
+                    cartItems.add(Cart(tempProductItems[position].NAME, productKeys[index],tempProductItems[position].PROD_CODE,
                         tempProductItems[position].MANAGE_STOCK,tempProductItems[position].PRICE,1F,wholeSalePrice))
                 }
             }
@@ -440,12 +448,19 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
     fun fetchProductByCat(){
         pbHome.visibility = View.VISIBLE
         tempProductItems.clear()
-        tmpProductKeys.clear()
         tempProductQtyItems.clear()
 
         when (sortBy) {
-            ESort.PROD_PRICE.toString() -> productItems.sortWith(compareBy {it.PRICE})
-            ESort.PROD_CODE.toString() -> productItems.sortWith(compareBy {it.CODE})
+            ESort.PROD_PRICE.toString() -> {
+                productItems.sortWith(compareBy {it.PRICE})
+            }
+            ESort.PROD_CODE.toString() -> {
+                productItems.sortWith(compareBy {it.CODE})
+            }
+            ESort.NEWEST.toString() -> {
+                productItems.sortWith(compareBy {it.CREATED_DATE})
+                productItems.reverse()
+            }
             else -> productItems.sortWith(compareBy {it.NAME})
         }
 
@@ -456,8 +471,6 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                     && (data.CAT.toString() == categoryItems[currentCat]
                     || currentCat == 0)
                 ){
-                    tmpProductKeys.add(productKeys[index])
-
                     tempProductItems.add(productItems[index])
                     tempProductQtyItems.add(productItems[index].STOCK!!)
                 }
@@ -466,8 +479,6 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                     && (data.CAT.toString() == categoryItems[currentCat]
                             || currentCat == 0)
                 ){
-                    tmpProductKeys.add(productKeys[index])
-
                     tempProductItems.add(productItems[index])
                     tempProductQtyItems.add(productItems[index].STOCK!!)
                 }
@@ -476,8 +487,6 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                     && (data.CAT.toString() == categoryItems[currentCat]
                             || currentCat == 0)
                 ){
-                    tmpProductKeys.add(productKeys[index])
-
                     tempProductItems.add(productItems[index])
                     tempProductQtyItems.add(productItems[index].STOCK!!)
                 }
@@ -485,8 +494,6 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
         }else{
             for ((index, data) in productItems.withIndex()) {
                 if (currentCat == 0 || data.CAT.toString() == categoryItems[currentCat]){
-                    tmpProductKeys.add(productKeys[index])
-
                     tempProductItems.add(productItems[index])
                     tempProductQtyItems.add(productItems[index].STOCK!!)
                 }
@@ -528,6 +535,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                     rvHome.visibility = View.VISIBLE
                     productKeys.clear()
                     productItems.clear()
+                    productCodes.clear()
                     tempProductItems.clear()
                     tempProductQtyItems.clear()
 
@@ -537,12 +545,11 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
                         if (item.STATUS_CODE == EStatusCode.ACTIVE.toString()){
                             tempProductItems.add(item)
                             tempProductQtyItems.add(item.STOCK!!)
-
+                            productCodes.add(item.PROD_CODE.toString())
                             productKeys.add(data.key!!.toInt())
                         }
                     }
                     productItems.addAll(tempProductItems)
-                    tmpProductKeys.addAll(productKeys)
 
                     adapter.notifyDataSetChanged()
                     if (categoryItems.size > 0)

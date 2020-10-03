@@ -114,6 +114,10 @@ class SignUpActivity : AppCompatActivity(), MainView {
             startActivity<ManageMerchantActivity>()
             finish()
             Toast.makeText(this, "Successfully registered ", Toast.LENGTH_LONG).show()
+        }else{
+            toast(message)
+            pbSignUp.visibility = View.GONE
+            btnSignUp.isEnabled = true
         }
     }
 }

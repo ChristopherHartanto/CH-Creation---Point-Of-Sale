@@ -2,6 +2,7 @@ package com.chcreation.pointofsale.presenter
 
 import android.content.Context
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.custom_receipt.Sincere
 import com.chcreation.pointofsale.model.ActivityLogs
 import com.chcreation.pointofsale.model.Customer
 import com.chcreation.pointofsale.model.User
@@ -17,6 +18,8 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 class TransactionPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference, private val context: Context){
@@ -405,6 +408,38 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
         database.child(ETable.USER.toString())
             .child(userId)
             .addListenerForSingleValueEvent(postListener)
+    }
+
+    suspend fun getSincere(): String{
+        return suspendCoroutine {ctx->
+            try{
+                postListener = object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                        database.removeEventListener(this)
+                        ctx.resume(getMerchantSincere(context))
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot) {
+                        if (p0.exists()){
+                            val item = p0.getValue(Sincere::class.java)
+                            if (item != null) {
+                                ctx.resume(item.SINCERE.toString())
+                            }else
+                                ctx.resume(getMerchantSincere(context))
+                        }else
+                            ctx.resume(getMerchantSincere(context))
+                    }
+
+                }
+                database.child(ETable.SINCERE.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchantCode(context))
+                    .addListenerForSingleValueEvent(postListener)
+            }catch (e: Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+            }
+        }
     }
 
     fun saveActivityLogs(logs: ActivityLogs){

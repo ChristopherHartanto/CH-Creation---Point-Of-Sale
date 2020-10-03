@@ -54,7 +54,7 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
     private lateinit var sharedPreference: SharedPreferences
     private var categoryItems: ArrayList<String> = arrayListOf()
     private var productKeys: ArrayList<Int> = arrayListOf()
-    private var tmpProductKeys: ArrayList<Int> = arrayListOf()
+    private var productCodes: ArrayList<String> = arrayListOf()
     private var tempProductItems : ArrayList<Product> = arrayListOf()
     private var currentCat = 0
     private var searchFilter = ""
@@ -166,7 +166,7 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
         ivSort.onClick{
             ivSort.startAnimation(normalClickAnimation())
 
-            selector("Sort by", arrayListOf("Product Name","Product Code","Product Price")){dialogInterface, i ->
+            selector("Sort by", arrayListOf("Name","Product Code","Price","Newest")){dialogInterface, i ->
                 when(i){
                     0->{
                         sortBy = ESort.PROD_NAME.toString()
@@ -176,6 +176,9 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
                     }
                     2->{
                         sortBy = ESort.PROD_PRICE.toString()
+                    }
+                    3->{
+                        sortBy = ESort.NEWEST.toString()
                     }
                 }
                 fetchProductByCat()
@@ -291,10 +294,13 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
     fun fetchProductByCat(){
         pbManageProduct.visibility = View.VISIBLE
         tempProductItems.clear()
-        tmpProductKeys.clear()
         when (sortBy) {
             ESort.PROD_PRICE.toString() -> productItems.sortWith(compareBy {it.PRICE})
             ESort.PROD_CODE.toString() -> productItems.sortWith(compareBy {it.CODE})
+            ESort.NEWEST.toString() -> {
+                productItems.sortWith(compareBy {it.CREATED_DATE})
+                productItems.reverse()
+            }
             else -> productItems.sortWith(compareBy {it.NAME})
         }
 
@@ -305,28 +311,24 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
                     || currentCat == 0)
                 ){
                     tempProductItems.add(productItems[index])
-                    tmpProductKeys.add(productKeys[index])
                 }
                 else if (data.PRICE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
                     && (data.CAT.toString() == categoryItems[currentCat]
                             || currentCat == 0)
                 ){
                     tempProductItems.add(productItems[index])
-                    tmpProductKeys.add(productKeys[index])
                 }
                 else if (data.CODE.toString().toLowerCase(Locale.getDefault()).contains(searchFilter.toLowerCase(Locale.getDefault()))
                     && (data.CAT.toString() == categoryItems[currentCat]
                             || currentCat == 0)
                 ){
                     tempProductItems.add(productItems[index])
-                    tmpProductKeys.add(productKeys[index])
                 }
             }
         }else{
             for ((index, data) in productItems.withIndex()) {
                 if (currentCat == 0 || data.CAT.toString() == categoryItems[currentCat]){
                     tempProductItems.add(productItems[index])
-                    tmpProductKeys.add(productKeys[index])
                 }
             }
         }
@@ -350,11 +352,11 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
 
                         if (item.STATUS_CODE == EStatusCode.ACTIVE.toString()){
                             tempProductItems.add(item)
+                            productCodes.add(item.PROD_CODE.toString())
                             productKeys.add(data.key!!.toInt())
                         }
                     }
                     productItems.addAll(tempProductItems)
-                    tmpProductKeys.addAll(productKeys)
 
                     adapter.notifyDataSetChanged()
                     if (context != null)

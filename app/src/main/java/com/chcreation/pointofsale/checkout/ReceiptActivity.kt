@@ -98,6 +98,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         tvReceiptTransCode.text = "Receipt: ${receiptFormat(transCode)}"
 
         GlobalScope.launch{
+            sincere = presenter.getSincere()
             merchantImageBitmap = BitmapFactory.decodeStream(URL(getMerchantImage(this@ReceiptActivity)).openConnection().getInputStream())
         }
 
