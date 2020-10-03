@@ -28,7 +28,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="40dp">
             <androidx.appcompat.widget.SearchView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -51,6 +51,14 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sort_black_24dp"
                 android:id="@+id/ivSort"
+                android:layout_marginHorizontal="3dp"/>
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_format_list_bulleted_black_24dp"
+                android:id="@+id/ivManageProductView"
                 android:layout_marginHorizontal="3dp"/>
         </LinearLayout>
 

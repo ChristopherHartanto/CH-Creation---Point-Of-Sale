@@ -30,6 +30,7 @@ import kotlinx.android.synthetic.main.activity_cart.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.lang.Exception
+import java.util.*
 
 class CartActivity : AppCompatActivity() {
 
@@ -50,7 +51,7 @@ class CartActivity : AppCompatActivity() {
 
         adapter = CheckOutRecyclerViewAdapter(this, cartItems, imageItems){ type,it->
             if (type == 1){
-                if (cartItems[it].Qty == 1F){
+                if (cartItems[it].Qty!! <= 1F){
                     alert ("Remove ${cartItems[it].NAME} From Cart?"){
                         title = "Remove"
                         yesButton {a->
@@ -90,14 +91,20 @@ class CartActivity : AppCompatActivity() {
                 adapter.notifyDataSetChanged()
             }else if (type == 3){
                 selectedCart = it
-                etCartQty.setText(cartItems[it].Qty.toString())
+                etCartQty.setText((if (isInt(cartItems[it].Qty!!)) cartItems[it].Qty!!.toInt() else cartItems[it].Qty).toString())
                 tvCartProdName.text = cartItems[it].NAME.toString()
+                tvCartFirstName.text = cartItems[it].NAME!!.first().toString().toUpperCase(Locale.getDefault())
 
-                if (tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.WHOLE_SALE != ""){
-                    tvCartProdCode.text = tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.CODE.toString()
-                }
+                if (tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.CODE != ""){
+                    tvCartProdCode.text = (if (tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.CODE == "") "-"
+                            else tempProductItems.single { f -> f.PROD_CODE == cartItems[it].PROD_CODE }.CODE).toString()
+                }else
+                    tvCartProdCode.text = "-"
 
-                if (imageItems[it] != "")
+                if (imageItems[it] != ""){
+                    layoutCartDefaultImage.visibility = View.GONE
+                    ivCartProdImage.visibility = View.VISIBLE
+
                     Glide.with(this).load(imageItems[it]).listener(object : RequestListener<String,GlideDrawable>{
                         override fun onException(
                             e: Exception?,
@@ -123,17 +130,21 @@ class CartActivity : AppCompatActivity() {
                         }
 
                     }).into(ivCartProdImage)
+                }
                 else{
                     pbCart.visibility = View.GONE
-                    ivCartProdImage.imageResource = R.drawable.default_image
+                    layoutCartDefaultImage.visibility = View.VISIBLE
+                    ivCartProdImage.visibility = View.GONE
                 }
                 cvCartProdDetail.visibility = View.VISIBLE
+                bgCartProdDetail.visibility = View.VISIBLE
             }
         }
 
         btnCartDeleteProd.onClick {
             btnCartDeleteProd.startAnimation(normalClickAnimation())
             cvCartProdDetail.visibility = View.GONE
+            bgCartProdDetail.visibility = View.GONE
 
             deleteItem(selectedCart)
         }
@@ -141,6 +152,7 @@ class CartActivity : AppCompatActivity() {
         btnCartDoneProd.onClick {
             btnCartDeleteProd.startAnimation(normalClickAnimation())
             cvCartProdDetail.visibility = View.GONE
+            bgCartProdDetail.visibility = View.GONE
 
             val qty = etCartQty.text.toString().toFloat()
             if (qty <= 0)
@@ -165,14 +177,19 @@ class CartActivity : AppCompatActivity() {
 
         btnCartMinQty.onClick {
             btnCartMinQty.startAnimation(normalClickAnimation())
-            val qty = etCartQty.text.toString().toFloat()
-            etCartQty.setText((qty-1F).toString())
+            val qty = etCartQty.text.toString().toFloat() - 1F
+            etCartQty.setText((if (isInt(qty)) qty.toInt() else qty).toString())
         }
 
         btnCartAddQty.onClick {
             btnCartAddQty.startAnimation(normalClickAnimation())
-            val qty = etCartQty.text.toString().toFloat()
-            etCartQty.setText((qty+1F).toString())
+            val qty = etCartQty.text.toString().toFloat() + 1F
+            etCartQty.setText((if (isInt(qty)) qty.toInt() else qty).toString())
+        }
+
+        bgCartProdDetail.onClick {
+            cvCartProdDetail.visibility = View.GONE
+            bgCartProdDetail.visibility = View.GONE
         }
 
         rvCart.adapter = adapter

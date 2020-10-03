@@ -20,10 +20,13 @@ import org.jetbrains.anko.support.v4.ctx
 import org.jetbrains.anko.textColorResource
 import java.util.*
 
-class HomeRecyclerViewAdapter(private val context: Context, private val items: List<Product>,private val listener: (position: Int) -> Unit)
+class HomeRecyclerViewAdapter(private val context: Context,
+                              private val items: List<Product>,
+                              private val listener: (position: Int) -> Unit)
     : RecyclerView.Adapter<HomeRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        if (getProductView(context) == EProductView.LIST.toString())
         ViewHolder(
             LayoutInflater.from(context).inflate(
                 R.layout.row_product,
@@ -31,24 +34,35 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
                 false
             )
         )
+        else
+            ViewHolder(
+                LayoutInflater.from(context).inflate(
+                    R.layout.row_product_grid,
+                    parent,
+                    false
+                )
+            )
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bindItem(items[position],listener, position,context)
+        if (getProductView(context) == EProductView.LIST.toString())
+            holder.bindItem(items[position],listener, position,context)
+        else
+            holder.bindItemGrid(items[position],listener, position,context)
     }
 
     override fun getItemCount(): Int = items.size
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view){
-
-        private val wholeSale = view.findViewById<ImageView>(R.id.ivRowProductWholeSale)
-        private val image = view.findViewById<ImageView>(R.id.ivRowProductImage)
-        private val name = view.findViewById<TextView>(R.id.tvRowProductName)
-        private val price = view.findViewById<TextView>(R.id.tvRowProductPrice)
-        private val stock = view.findViewById<TextView>(R.id.tvRowProductStock)
-        private val firstName = view.findViewById<TextView>(R.id.tvRowProductFirstName)
-        private val layoutDefaultImage = view.findViewById<FrameLayout>(R.id.layoutRowProductDefaultImage)
+    class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view){
 
         fun bindItem(product: Product, listener: (position: Int) -> Unit, position: Int,context: Context) {
+            val wholeSale = view.findViewById<ImageView>(R.id.ivRowProductWholeSale)
+            val image = view.findViewById<ImageView>(R.id.ivRowProductImage)
+            val name = view.findViewById<TextView>(R.id.tvRowProductName)
+            val price = view.findViewById<TextView>(R.id.tvRowProductPrice)
+            val stock = view.findViewById<TextView>(R.id.tvRowProductStock)
+            val firstName = view.findViewById<TextView>(R.id.tvRowProductFirstName)
+            val layoutDefaultImage = view.findViewById<FrameLayout>(R.id.layoutRowProductDefaultImage)
+
             if (product.IMAGE != ""){
                 image.visibility = View.VISIBLE
                 layoutDefaultImage.visibility = View.GONE
@@ -79,7 +93,7 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
                 getLanguage(context),
                 getCountry(context)
             ).format(product.PRICE)
-            stock.text = "${if(isInt(product.STOCK!!)) product.STOCK!!.toInt() else product.STOCK } qty"
+            stock.text = "${if(isInt(product.STOCK!!)) product.STOCK!!.toInt() else String.format("%.2f",product.STOCK) } qty"
 
             if (product.STOCK!! <= 0 && product.MANAGE_STOCK)
                 stock.textColorResource = R.color.colorRed
@@ -87,6 +101,62 @@ class HomeRecyclerViewAdapter(private val context: Context, private val items: L
                 stock.textColorResource = R.color.colorPrimary
             else
                 stock.textColorResource = R.color.colorBlack
+
+            itemView.onClick {
+                itemView.startAnimation(normalClickAnimation())
+                listener(position)
+            }
+        }
+
+
+        fun bindItemGrid(product: Product, listener: (position: Int) -> Unit, position: Int,context: Context) {
+            val gWholeSale = view.findViewById<ImageView>(R.id.ivRowProductGridWholeSale)
+            val gImage = view.findViewById<ImageView>(R.id.ivRowProductGridImage)
+            val gName = view.findViewById<TextView>(R.id.tvRowProductGridName)
+            val gFirstName = view.findViewById<TextView>(R.id.tvRowProductGridFirstName)
+            val gLayoutDefaultImage = view.findViewById<FrameLayout>(R.id.layoutRowProductGridDefaultImage)
+
+            if (product.IMAGE != ""){
+                gImage.visibility = View.VISIBLE
+                gLayoutDefaultImage.visibility = View.GONE
+
+                Glide.with(context).load(product.IMAGE).into(gImage)
+            }
+            else{
+                gImage.visibility = View.GONE
+                gLayoutDefaultImage.visibility = View.VISIBLE
+
+                gFirstName.text = product.NAME!!.first().toString().toUpperCase(Locale.getDefault())
+            }
+            if (product.WHOLE_SALE == ""){
+                gWholeSale.visibility = View.GONE
+            }else{
+                val gson = Gson()
+                val arrayWholeSaleType = object : TypeToken<MutableList<WholeSale>>() {}.type
+                val wholeSaleItems : MutableList<WholeSale> = gson.fromJson(product.WHOLE_SALE,arrayWholeSaleType)
+
+                if (wholeSaleItems.size == 0)
+                    gWholeSale.visibility = View.GONE
+                else
+                    gWholeSale.visibility = View.VISIBLE
+            }
+
+            gName.text = product.NAME
+
+            if (product.STOCK!! <= 0)
+                gName.textColorResource = R.color.colorRed
+            else
+                gName.textColorResource = R.color.colorBlack
+
+//            val tvNameHeight = gName.lineCount * gName.lineHeight
+//            if (tvNameHeight > gName.lineHeight){
+//                val name = if (product.NAME!!.length > 13) "${product.NAME!!.substring(0,13)}.."
+//                else product.NAME
+//
+//                gName.text = name
+//            }
+
+
 
             itemView.onClick {
                 itemView.startAnimation(normalClickAnimation())

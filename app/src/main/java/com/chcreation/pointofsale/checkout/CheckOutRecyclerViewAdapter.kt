@@ -18,6 +18,7 @@ import com.chcreation.pointofsale.model.Cart
 import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.lang.Exception
+import java.util.*
 
 class CheckOutRecyclerViewAdapter(private val context: Context,
                                   private val items: List<Cart>,
@@ -44,6 +45,7 @@ class CheckOutRecyclerViewAdapter(private val context: Context,
 
         private val qty = view.findViewById<TextView>(R.id.tvRowCheckOutQty)
         private val name = view.findViewById<TextView>(R.id.tvRowCheckOutProdName)
+        private val firstName = view.findViewById<TextView>(R.id.tvRowCheckOutFirstName)
         private val price = view.findViewById<TextView>(R.id.tvRowCheckOutPrice)
         private val totalPrice = view.findViewById<TextView>(R.id.tvRowCheckOutTotalPrice)
         private val ivProduct = view.findViewById<ImageView>(R.id.ivRowCheckOut)
@@ -54,10 +56,14 @@ class CheckOutRecyclerViewAdapter(private val context: Context,
         private val tvRowCheckOutDiscountLine = view.findViewById<TextView>(R.id.tvRowCheckOutDiscountLine)
         private val progressBar = view.findViewById<ProgressBar>(R.id.pbRowCheckOut)
         private val layoutRowCheckOut = view.findViewById<FrameLayout>(R.id.layoutRowCheckOut)
+        private val layoutRowCheckOutDefaultImage = view.findViewById<FrameLayout>(R.id.layoutRowCheckOutDefaultImage)
 
         fun bindItem(context: Context,cart: Cart, image: String, listener: (type: Int,position: Int) -> Unit, position: Int) {
 
-            if (image != "")
+            if (image != ""){
+                ivProduct.visibility = View.VISIBLE
+                layoutRowCheckOutDefaultImage.visibility = View.GONE
+
                 Glide.with(context).load(image).listener(object :
                     RequestListener<String, GlideDrawable> {
                     override fun onException(
@@ -82,17 +88,20 @@ class CheckOutRecyclerViewAdapter(private val context: Context,
                     }
 
                 }).into(ivProduct)
+            }
             else{
                 progressBar.visibility = View.GONE
-                ivProduct.imageResource = R.drawable.default_image
+                ivProduct.visibility = View.GONE
+                layoutRowCheckOutDefaultImage.visibility = View.VISIBLE
             }
 
             name.text = cart.NAME
+            firstName.text = cart.NAME!!.first().toString().toUpperCase(Locale.getDefault())
             price.text = currencyFormat(getLanguage(context), getCountry(context))
                 .format(if (cart.WHOLE_SALE_PRICE == -1F) cart.PRICE else cart.WHOLE_SALE_PRICE)
             totalPrice.text = currencyFormat(getLanguage(context), getCountry(context))
                 .format((if (cart.WHOLE_SALE_PRICE == -1F) cart.PRICE else cart.WHOLE_SALE_PRICE!!)!! * cart.Qty!!)
-            qty.text = cart.Qty.toString()
+            qty.text = (if (isInt(cart.Qty!!)) cart.Qty!!.toInt() else cart.Qty).toString()
 
             tvRowCheckOutDiscount.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE)
             tvRowCheckOutDiscountLine.text = currencyFormat(getLanguage(context), getCountry(context)).format(cart.PRICE)

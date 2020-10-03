@@ -117,25 +117,35 @@ class AnalyticFragment : Fragment(), MainView {
 
                     noButton {  }
                 }.show()
-            }else
+            }else {
                 cvAnalyticSelectReport.visibility = View.VISIBLE
+                bgAnalyticSelectReport.visibility = View.VISIBLE
+            }
         }
 
         btnReceiptSelectReportClose.onClick{
             btnReceiptSelectReportClose.startAnimation(normalClickAnimation())
             cvAnalyticSelectReport.visibility = View.GONE
+            bgAnalyticSelectReport.visibility = View.GONE
         }
 
         layoutReceiptTransReport.onClick {
             layoutReceiptTransReport.startAnimation(normalClickAnimation())
             cvAnalyticSelectReport.visibility = View.GONE
+            bgAnalyticSelectReport.visibility = View.GONE
             printCallback.printTransactionReport(transactions,transactionCodeItems, month, year, userCode)
         }
 
         layoutReceiptInventoryReport.onClick {
             layoutReceiptInventoryReport.startAnimation(normalClickAnimation())
             cvAnalyticSelectReport.visibility = View.GONE
+            bgAnalyticSelectReport.visibility = View.GONE
             printCallback.printInventoryReport(month, year, userCode)
+        }
+
+        bgAnalyticSelectReport.onClick {
+            cvAnalyticSelectReport.visibility = View.GONE
+            bgAnalyticSelectReport.visibility = View.GONE
         }
 
     }

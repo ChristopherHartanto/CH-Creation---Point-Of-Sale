@@ -9,6 +9,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class ProductPresenter(private val view: MainView,
                        private val auth: FirebaseAuth,
@@ -167,7 +169,7 @@ class ProductPresenter(private val view: MainView,
                 .child(getMerchantCredential(context))
                 .child(getMerchantCode(context))
                 .child(key.toString())
-                .setValue(values).addOnFailureListener {
+                .updateChildren(values).addOnFailureListener {
                     view.response(it.message.toString())
                 }
                 .addOnSuccessListener {
@@ -179,21 +181,23 @@ class ProductPresenter(private val view: MainView,
         }
     }
 
-    fun saveNewCategory(categoryItems: String){
-        try{
-            database.child(ETable.MERCHANT.toString())
-                .child(getMerchantCredential(context))
-                .child(getMerchantCode(context))
-                .child(EMerchant.CAT.toString())
-                .setValue(categoryItems).addOnFailureListener {
-                    view.response(it.message.toString())
-                }
-                .addOnSuccessListener {
-                    view.response(EMessageResult.SUCCESS.toString())
-                }
-        }catch (e:java.lang.Exception){
-            showError(context,e.message.toString())
-            e.printStackTrace()
+    suspend fun saveNewCategory(categoryItems: String) : String{
+        return suspendCoroutine { ctx->
+            try{
+                database.child(ETable.MERCHANT.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchantCode(context))
+                    .child(EMerchant.CAT.toString())
+                    .setValue(categoryItems).addOnFailureListener {
+                        ctx.resume(it.message.toString())
+                    }
+                    .addOnSuccessListener {
+                        view.response(EMessageResult.SUCCESS.toString())
+                    }
+            }catch (e:java.lang.Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+            }
         }
     }
 
@@ -344,56 +348,60 @@ class ProductPresenter(private val view: MainView,
         }
     }
 
-    fun addStockMovement(stockMovement: StockMovement){
-        try{
-            var stockMovementKey = 0
-            postListener = object : ValueEventListener {
-                override fun onCancelled(p0: DatabaseError) {
-                    database.removeEventListener(this)
-                }
-
-                override fun onDataChange(p0: DataSnapshot) {
-                    if (p0.exists()){
-                        for (data in p0.children){
-                            stockMovementKey = data.key.toString().toInt() + 1
-                            break
-                        }
+    suspend fun addStockMovement(stockMovement: StockMovement) : String{
+        return suspendCoroutine {ctx->
+            try{
+                var stockMovementKey = 0
+                postListener = object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                        database.removeEventListener(this)
+                        ctx.resume(p0.message)
                     }
-                    val values  = hashMapOf(
-                        EStock_Movement.NOTE.toString() to stockMovement.NOTE,
-                        EStock_Movement.PROD_CODE.toString() to stockMovement.PROD_CODE,
-                        EStock_Movement.PROD_KEY.toString() to stockMovement.PROD_KEY,
-                        EStock_Movement.STATUS.toString() to stockMovement.STATUS,
-                        EStock_Movement.QTY.toString() to stockMovement.QTY,
-                        EStock_Movement.STATUS_CODE.toString() to stockMovement.STATUS_CODE,
-                        EStock_Movement.CREATED_DATE.toString() to stockMovement.CREATED_DATE,
-                        EStock_Movement.UPDATED_DATE.toString() to stockMovement.UPDATED_DATE,
-                        EStock_Movement.UPDATED_BY.toString() to stockMovement.UPDATED_BY
-                    )
 
-                    database.child(ETable.STOCK_MOVEMENT.toString())
-                        .child(getMerchantCredential(context))
-                        .child(getMerchantCode(context))
-                        .child(stockMovementKey.toString())
-                        .setValue(values).addOnFailureListener {
-                            view.response(it.message.toString())
+                    override fun onDataChange(p0: DataSnapshot) {
+                        if (p0.exists()){
+                            for (data in p0.children){
+                                stockMovementKey = data.key.toString().toInt() + 1
+                                break
+                            }
                         }
-                        .addOnSuccessListener {
-                            view.response(EMessageResult.SUCCESS.toString())
-                        }
+                        val values  = hashMapOf(
+                            EStock_Movement.NOTE.toString() to stockMovement.NOTE,
+                            EStock_Movement.PROD_CODE.toString() to stockMovement.PROD_CODE,
+                            EStock_Movement.PROD_KEY.toString() to stockMovement.PROD_KEY,
+                            EStock_Movement.STATUS.toString() to stockMovement.STATUS,
+                            EStock_Movement.QTY.toString() to stockMovement.QTY,
+                            EStock_Movement.STATUS_CODE.toString() to stockMovement.STATUS_CODE,
+                            EStock_Movement.CREATED_DATE.toString() to stockMovement.CREATED_DATE,
+                            EStock_Movement.UPDATED_DATE.toString() to stockMovement.UPDATED_DATE,
+                            EStock_Movement.UPDATED_BY.toString() to stockMovement.UPDATED_BY
+                        )
+
+                        database.child(ETable.STOCK_MOVEMENT.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchantCode(context))
+                            .child(stockMovementKey.toString())
+                            .setValue(values).addOnFailureListener {
+                                ctx.resume(it.message.toString())
+                            }
+                            .addOnSuccessListener {
+                                ctx.resume("Success")
+                            }
+
+                    }
 
                 }
-
+                database.child(ETable.STOCK_MOVEMENT.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchantCode(context))
+                    .orderByKey()
+                    .limitToLast(1)
+                    .addListenerForSingleValueEvent(postListener)
+            }catch (e:java.lang.Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+                ctx.resume(e.message.toString())
             }
-            database.child(ETable.STOCK_MOVEMENT.toString())
-                .child(getMerchantCredential(context))
-                .child(getMerchantCode(context))
-                .orderByKey()
-                .limitToLast(1)
-                .addListenerForSingleValueEvent(postListener)
-        }catch (e:java.lang.Exception){
-            showError(context,e.message.toString())
-            e.printStackTrace()
         }
     }
 
@@ -443,45 +451,55 @@ class ProductPresenter(private val view: MainView,
             .addListenerForSingleValueEvent(postListener)
     }
 
-    fun saveActivityLogs(logs: ActivityLogs){
-        try{
-            var key = 0
-            postListener = object : ValueEventListener {
-                override fun onCancelled(p0: DatabaseError) {
-                    database.removeEventListener(this)
-                }
-
-                override fun onDataChange(p0: DataSnapshot) {
-                    if (p0.exists()){
-                        for (data in p0.children){
-                            key = data.key.toString().toInt() + 1
-                            break
-                        }
+    suspend fun saveActivityLogs(logs: ActivityLogs) : Boolean{
+        return suspendCoroutine {ctx->
+            try{
+                var key = 0
+                postListener = object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                        database.removeEventListener(this)
+                        ctx.resume(false)
                     }
-                    val values  = hashMapOf(
-                        EActivityLogs.LOG.toString() to logs.LOG,
-                        EActivityLogs.CREATED_BY.toString() to logs.CREATED_BY,
-                        EActivityLogs.CREATED_DATE.toString() to logs.CREATED_DATE
-                    )
 
-                    database.child(ETable.ACTIVITY_LOGS.toString())
-                        .child(getMerchantCredential(context))
-                        .child(getMerchantCode(context))
-                        .child(key.toString())
-                        .setValue(values)
+                    override fun onDataChange(p0: DataSnapshot) {
+                        if (p0.exists()){
+                            for (data in p0.children){
+                                key = data.key.toString().toInt() + 1
+                                break
+                            }
+                        }
+                        val values  = hashMapOf(
+                            EActivityLogs.LOG.toString() to logs.LOG,
+                            EActivityLogs.CREATED_BY.toString() to logs.CREATED_BY,
+                            EActivityLogs.CREATED_DATE.toString() to logs.CREATED_DATE
+                        )
+
+                        database.child(ETable.ACTIVITY_LOGS.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchantCode(context))
+                            .child(key.toString())
+                            .setValue(values)
+                            .addOnCompleteListener {
+                                ctx.resume(true)
+                            }.addOnFailureListener {
+                                ctx.resume(false)
+                            }
+
+
+                    }
 
                 }
-
+                database.child(ETable.ACTIVITY_LOGS.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchantCode(context))
+                    .orderByKey()
+                    .limitToLast(1)
+                    .addListenerForSingleValueEvent(postListener)
+            }catch (e:java.lang.Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+                ctx.resume(false)
             }
-            database.child(ETable.ACTIVITY_LOGS.toString())
-                .child(getMerchantCredential(context))
-                .child(getMerchantCode(context))
-                .orderByKey()
-                .limitToLast(1)
-                .addListenerForSingleValueEvent(postListener)
-        }catch (e:java.lang.Exception){
-            showError(context,e.message.toString())
-            e.printStackTrace()
         }
     }
 

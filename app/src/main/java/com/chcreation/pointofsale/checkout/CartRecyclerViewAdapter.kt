@@ -55,7 +55,7 @@ class CartRecyclerViewAdapter(private val context: Context, private val items: L
                 .format((if (cart.WHOLE_SALE_PRICE == -1F) cart.PRICE!! else cart.WHOLE_SALE_PRICE!!) )
             totalPrice.text = currencyFormat(getLanguage(context), getCountry(context))
                 .format((if (cart.WHOLE_SALE_PRICE == -1F) cart.PRICE!! else cart.WHOLE_SALE_PRICE!!) * cart.Qty!!)
-            qty.text = "${if(isInt(cart.Qty!!)) cart.Qty!!.toInt() else cart.Qty}x"
+            qty.text = "${if(isInt(cart.Qty!!)) cart.Qty!!.toInt() else String.format("%.2f",cart.Qty)}x"
 
             itemView.onClick {
                 itemView.startAnimation(normalClickAnimation())

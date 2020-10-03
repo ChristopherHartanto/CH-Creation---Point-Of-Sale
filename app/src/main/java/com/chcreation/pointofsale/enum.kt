@@ -268,6 +268,7 @@ enum class EUserGroup{
 }
 
 enum class ESharedPreference{
+    PRODUCT_VIEW,
     DEVICE_ID,
     MERCHANT_CODE,
     MERCHANT_NAME,
@@ -315,4 +316,9 @@ enum class EMonth(var value:Int){
     October(10),
     November(11),
     December(12)
+}
+
+enum class EProductView{
+    LIST,
+    GRID
 }

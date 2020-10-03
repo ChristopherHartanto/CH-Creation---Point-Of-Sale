@@ -18,6 +18,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_manage_product_manage_stock.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -109,12 +111,14 @@ class ManageProductManageStockActivity : AppCompatActivity(), MainView {
 
         presenter.saveProduct(product, productKey)
 
-        presenter.addStockMovement(StockMovement(qty.toFloat(),status,EStatusCode.DONE.toString(),
-            prodCode,productKey,0,note,
-            dateFormat().format(Date()),dateFormat().format(Date()), mAuth.currentUser?.uid
-        ))
-        val log = if(action == 1) "Incoming Stock: $qty Qty" else "Missing Stock: $qty Qty"
-        presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+        GlobalScope.launch {
+            val message = presenter.addStockMovement(StockMovement(qty.toFloat(),status,EStatusCode.DONE.toString(),
+                prodCode,productKey,0,note,
+                dateFormat().format(Date()),dateFormat().format(Date()), mAuth.currentUser?.uid
+            ))
+            val log = if(action == 1) "Incoming Stock: $qty Qty" else "Missing Stock: $qty Qty"
+            presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+        }
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

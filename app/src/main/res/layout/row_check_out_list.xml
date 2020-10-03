@@ -18,12 +18,29 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_marginEnd="7dp">
+
             <ImageView
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_gravity="center_vertical"
                 android:id="@+id/ivRowCheckOut"
                 android:src="@drawable/default_image"/>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/colorGrey"
+                android:id="@+id/layoutRowCheckOutDefaultImage">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="18sp"
+                    android:text="P"
+                    android:id="@+id/tvRowCheckOutFirstName"/>
+            </FrameLayout>
 
             <ProgressBar
                 android:layout_width="30dp"

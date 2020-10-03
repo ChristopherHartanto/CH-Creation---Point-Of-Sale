@@ -62,7 +62,7 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
             database.child(ETable.ACTIVITY_LOGS.toString())
                 .child(getMerchantCredential(context))
                 .child(getMerchantCode(context))
-                .limitToFirst(200)
+                .limitToLast(200)
                 .addListenerForSingleValueEvent(postListener)
         }catch (e: Exception){
             showError(context,e.message.toString())

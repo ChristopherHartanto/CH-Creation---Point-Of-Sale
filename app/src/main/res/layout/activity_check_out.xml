@@ -82,7 +82,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Amount Received"
-                    android:inputType="number"
+                    android:inputType="numberDecimal"
                     android:text="100000"
                     android:id="@+id/etCheckOutAmountReceived"/>
 

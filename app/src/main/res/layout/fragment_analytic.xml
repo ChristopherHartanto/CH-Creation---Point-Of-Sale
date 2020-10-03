@@ -561,6 +561,13 @@
         </ScrollView>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorGrey"
+        android:alpha="0.8"
+        android:id="@+id/bgAnalyticSelectReport"
+        android:visibility="gone"/>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"

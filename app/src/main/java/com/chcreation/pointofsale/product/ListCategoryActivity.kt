@@ -18,6 +18,9 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_list_category.*
 import kotlinx.android.synthetic.main.fragment_manage_product_update_product.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.onRefresh
@@ -52,10 +55,20 @@ class ListCategoryActivity : AppCompatActivity(), MainView {
 
                     val gson = Gson()
                     val categoryItem = gson.toJson(categoryItems)
-                    presenter.saveNewCategory(categoryItem)
 
                     val log = "Delete Category ${categoryItems[it].CAT}"
-                    presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+
+                    GlobalScope.launch (Dispatchers.Main){
+                        val success = presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+                        val message = presenter.saveNewCategory(categoryItem)
+
+                        if (message == EMessageResult.SUCCESS.toString())
+                            toast("Delete Success")
+                        else
+                            toast(message)
+
+                        presenter.retrieveCategories()
+                    }
 
                 }
 
@@ -128,11 +141,5 @@ class ListCategoryActivity : AppCompatActivity(), MainView {
     }
 
     override fun response(message: String) {
-        if (message == EMessageResult.SUCCESS.toString())
-            toast("Delete Success")
-        else
-            toast(message)
-        loading()
-        presenter.retrieveCategories()
     }
 }

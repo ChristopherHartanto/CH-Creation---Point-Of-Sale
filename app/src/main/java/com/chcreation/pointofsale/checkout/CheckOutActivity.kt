@@ -30,6 +30,8 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_check_out.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import java.util.*
@@ -196,18 +198,20 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                         tvCheckOutProcessTitle.visibility = View.VISIBLE
                         layoutCheckOutContent.alpha = 0.3F
 
-                        presenter.saveTransaction(Transaction(totalPrice,totalOutStanding,
-                            discount,tax,paymentMethod,orderDetail,selectCustomerCode, note,"",
-                            statusCode.toString(), dateFormat().format(Date()), dateFormat().format(Date()),
-                            mAuth.currentUser!!.uid,mAuth.currentUser!!.uid)
-                            , Payment("", totalReceived,paymentMethod, note,
-                                mAuth.currentUser!!.uid,EStatusCode.DONE.toString()), cartItems){
+                        GlobalScope.launch {
 
-                            val log = if (custName != "-") "Receive ${currencyFormat(getLanguage(this@CheckOutActivity), 
+                            val receipt = presenter.saveTransaction(Transaction(totalPrice,totalOutStanding,
+                                discount,tax,paymentMethod,orderDetail,selectCustomerCode, note,"",
+                                statusCode.toString(), dateFormat().format(Date()), dateFormat().format(Date()),
+                                mAuth.currentUser!!.uid,mAuth.currentUser!!.uid)
+                                , Payment("", totalReceived,paymentMethod, note,
+                                    mAuth.currentUser!!.uid,EStatusCode.DONE.toString()), cartItems)
+
+                            val log = if (custName != "-") "Receive ${currencyFormat(getLanguage(this@CheckOutActivity),
                                 getCountry(this@CheckOutActivity)).format(totalReceived)} from $custName"
                             else
                                 "Receive ${currencyFormat(getLanguage(this@CheckOutActivity),
-                                    getCountry(this@CheckOutActivity)).format(totalReceived)} from Receipt ${receiptFormat(it.toInt())}"
+                                    getCountry(this@CheckOutActivity)).format(totalReceived)} from Receipt ${receiptFormat(receipt.toInt())}"
                             presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
                         }
 

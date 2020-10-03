@@ -482,7 +482,9 @@ class MainActivity : AppCompatActivity(), MainView, GenerateReport {
 
                                 row.createCell(2).setCellValue(data.STATUS)
 
-                                row.createCell(3).setCellValue(receiptFormat(data.TRANS_KEY!!.toInt()))
+                                row.createCell(3)
+                                    .setCellValue(if (data.TRANS_KEY == 0) "-"
+                                        else receiptFormat(data.TRANS_KEY!!.toInt()))
 
                                 row.createCell(4)
                                     .setCellValue(data.QTY.toString())

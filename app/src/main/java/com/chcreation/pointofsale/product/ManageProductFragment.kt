@@ -14,6 +14,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.chcreation.pointofsale.*
@@ -80,10 +81,10 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = Homepresenter(this,mAuth,mDatabase,ctx)
         mScannerView = ZXingScannerView(ctx)
+        sharedPreference =  ctx.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
         adapter = HomeRecyclerViewAdapter(
-            ctx,
-            tempProductItems
+            ctx,tempProductItems
         ) {
             try {
                 if (!isScanning){
@@ -95,8 +96,7 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
             }
         }
 
-        rvManageProduct.layoutManager = LinearLayoutManager(ctx)
-        rvManageProduct.adapter = adapter
+        rvConfig()
 
         rvManageProduct.addOnScrollListener(object : RecyclerView.OnScrollListener(){
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -198,6 +198,19 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
             btnManageProductCancel.startAnimation(normalClickAnimation())
             cancelScan()
         }
+
+        ivManageProductView.onClick {
+            ivManageProductView.startAnimation(normalClickAnimation())
+            val editor = sharedPreference.edit()
+            if (getProductView(ctx) == EProductView.LIST.toString()){
+                editor.putString(ESharedPreference.PRODUCT_VIEW.toString(),EProductView.GRID.toString())
+            }
+            else if (getProductView(ctx) == EProductView.GRID.toString()){
+                editor.putString(ESharedPreference.PRODUCT_VIEW.toString(),EProductView.LIST.toString())
+            }
+            editor.apply()
+            rvConfig()
+        }
     }
 
     override fun onStart() {
@@ -242,6 +255,18 @@ class ManageProductFragment : Fragment() , MainView, ZXingScannerView.ResultHand
 
         if (savedInstanceState != null) {
             savedInstanceState.getStringArray("categoryItems")?.let { categoryItems.addAll(it) }
+        }
+    }
+
+    private fun rvConfig(){
+        if (getProductView(ctx) == EProductView.LIST.toString()){
+            ivManageProductView.imageResource = R.drawable.ic_view_module_black_24dp
+            rvManageProduct.layoutManager = LinearLayoutManager(ctx)
+            rvManageProduct.adapter = adapter
+        }else{
+            ivManageProductView.imageResource = R.drawable.ic_format_list_bulleted_black_24dp
+            rvManageProduct.layoutManager = GridLayoutManager(ctx,3)
+            rvManageProduct.adapter = adapter
         }
     }
 

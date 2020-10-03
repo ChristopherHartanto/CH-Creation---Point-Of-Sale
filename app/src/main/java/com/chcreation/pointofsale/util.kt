@@ -25,6 +25,7 @@ fun removeAllSharedPreference(context: Context){
     val editor = sharedPreference.edit()
     editor.putString(ESharedPreference.NAME.toString(),"")
     editor.putString(ESharedPreference.EMAIL.toString(),"")
+    editor.putString(ESharedPreference.PRODUCT_VIEW.toString(),EProductView.LIST.toString())
     editor.putString(ESharedPreference.MERCHANT_NAME.toString(),"")
     editor.putString(ESharedPreference.MERCHANT_CODE.toString(),"")
     editor.putString(ESharedPreference.MERCHANT_IMAGE.toString(),"")
@@ -66,6 +67,11 @@ fun removeMerchantSharedPreference(context: Context){
     editor.putBoolean(ESharedPreference.CUSTOMER_NAME.toString(),false)
     editor.putBoolean(ESharedPreference.RECEIPT_MERCHANT_ICON.toString(),false)
     editor.apply()
+}
+
+fun getProductView(context: Context) : String{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+    return sharedPreference.getString(ESharedPreference.PRODUCT_VIEW.toString(),EProductView.LIST.toString()).toString()
 }
 
 fun getLanguage(context: Context) : String{

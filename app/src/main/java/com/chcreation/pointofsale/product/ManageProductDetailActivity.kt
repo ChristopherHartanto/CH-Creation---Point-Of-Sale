@@ -30,6 +30,8 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.activity_detail_transaction.*
 import kotlinx.android.synthetic.main.activity_manage_product_detail.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.ctx
@@ -113,10 +115,12 @@ class ManageProductDetailActivity : AppCompatActivity(),MainView {
                     alert ("Are Sure Want to Delete?"){
                         title = "Delete"
                         yesButton {
-                            presenter.deleteProduct(prodCode)
 
                             val log = "Delete Product $prodName"
-                            presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+                            GlobalScope.launch {
+                                presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+                                presenter.deleteProduct(prodCode)
+                            }
                         }
                         noButton {
 

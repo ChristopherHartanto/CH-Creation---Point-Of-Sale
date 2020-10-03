@@ -49,6 +49,8 @@ import com.google.zxing.Result
 import kotlinx.android.synthetic.main.activity_new_product.*
 import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_manage_product_update_product.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
@@ -276,11 +278,14 @@ class NewProductActivity : AppCompatActivity(), MainView, AdapterView.OnItemSele
             toast("You Haven't Set Up Your Merchant")
         }
         else{
-            presenter.saveProduct(Product(name,price,desc,cost,manageStock,stock,imageUrl,prodCode,uomCode,selectedCategory,code,EStatusCode.ACTIVE.toString(),
-                dateFormat().format(Date()),dateFormat().format(Date()),
-                mAuth.currentUser!!.uid,mAuth.currentUser!!.uid,wholeSaleItems))
 
-            presenter.saveActivityLogs(ActivityLogs("Create Product $name",mAuth.currentUser!!.uid,dateFormat().format(Date())))
+            GlobalScope.launch {
+                presenter.saveActivityLogs(ActivityLogs("Create Product $name",mAuth.currentUser!!.uid,dateFormat().format(Date())))
+                presenter.saveProduct(Product(name,price,desc,cost,manageStock,stock,imageUrl,prodCode,uomCode,selectedCategory,code,EStatusCode.ACTIVE.toString(),
+                    dateFormat().format(Date()),dateFormat().format(Date()),
+                    mAuth.currentUser!!.uid,mAuth.currentUser!!.uid,wholeSaleItems))
+            }
+
         }
     }
 

@@ -11,6 +11,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.checkout.CartActivity
@@ -90,8 +91,7 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
         btnHomeAddItem.text = "0 Item = ${currencyFormat(getLanguage(ctx), getCountry(ctx)).format(0)}"
 
         adapter = HomeRecyclerViewAdapter(
-            ctx,
-            tempProductItems
+            ctx,tempProductItems
         ) {
             try {
                 if(!isScanning){
@@ -123,8 +123,6 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
             }
         }
 
-        rvHome.layoutManager = LinearLayoutManager(ctx)
-        rvHome.adapter = adapter
 
         tlHome.tabMode = TabLayout.MODE_FIXED
 
@@ -223,6 +221,20 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
             btnHomeScanCancel.startAnimation(normalClickAnimation())
             cancelScan()
         }
+
+        ivHomeView.onClick {
+            ivHomeView.startAnimation(normalClickAnimation())
+            val editor = sharedPreference.edit()
+            if (getProductView(ctx) == EProductView.LIST.toString()){
+                editor.putString(ESharedPreference.PRODUCT_VIEW.toString(),EProductView.GRID.toString())
+            }
+            else if (getProductView(ctx) == EProductView.GRID.toString()){
+                editor.putString(ESharedPreference.PRODUCT_VIEW.toString(),EProductView.LIST.toString())
+            }
+            editor.apply()
+            rvConfig()
+        }
+        rvConfig()
     }
 
     override fun onStart() {
@@ -295,6 +307,18 @@ class HomeFragment : Fragment() , MainView,ZXingScannerView.ResultHandler {
 
         if (savedInstanceState != null) {
             savedInstanceState.getStringArray("categoryItems")?.let { categoryItems.addAll(it) }
+        }
+    }
+
+    private fun rvConfig(){
+        if (getProductView(ctx) == EProductView.LIST.toString()){
+            ivHomeView.imageResource = R.drawable.ic_view_module_black_24dp
+            rvHome.layoutManager = LinearLayoutManager(ctx)
+            rvHome.adapter = adapter
+        }else{
+            ivHomeView.imageResource = R.drawable.ic_format_list_bulleted_black_24dp
+            rvHome.layoutManager = GridLayoutManager(ctx,3)
+            rvHome.adapter = adapter
         }
     }
 

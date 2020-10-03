@@ -19,6 +19,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference,private val context: Context){
@@ -35,48 +37,50 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
 
     }
 
-    fun saveTransaction(transaction: Transaction,payment: Payment, cartItems: ArrayList<Cart>, callback:(receipt:String)->Unit){
-        try{
-            for ((index,data) in cartItems.withIndex()){
-                if (cartItems[index].MANAGE_STOCK!!){
-                    postListener = object : ValueEventListener {
-                        override fun onCancelled(p0: DatabaseError) {
-                            database.removeEventListener(this)
+    suspend fun saveTransaction(transaction: Transaction,payment: Payment, cartItems: ArrayList<Cart>) : String{
+        return suspendCoroutine {ctx->
+            try{
+                for ((index,data) in cartItems.withIndex()){
+                    if (cartItems[index].MANAGE_STOCK!!){
+                        postListener = object : ValueEventListener {
+                            override fun onCancelled(p0: DatabaseError) {
+                                database.removeEventListener(this)
+                            }
+
+                            override fun onDataChange(p0: DataSnapshot) {
+                                var currentStock = 0F
+                                if (p0.exists())
+                                    currentStock = p0.value.toString().toFloat()
+
+                                database.child(ETable.PRODUCT.toString())
+                                    .child(getMerchantCredential(context))
+                                    .child(getMerchantCode(context))
+                                    .child(cartItems[index].PROD_KEY.toString())
+                                    .child(EProduct.STOCK.toString())
+                                    .setValue(currentStock - cartItems[index].Qty!!).addOnFailureListener {
+                                        view.response(it.message.toString())
+                                    }
+                                    .addOnSuccessListener {
+                                    }
+                            }
+
                         }
-
-                        override fun onDataChange(p0: DataSnapshot) {
-                            var currentStock = 0
-                            if (p0.exists())
-                                currentStock = p0.value.toString().toInt()
-
-                            database.child(ETable.PRODUCT.toString())
-                                .child(getMerchantCredential(context))
-                                .child(getMerchantCode(context))
-                                .child(cartItems[index].PROD_KEY.toString())
-                                .child(EProduct.STOCK.toString())
-                                .setValue(currentStock - cartItems[index].Qty!!).addOnFailureListener {
-                                    view.response(it.message.toString())
-                                }
-                                .addOnSuccessListener {
-                                }
-                        }
-
+                        database.child(ETable.PRODUCT.toString())
+                            .child(getMerchantCredential(context))
+                            .child(getMerchantCode(context))
+                            .child(cartItems[index].PROD_KEY.toString())
+                            .child(EProduct.STOCK.toString())
+                            .addListenerForSingleValueEvent(postListener)
                     }
-                    database.child(ETable.PRODUCT.toString())
-                        .child(getMerchantCredential(context))
-                        .child(getMerchantCode(context))
-                        .child(cartItems[index].PROD_KEY.toString())
-                        .child(EProduct.STOCK.toString())
-                        .addListenerForSingleValueEvent(postListener)
+                    if (index == cartItems.size-1)
+                        getTransPrimaryKey(transaction,payment,cartItems){
+                            ctx.resume(it)
+                        }
                 }
-                if (index == cartItems.size-1)
-                    getTransPrimaryKey(transaction,payment,cartItems){
-                        callback(it)
-                    }
+            }catch (e: Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
             }
-        }catch (e: Exception){
-            showError(context,e.message.toString())
-            e.printStackTrace()
         }
     }
 

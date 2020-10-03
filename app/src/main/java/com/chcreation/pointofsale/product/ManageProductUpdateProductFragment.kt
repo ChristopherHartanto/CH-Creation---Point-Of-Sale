@@ -217,13 +217,16 @@ class ManageProductUpdateProductFragment : Fragment(), MainView, AdapterView.OnI
         val gson = Gson()
         val wholeSaleItems = gson.toJson(wholeSaleItems)
 
-        presenter.saveProduct(Product(name,price,desc,cost,manageStock,product.STOCK,image,
-            product.PROD_CODE,product.UOM_CODE,categoryItems[positionSpinner],prodCode,
-            EStatusCode.ACTIVE.toString(),product.CREATED_DATE,
-            dateFormat().format(Date()), product.CREATED_BY,mAuth.currentUser!!.uid, wholeSaleItems),productKey)
+        GlobalScope.launch {
+            val log = "Update Product $name"
+            presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
 
-        val log = "Update Product $name"
-        presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+            presenter.saveProduct(Product(name,price,desc,cost,manageStock,product.STOCK,image,
+                product.PROD_CODE,product.UOM_CODE,categoryItems[positionSpinner],prodCode,
+                EStatusCode.ACTIVE.toString(),product.CREATED_DATE,
+                dateFormat().format(Date()), product.CREATED_BY,mAuth.currentUser!!.uid, wholeSaleItems),productKey)
+        }
+
     }
     private fun uploadImage(){
         if(filePath != null){
