@@ -22,75 +22,17 @@ import org.jetbrains.anko.toast
 
 class CustomReceiptActivity : AppCompatActivity(), MainView {
 
-    private var sincere = "Thank You"
-    private var template = ""
-    private lateinit var sharedPreference: SharedPreferences
-    private lateinit var presenter: Homepresenter
-    private lateinit var mAuth: FirebaseAuth
-    private lateinit var mDatabase : DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_custom_receipt)
 
-        mAuth = FirebaseAuth.getInstance()
-        mDatabase = FirebaseDatabase.getInstance().reference
-        sharedPreference =  getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
-        presenter = Homepresenter(this,mAuth,mDatabase,this)
-        supportActionBar?.title = "Receipt Template"
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        template = intent.extras!!.getString(ESharedPreference.CUSTOM_RECEIPT.toString()).toString()
-
-        if (template == ECustomReceipt.RECEIPT1.toString()){
-            cvCustomReceiptCustInfo.visibility = View.GONE
-            ivCustomReceiptImage.imageResource = R.drawable.receipt1
-            supportActionBar?.title = "Template 1"
-        }
-        else if (template == ECustomReceipt.RECEIPT2.toString()){
-            cvCustomReceiptCustInfo.visibility = View.VISIBLE
-            ivCustomReceiptImage.imageResource = R.drawable.receipt2
-            supportActionBar?.title = "Template 2"
-        }
-
-        cbCustomReceiptCustAddress.isChecked = getMerchantReceiptCustAddress(this)
-        cbCustomReceiptCustName.isChecked = getMerchantReceiptCustName(this)
-        cbCustomReceiptCustNoTel.isChecked = getMerchantReceiptCustNoTel(this)
-        cbCustomReceiptShowMerchantImage.isChecked = getMerchantReceiptImage(this)
-
-        btnCustomReceiptSave.onClick {
-            btnCustomReceiptSave.startAnimation(normalClickAnimation())
-
-            if (template == "")
-                toast("Please Try Again Later")
-            else{
-                val sincere = etCustomReceiptSincere.text.toString()
-                presenter.saveSincere(sincere){
-                    if (it){
-                        val editor = sharedPreference.edit()
-                        editor.putString(ESharedPreference.CUSTOM_RECEIPT.toString(),template)
-                        editor.putString(ESharedPreference.SINCERE.toString(),sincere)
-                        editor.putBoolean(ESharedPreference.CUSTOMER_NAME.toString(),cbCustomReceiptCustName.isChecked)
-                        editor.putBoolean(ESharedPreference.CUSTOMER_ADDRESS.toString(),cbCustomReceiptCustAddress.isChecked)
-                        editor.putBoolean(ESharedPreference.CUSTOMER_NO_TEL.toString(),cbCustomReceiptCustNoTel.isChecked)
-                        editor.putBoolean(ESharedPreference.RECEIPT_MERCHANT_ICON.toString(),cbCustomReceiptShowMerchantImage.isChecked)
-                        editor.apply()
-                        toast("Save Success")
-                        finish()
-                    }else
-                        toast("Failed to Save")
-                }
-            }
-        }
     }
 
     override fun onStart() {
         super.onStart()
 
-        if (sharedPreference.getString(ESharedPreference.SINCERE.toString(),"") != "")
-            sincere  = sharedPreference.getString(ESharedPreference.SINCERE.toString(),"").toString()
-
-        etCustomReceiptSincere.setText(sincere)
     }
 
 
@@ -112,6 +54,3 @@ class CustomReceiptActivity : AppCompatActivity(), MainView {
 }
 
 
-data class Sincere(
-    var SINCERE: String? = ""
-)

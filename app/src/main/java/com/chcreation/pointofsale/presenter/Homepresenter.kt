@@ -10,6 +10,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, private val database: DatabaseReference, private val  context: Context){
 
@@ -20,6 +22,39 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
         override fun onDataChange(p0: DataSnapshot) {
         }
 
+    }
+
+    suspend fun getSincere() : String{
+        return suspendCoroutine {ctx->
+            try{
+                postListener = object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                        database.removeEventListener(this)
+                        ctx.resume("Thank You")
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot) {
+                        if (p0.exists()){
+                            val item = p0.getValue(Sincere::class.java)
+                            if (item != null) {
+                                ctx.resume(item.SINCERE.toString())
+                            }else
+                                ctx.resume("Thank You")
+                        }else
+                            ctx.resume("Thank You")
+                    }
+
+                }
+
+                database.child(ETable.SINCERE.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchantCode(context))
+                    .addListenerForSingleValueEvent(postListener)
+            }catch (e: Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+            }
+        }
     }
 
     suspend fun retrieveProducts(){
@@ -318,23 +353,24 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
         }
     }
 
-    fun saveSincere(sincere:String,callBack:(success:Boolean) -> Unit){
-        try{
-
-            database.child(ETable.SINCERE.toString())
-                .child(getMerchantCredential(context))
-                .child(getMerchantCode(context))
-                .child(ESincere.SINCERE.toString())
-                .setValue(sincere)
-                .addOnSuccessListener {
-                    callBack(true)
-                }
-                .addOnFailureListener {
-                    callBack(false)
-                }
-        }catch (e:java.lang.Exception){
-            showError(context,e.message.toString())
-            e.printStackTrace()
+    suspend fun saveSincere(sincere:String) : Boolean{
+        return suspendCoroutine {ctx->
+            try{
+                database.child(ETable.SINCERE.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchantCode(context))
+                    .child(ESincere.SINCERE.toString())
+                    .setValue(sincere)
+                    .addOnSuccessListener {
+                        ctx.resume(true)
+                    }
+                    .addOnFailureListener {
+                        ctx.resume(false)
+                    }
+            }catch (e:java.lang.Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+            }
         }
     }
 

@@ -98,9 +98,17 @@ class MainActivity : AppCompatActivity(), MainView, GenerateReport {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_check_out,R.id.nav_manage_product,R.id.nav_catalog,R.id.nav_customer,
-                R.id.nav_transaction,R.id.nav_custom_receipt,R.id.nav_analytics,R.id.nav_activity_logs,
-                R.id.nav_user_list,R.id.nav_merchant_list,R.id.nav_about
+                R.id.nav_check_out
+                ,R.id.nav_manage_product
+                ,R.id.nav_catalog
+                ,R.id.nav_customer
+                ,R.id.nav_transaction
+                ,R.id.nav_receipt_settings
+                ,R.id.nav_analytics
+                ,R.id.nav_activity_logs
+                ,R.id.nav_user_list
+                ,R.id.nav_merchant_list
+                ,R.id.nav_about
             ), drawerLayout
         )
         mAuth = FirebaseAuth.getInstance()

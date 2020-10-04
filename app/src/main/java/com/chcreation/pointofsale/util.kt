@@ -39,10 +39,16 @@ fun removeAllSharedPreference(context: Context){
     editor.putString(ESharedPreference.MERCHANT_MEMBER_STATUS.toString(),EMerchantMemberStatus.FREE_TRIAL.toString())
     editor.putString(ESharedPreference.LANGUAGE.toString(),Locale.getDefault().language)
     editor.putString(ESharedPreference.COUNTRY.toString(),Locale.getDefault().country)
+    editor.putInt(ESharedPreference.PRINTER_DPI.toString(),203)
+    editor.putFloat(ESharedPreference.PRINTER_WIDTH.toString(),48F)
+    editor.putInt(ESharedPreference.PRINTER_CHAR_LINE.toString(),32)
     editor.putBoolean(ESharedPreference.CUSTOMER_ADDRESS.toString(),false)
     editor.putBoolean(ESharedPreference.CUSTOMER_NO_TEL.toString(),false)
     editor.putBoolean(ESharedPreference.CUSTOMER_NAME.toString(),false)
     editor.putBoolean(ESharedPreference.RECEIPT_MERCHANT_ICON.toString(),false)
+    editor.putBoolean(ESharedPreference.RECEIPT_NOTE.toString(),false)
+    editor.putBoolean(ESharedPreference.RECEIPT_NO.toString(),true)
+    editor.putBoolean(ESharedPreference.RECEIPT_DATE.toString(),true)
     editor.apply()
 }
 
@@ -193,6 +199,41 @@ fun getMerchantMemberDeadline(context: Context) : String{
     sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
 
     return sharedPreference.getString(ESharedPreference.MEMBER_DEADLINE.toString(),"").toString()
+}
+
+fun getPrintDpi(context: Context) : Int{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getInt(ESharedPreference.PRINTER_DPI.toString(),203)
+}
+
+fun getPrintWidth(context: Context) : Float{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getFloat(ESharedPreference.PRINTER_WIDTH.toString(),48F)
+}
+fun getPrintCharLine(context: Context) : Int{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getInt(ESharedPreference.PRINTER_CHAR_LINE.toString(),32)
+}
+
+fun getReceiptNo(context: Context) : Boolean{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getBoolean(ESharedPreference.RECEIPT_NO.toString(),true)
+}
+
+fun getReceiptDate(context: Context) : Boolean{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getBoolean(ESharedPreference.RECEIPT_DATE.toString(),true)
+}
+
+fun getReceiptNote(context: Context) : Boolean{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getBoolean(ESharedPreference.RECEIPT_NOTE.toString(),false)
 }
 
 fun normalClickAnimation() : AlphaAnimation = AlphaAnimation(10F,0.5F)

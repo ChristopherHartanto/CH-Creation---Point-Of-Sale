@@ -274,6 +274,7 @@ class CartActivity : AppCompatActivity() {
     private fun deleteItem(position: Int){
 
         cartItems.removeAt(position)
+        imageItems.removeAt(position)
 
         totalPrice = sumPrice()
         totalQty = countQty()

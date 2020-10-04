@@ -6,7 +6,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.*
 import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.Environment
+import android.os.Handler
 import android.view.PixelCopy
 import android.view.View
 import android.widget.Toast
@@ -33,6 +36,7 @@ import com.chcreation.pointofsale.view.MainView
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothConnection
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
+import com.dantsu.escposprinter.exceptions.EscPosConnectionException
 import com.dantsu.escposprinter.textparser.PrinterTextParserImg
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -44,13 +48,17 @@ import kotlinx.android.synthetic.main.activity_receipt.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.selector
+import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.toast
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URL
 import java.util.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 class ReceiptActivity : AppCompatActivity(), MainView {
@@ -105,64 +113,27 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         btnReceiptShare.onClick {
             btnReceiptShare.startAnimation(normalClickAnimation())
             loading()
-            val currentDate = dateFormat().format(Date())
-
-            selector("Share", arrayListOf("Print","Share as Screenshot")){dialogInterface, i ->
-                when(i){
-                    0 ->{
-                        if (getMerchantMemberStatus(this@ReceiptActivity) == EMerchantMemberStatus.FREE_TRIAL.toString()){
-                            alert ("Upgrade to Premium for Print Receipt"){
-                                title = "Premium Feature!"
-                                yesButton {
-                                    sendEmail("Upgrade Premium",
-                                        "Merchant: ${getMerchantName(this@ReceiptActivity)}",this@ReceiptActivity)
-                                }
-                                noButton {  }
-                            }.show()
-                        }else if (getMerchantMemberDeadline(this@ReceiptActivity) == ""){
-                            alert ("Upgrade to Premium for Print Receipt"){
-                                title = "Premium Feature!"
-                                yesButton {
-                                    sendEmail("Upgrade Premium",
-                                        "Merchant: ${getMerchantName(this@ReceiptActivity)}",this@ReceiptActivity)
-                                }
-
-                                noButton {  }
-                            }.show()
-                        }else if (compareDate(getMerchantMemberDeadline(this@ReceiptActivity),currentDate) == 2){
-                            alert ("Your Premium Member Has Ended, Do You Want to Extend?"){
-                                title = "Premium End"
-                                yesButton {
-                                    sendEmail("Extend Premium",
-                                        "Merchant: ${getMerchantName(ctx)}",ctx)
-                                }
-
-                                noButton {  }
-                            }.show()
-                            endLoading()
-                        } else {
-                            if (ContextCompat.checkSelfPermission(this@ReceiptActivity, android.Manifest.permission.BLUETOOTH)
-                                != PackageManager.PERMISSION_GRANTED)
-                                ActivityCompat.requestPermissions(this@ReceiptActivity,
-                                    arrayOf(android.Manifest.permission.BLUETOOTH),BLUETOOTH_PERMISSION
-                                )
-                            else
-                                selectPrinter()
-                        }
-
-                    }
-                    1->{
-                        getBitmapFromView(layoutReceipt.rootView,this@ReceiptActivity){bitmap,uri->
-                            shareImage(uri)
-                            endLoading()
-                        }
-                        Handler().postDelayed(Runnable { endLoading() }, 1000)
-                    }
-                    else -> endLoading()
+            selector("Share", arrayListOf("Other Apps")){dialogInterface, i ->
+                getBitmapFromView(layoutReceipt.rootView,this@ReceiptActivity){bitmap,uri->
+                    shareImage(uri)
+                    endLoading()
                 }
             }
+            Handler().postDelayed({endLoading()},2000)
 
+        }
 
+        btnReceiptPrint.onClick {
+            if (ContextCompat.checkSelfPermission(this@ReceiptActivity, android.Manifest.permission.BLUETOOTH)
+                != PackageManager.PERMISSION_GRANTED)
+                ActivityCompat.requestPermissions(this@ReceiptActivity,
+                    arrayOf(android.Manifest.permission.BLUETOOTH),BLUETOOTH_PERMISSION
+                )
+            else{
+                selector("Print", arrayListOf("Receipt","Kitchen Ticket")){dialogInterface, i ->
+                    selectPrinter(i)
+                }
+            }
         }
     }
 
@@ -175,12 +146,13 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 presenter.retrieveTransaction(transCode)
             }
         }
-        else{ // from transaction
+        else if (transCodeItems.elementAtOrNull(transPosition) != null){ // from transaction
             GlobalScope.launch {
                 presenter.retrieveTransactionListPayments(transCodeItems[transPosition])
                 presenter.retrieveTransaction(transCodeItems[transPosition])
             }
-        }
+        }else
+            finish()
     }
 
     override fun onRequestPermissionsResult(
@@ -191,14 +163,16 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == BLUETOOTH_PERMISSION){
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                selectPrinter()
+                selector("Print", arrayListOf("Receipt","Kitchen Ticket")){dialogInterface, i ->
+                    selectPrinter(i)
+                }
             }
             else
                 toast("Permission Denied")
         }
     }
 
-    private fun selectPrinter(){
+    private fun selectPrinter(type: Int){
         val bPrinter = BluetoothPrintersConnections()
         val printerList = arrayListOf<String>()
         if (bPrinter.list == null){
@@ -207,20 +181,23 @@ class ReceiptActivity : AppCompatActivity(), MainView {
             bPrinter.list.forEach { printerList.add(it.device.name) }
             val title = if (bPrinter.list.isEmpty()) "No Device Available" else "Select Printer"
             selector(title, printerList){dialogInterface, i ->
-                if (bPrinter.list.elementAtOrNull(i) != null && purchasedItems.size > 0){
+                if (bPrinter.list != null && purchasedItems.size > 0){
                     cvReceiptPrint.visibility = View.VISIBLE
                     tvReceiptPrinterName.text = bPrinter.list[i].device.name
-                    var message = ""
                     GlobalScope.launch (Dispatchers.Main){
-                        val job = GlobalScope.launch (Dispatchers.Default){
-                            sysPrintReceipt(bPrinter.list[i].connect(),purchasedItems){
-                                message = it
+                        try {
+                            if (bPrinter.list[i] == null){
+                                toast("Please Check Your Printer!")
+                            }else{
+                                val cPrinter = bPrinter.list[i].connect()
+                                val message = sysPrintReceipt(cPrinter,type,purchasedItems)
+                                cvReceiptPrint.visibility = View.GONE
+                                toast(message)
                             }
+                        }catch (e: EscPosConnectionException){
+                            toast(e.message.toString())
+                            cvReceiptPrint.visibility = View.GONE
                         }
-                        job.join()
-                        cvReceiptPrint.visibility = View.GONE
-                        toast(message)
-                        finish()
                     }
                 }
                 else if (purchasedItems.size == 0){
@@ -245,7 +222,8 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
     private fun defaultReceipt(bluetoothConnection: BluetoothConnection,purchasedItems: MutableList<Cart>,callback: (message:String) -> Unit){
         try{
-            val printer = EscPosPrinter(bluetoothConnection,203,48F,32)
+            val printer = EscPosPrinter(bluetoothConnection, getPrintDpi(this), getPrintWidth(this),
+                getPrintCharLine(this))
             var textReceipt = ""
             val discount = boughtList.DISCOUNT!!
             val tax = boughtList.TAX!!
@@ -265,18 +243,20 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
             textReceipt += "[L]\n[L]Cashier: ${user.NAME}\n"
 
-            if (boughtList.CUST_CODE != "") {
-                if (getMerchantReceiptCustName(this))
-                    textReceipt += "[L]Customer: ${customer.NAME}\n"
+            if (getMerchantReceiptCustName(this))
+                textReceipt += "[L]Customer: ${customer.NAME}\n"
 
-                if (getMerchantReceiptCustAddress(this))
-                    textReceipt += "[L]Address: ${customer.ADDRESS}\n"
+            if (getMerchantReceiptCustAddress(this))
+                textReceipt += "[L]Address: ${customer.ADDRESS}\n"
 
-                if (getMerchantReceiptCustNoTel(this))
-                    textReceipt += "[L]No Tel: ${customer.PHONE}\n"
+            if (getMerchantReceiptCustNoTel(this))
+                textReceipt += "[L]No Tel: ${customer.PHONE}\n"
+
+            textReceipt += "[C]"
+            for (data in 1..getPrintCharLine(this)){
+                textReceipt += "-"
             }
-
-            textReceipt += "[C]--------------------------------\n"
+            textReceipt += "\n"
 
             for (data in purchasedItems){
                 textReceipt += "[L]<b>${data.NAME}</b>[R]${currencyFormat(getLanguage(this), getCountry(this))
@@ -285,7 +265,12 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 textReceipt +="[L]  ${if (isInt(data.Qty!!)) data.Qty!!.toInt() else data.Qty}x${currencyFormat(getLanguage(this), getCountry(this))
                     .format((if (data.WHOLE_SALE_PRICE == -1F) data.PRICE!! else data.WHOLE_SALE_PRICE!!) )}\n"
             }
-            textReceipt += "[C]--------------------------------\n"
+
+            textReceipt += "[C]"
+            for (data in 1..getPrintCharLine(this)){
+                textReceipt += "-"
+            }
+            textReceipt += "\n"
 
             if (tax != 0F || discount != 0F)
                 textReceipt += "[L]<b>SubTotal:</b>[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)}</b>\n"
@@ -294,8 +279,13 @@ class ReceiptActivity : AppCompatActivity(), MainView {
             if (tax != 0F)
                 textReceipt += "[L]<b>Tax:</b>[R]${currencyFormat(getLanguage(this), getCountry(this)).format(tax)}\n"
 
-            textReceipt += "[L]<b>Total:</b>[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}</b>\n" +
-                    "[C]--------------------------------\n"
+            textReceipt += "[L]<b>Total:</b>[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}</b>\n"
+
+            textReceipt += "[C]"
+            for (data in 1..getPrintCharLine(this)){
+                textReceipt += "-"
+            }
+            textReceipt += "\n"
 
             textReceipt += "[L]<b>Amount:</b>"
 
@@ -303,7 +293,11 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 textReceipt += "[R]${currencyFormat(getLanguage(this), getCountry(this)).format(payment.TOTAL_RECEIVED)}\n"
             }
 
-            textReceipt += "[C]--------------------------------\n"
+            textReceipt += "[C]"
+            for (data in 1..getPrintCharLine(this)){
+                textReceipt += "-"
+            }
+            textReceipt += "\n"
 
             if (totalOutstanding > 0){
                 textReceipt += "[L]Pending:[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalOutstanding)}</b>\n"
@@ -315,12 +309,16 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 textReceipt += "[L]Changes:[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPaid - totalPayment)}</b>\n"
             }
 
-            if (receiptTemplate == ECustomReceipt.RECEIPT2.toString())
-                textReceipt += "[L]Note:${boughtList.NOTE}\n"
+            if (getReceiptNote(this))
+                textReceipt += "[L]Note:${boughtList.NOTE}\n[L]\n"
 
-            textReceipt += "[L]\n[C]Receipt:${receiptFormat(receiptCode)}\n" +
-                    "[C]${parseDateFormatFull(boughtList.UPDATED_DATE.toString())}\n" +
-                    "[L]\n[C]${sincere}"
+            if (getReceiptNo(this))
+                textReceipt += "[C]Receipt:${receiptFormat(receiptCode)}\n"
+
+            if (getReceiptDate(this))
+                textReceipt += "[C]${parseDateFormatFull(boughtList.UPDATED_DATE.toString())}\n"
+
+            textReceipt +=  "[L]\n[C]${sincere}\n"
 
             printer.printFormattedTextAndCut(textReceipt)
             callback("Print End")
@@ -360,7 +358,8 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
     private fun backToSchoolReceipt(bluetoothConnection: BluetoothConnection,purchasedItems: MutableList<Cart>,callback: (message:String) -> Unit){ // Back To School Store 🎒🏫
         try{
-            val printer = EscPosPrinter(bluetoothConnection,203,48F,32)
+            val printer = EscPosPrinter(bluetoothConnection, getPrintDpi(this), getPrintWidth(this),
+                getPrintCharLine(this))
             var textReceipt = ""
             val discount = boughtList.DISCOUNT!!
             val tax = boughtList.TAX!!
@@ -380,18 +379,20 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
             textReceipt += "[L]\n[L]Cashier: ${user.NAME}\n"
 
-            if (boughtList.CUST_CODE != "") {
-                if (getMerchantReceiptCustName(this))
-                    textReceipt += "[L]Customer: ${customer.NAME}\n"
+            if (getMerchantReceiptCustName(this))
+                textReceipt += "[L]Customer: ${customer.NAME}\n"
 
-                if (getMerchantReceiptCustAddress(this))
-                    textReceipt += "[L]Address: ${customer.ADDRESS}\n"
+            if (getMerchantReceiptCustAddress(this))
+                textReceipt += "[L]Address: ${customer.ADDRESS}\n"
 
-                if (getMerchantReceiptCustNoTel(this))
-                    textReceipt += "[L]No Tel: ${customer.PHONE}\n"
+            if (getMerchantReceiptCustNoTel(this))
+                textReceipt += "[L]No Tel: ${customer.PHONE}\n"
+
+            textReceipt += "[C]"
+            for (data in 1..getPrintCharLine(this)){
+                textReceipt += "-"
             }
-
-            textReceipt += "[C]--------------------------------\n"
+            textReceipt += "\n"
 
             for (data in purchasedItems){
                 textReceipt += "[L]<b>${data.NAME}</b>[R]${currencyFormat(getLanguage(this), getCountry(this))
@@ -400,7 +401,12 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 textReceipt +="[L]  ${if (isInt(data.Qty!!)) data.Qty!!.toInt() else data.Qty}x${currencyFormat(getLanguage(this), getCountry(this))
                     .format((if (data.WHOLE_SALE_PRICE == -1F) data.PRICE!! else data.WHOLE_SALE_PRICE!!) )}\n"
             }
-            textReceipt += "[C]--------------------------------\n"
+
+            textReceipt += "[C]"
+            for (data in 1..getPrintCharLine(this)){
+                textReceipt += "-"
+            }
+            textReceipt += "\n"
 
             if (tax != 0F || discount != 0F)
                 textReceipt += "[L]<b>SubTotal:</b>[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)}</b>\n"
@@ -409,8 +415,13 @@ class ReceiptActivity : AppCompatActivity(), MainView {
             if (tax != 0F)
                 textReceipt += "[L]<b>Tax:</b>[R]${currencyFormat(getLanguage(this), getCountry(this)).format(tax)}\n"
 
-            textReceipt += "[L]<b>Total:</b>[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}</b>\n" +
-                    "[C]--------------------------------\n"
+            textReceipt += "[L]<b>Total:</b>[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}</b>\n"
+
+            textReceipt += "[C]"
+            for (data in 1..getPrintCharLine(this)){
+                textReceipt += "-"
+            }
+            textReceipt += "\n"
 
             textReceipt += "[L]<b>Amount:</b>"
 
@@ -418,7 +429,11 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 textReceipt += "[R]${currencyFormat(getLanguage(this), getCountry(this)).format(payment.TOTAL_RECEIVED)}\n"
             }
 
-            textReceipt += "[C]--------------------------------\n"
+            textReceipt += "[C]"
+            for (data in 1..getPrintCharLine(this)){
+                textReceipt += "-"
+            }
+            textReceipt += "\n"
 
             if (totalOutstanding > 0){
                 textReceipt += "[L]Pending:[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalOutstanding)}</b>\n"
@@ -430,12 +445,16 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 textReceipt += "[L]Changes:[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPaid - totalPayment)}</b>\n"
             }
 
-            if (receiptTemplate == ECustomReceipt.RECEIPT2.toString())
-                textReceipt += "[L]Note:${boughtList.NOTE}\n"
+            if (getReceiptNote(this))
+                textReceipt += "[L]Note:${boughtList.NOTE}\n[L]\n"
 
-            textReceipt += "[L]\n[C]Receipt:${receiptFormat(receiptCode)}\n" +
-                    "[C]${parseDateFormatFull(boughtList.UPDATED_DATE.toString())}\n" +
-                    "[L]\n[C]${sincere}\n"
+            if (getReceiptNo(this))
+                textReceipt += "[C]Receipt:${receiptFormat(receiptCode)}\n"
+
+            if (getReceiptDate(this))
+                textReceipt += "[C]${parseDateFormatFull(boughtList.UPDATED_DATE.toString())}\n"
+
+            textReceipt +=  "[L]\n[C]${sincere}\n"
 
             textReceipt += "[L]\n[C]<qrcode size='20'>https://instagram.com/william_hartanto999?igshid=1sp4iu6eo925c</qrcode>\n"
 
@@ -448,16 +467,172 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         }
     }
 
-    private fun sysPrintReceipt(bluetoothConnection: BluetoothConnection,purchasedItems: MutableList<Cart>,callback: (message:String) -> Unit){
-        if (getMerchantCode(this) == "Back To School Store \uD83C\uDF92\uD83C\uDFEB")
-            backToSchoolReceipt(bluetoothConnection,purchasedItems){
-                callback(it)
+    private fun printKitchen(bluetoothConnection: BluetoothConnection,callback: (message:String) -> Unit){
+        try{
+            val printer = EscPosPrinter(bluetoothConnection, getPrintDpi(this), getPrintWidth(this),
+                getPrintCharLine(this))
+
+            var textReceipt = ""
+
+            textReceipt += "[C]KITCHEN\n[L]\n" +
+                    "[L]Date:${parseDateFormatFull(boughtList.UPDATED_DATE.toString())}\n" +
+                    "[L]Receipt:${receiptFormat(receiptCode)}\n" +
+                    "[L]Cashier:${user.NAME}\n"
+
+            textReceipt += "[C]"
+            for (data in 1..getPrintCharLine(this)){
+                textReceipt += "-"
             }
-        else
-            defaultReceipt(bluetoothConnection,purchasedItems){
-                callback(it)
+            textReceipt += "\n[L]\n"
+
+            for (data in purchasedItems){
+                textReceipt +="[L]${data.NAME}" +
+                        "[R]x ${if (isInt(data.Qty!!)) data.Qty!!.toInt() else data.Qty}\n"
             }
+            textReceipt += "[L]\n[C]--------------------------------"
+            printer.printFormattedText(textReceipt)
+            callback("Print End")
+        }catch (e: java.lang.Exception){
+            callback(e.message.toString())
+            e.printStackTrace()
+        }
     }
+
+    private suspend fun sysPrintReceipt(bluetoothConnection: BluetoothConnection
+                                ,type: Int
+                                ,purchasedItems: MutableList<Cart>) : String{
+        return suspendCoroutine {ctx->
+
+            when {
+                type == 1 -> {
+                    printKitchen(bluetoothConnection){
+                        ctx.resume(it)
+                    }
+                }
+                getMerchantCode(this) == "Back To School Store \uD83C\uDF92\uD83C\uDFEB" -> backToSchoolReceipt(bluetoothConnection,purchasedItems){
+                    ctx.resume(it)
+                }
+                else -> defaultReceipt(bluetoothConnection,purchasedItems){
+                    ctx.resume(it)
+                }
+            }
+        }
+    }
+
+
+//    private fun fetchData(){
+//        if (getMerchantReceiptImage(this))
+//            layoutReceiptMerchantImage.visibility = View.VISIBLE
+//        else
+//            layoutReceiptMerchantImage.visibility = View.GONE
+//
+//        layoutReceiptCustomer.visibility = View.GONE
+//        layoutReceiptCustomerAddress.visibility = View.GONE
+//        layoutReceiptCustomerNoTel.visibility = View.GONE
+//
+//        layoutReceiptNote.visibility = View.GONE
+//
+//        GlobalScope.launch {
+//            presenter.retrieveCashier(boughtList.CREATED_BY.toString())
+//        }
+//        val gson = Gson()
+//        val arrayCartType = object : TypeToken<MutableList<Cart>>() {}.type
+//        purchasedItems = gson.fromJson(boughtList.DETAIL,arrayCartType)
+//
+//        adapter = CartRecyclerViewAdapter(this,purchasedItems){
+//
+//        }
+//        rvReceipt.adapter = adapter
+//        rvReceipt.layoutManager = LinearLayoutManager(this)
+//
+//        if (getMerchantImage(this) == "")
+//            layoutReceiptMerchantImage.visibility = View.GONE
+//        else
+//            Glide.with(this).load(getMerchantImage(this)).listener(object :
+//                RequestListener<String, GlideDrawable> {
+//                override fun onException(
+//                    e: java.lang.Exception?,
+//                    model: String?,
+//                    target: Target<GlideDrawable>?,
+//                    isFirstResource: Boolean
+//                ): Boolean {
+//                    pbReceiptMerchantImage.visibility = View.GONE
+//                    return false
+//                }
+//
+//                override fun onResourceReady(
+//                    resource: GlideDrawable?,
+//                    model: String?,
+//                    target: Target<GlideDrawable>?,
+//                    isFromMemoryCache: Boolean,
+//                    isFirstResource: Boolean
+//                ): Boolean {
+//                    pbReceiptMerchantImage.visibility = View.GONE
+//                    ivReceiptMerchantImage.visibility = View.VISIBLE
+//                    return false
+//                }
+//
+//            }).into(ivReceiptMerchantImage)
+//        tvReceiptCashier.text = mAuth.currentUser?.displayName
+//
+//        val discount = boughtList.DISCOUNT!!
+//        val tax = boughtList.TAX!!
+//        val totalPrice = boughtList.TOTAL_PRICE!!
+//        val totalOutstanding = boughtList.TOTAL_OUTSTANDING!!
+//
+//        val totalPayment = totalPrice - discount + tax
+//
+//        if (discount != 0F || tax != 0F){
+//            tvReceiptSubTotal.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)
+//            tvReceiptSubTotalTitle.visibility = View.VISIBLE
+//            tvReceiptSubTotal.visibility = View.VISIBLE
+//        }
+//        else{
+//            tvReceiptSubTotalTitle.visibility = View.GONE
+//            tvReceiptSubTotal.visibility = View.GONE
+//        }
+//
+//        if (discount == 0F){
+//            tvReceiptDiscount.visibility = View.GONE
+//            tvReceiptDiscountTitle.visibility = View.GONE
+//        }
+//        if (tax == 0F){
+//            tvReceiptTax.visibility = View.GONE
+//            tvReceiptTaxTitle.visibility = View.GONE
+//        }
+//
+//        tvReceiptDiscount.text = currencyFormat(getLanguage(this), getCountry(this)).format(discount)
+//        tvReceiptTax.text = currencyFormat(getLanguage(this), getCountry(this)).format(tax)
+//        tvReceiptTotal.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)
+////
+////        if (note != "")
+////            tvReceiptNote.text = "$note"
+////        else{
+////            layoutReceiptNote.visibility = View.GONE
+////        }
+////        if (transCode != 0){ // 0 berarti new receipt
+////            if (totalReceived >= totalPayment)
+////                tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalReceived-totalPayment)
+////            else{
+////                tvReceiptAmountReceivedTitle.text = "Pending:"
+////                tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalPayment-totalReceived)
+////            }
+////        }
+//
+//        if (totalOutstanding > 0F){
+//            tvReceiptAmountReceivedTitle.text = "Pending:"
+//            tvReceiptChanges.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalOutstanding)
+//        }else{
+//            var totalPaid = 0F
+//            for (data in paymentLists){
+//                totalPaid += data.TOTAL_RECEIVED!!
+//            }
+//            tvReceiptChanges.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPaid - totalPayment)
+//        }
+//        tvReceiptTransCode.text = "Receipt: ${receiptFormat(receiptCode)}"
+//        tvReceiptDate.text = parseDateFormatFull(boughtList.UPDATED_DATE.toString())
+//        tvReceiptSincere.text = sincere
+//    }
 
 
     private fun fetchData(){
@@ -466,138 +641,24 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         else
             layoutReceiptMerchantImage.visibility = View.GONE
 
-        layoutReceiptCustomer.visibility = View.GONE
-        layoutReceiptCustomerAddress.visibility = View.GONE
-        layoutReceiptCustomerNoTel.visibility = View.GONE
-
-        layoutReceiptNote.visibility = View.GONE
-
-        GlobalScope.launch {
-            presenter.retrieveCashier(boughtList.CREATED_BY.toString())
-        }
-        val gson = Gson()
-        val arrayCartType = object : TypeToken<MutableList<Cart>>() {}.type
-        purchasedItems = gson.fromJson(boughtList.DETAIL,arrayCartType)
-
-        adapter = CartRecyclerViewAdapter(this,purchasedItems){
-
-        }
-        rvReceipt.adapter = adapter
-        rvReceipt.layoutManager = LinearLayoutManager(this)
-
-        if (getMerchantImage(this) == "")
-            layoutReceiptMerchantImage.visibility = View.GONE
-        else
-            Glide.with(this).load(getMerchantImage(this)).listener(object :
-                RequestListener<String, GlideDrawable> {
-                override fun onException(
-                    e: java.lang.Exception?,
-                    model: String?,
-                    target: Target<GlideDrawable>?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    pbReceiptMerchantImage.visibility = View.GONE
-                    return false
-                }
-
-                override fun onResourceReady(
-                    resource: GlideDrawable?,
-                    model: String?,
-                    target: Target<GlideDrawable>?,
-                    isFromMemoryCache: Boolean,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    pbReceiptMerchantImage.visibility = View.GONE
-                    ivReceiptMerchantImage.visibility = View.VISIBLE
-                    return false
-                }
-
-            }).into(ivReceiptMerchantImage)
-        tvReceiptCashier.text = mAuth.currentUser?.displayName
-
-        val discount = boughtList.DISCOUNT!!
-        val tax = boughtList.TAX!!
-        val totalPrice = boughtList.TOTAL_PRICE!!
-        val totalOutstanding = boughtList.TOTAL_OUTSTANDING!!
-
-        val totalPayment = totalPrice - discount + tax
-
-        if (discount != 0F || tax != 0F){
-            tvReceiptSubTotal.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)
-            tvReceiptSubTotalTitle.visibility = View.VISIBLE
-            tvReceiptSubTotal.visibility = View.VISIBLE
-        }
-        else{
-            tvReceiptSubTotalTitle.visibility = View.GONE
-            tvReceiptSubTotal.visibility = View.GONE
-        }
-
-        if (discount == 0F){
-            tvReceiptDiscount.visibility = View.GONE
-            tvReceiptDiscountTitle.visibility = View.GONE
-        }
-        if (tax == 0F){
-            tvReceiptTax.visibility = View.GONE
-            tvReceiptTaxTitle.visibility = View.GONE
-        }
-
-        tvReceiptDiscount.text = currencyFormat(getLanguage(this), getCountry(this)).format(discount)
-        tvReceiptTax.text = currencyFormat(getLanguage(this), getCountry(this)).format(tax)
-        tvReceiptTotal.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)
-//
-//        if (note != "")
-//            tvReceiptNote.text = "$note"
-//        else{
-//            layoutReceiptNote.visibility = View.GONE
-//        }
-//        if (transCode != 0){ // 0 berarti new receipt
-//            if (totalReceived >= totalPayment)
-//                tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalReceived-totalPayment)
-//            else{
-//                tvReceiptAmountReceivedTitle.text = "Pending:"
-//                tvReceiptChanges.text = indonesiaCurrencyFormat().format(totalPayment-totalReceived)
-//            }
-//        }
-
-        if (totalOutstanding > 0F){
-            tvReceiptAmountReceivedTitle.text = "Pending:"
-            tvReceiptChanges.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalOutstanding)
-        }else{
-            var totalPaid = 0F
-            for (data in paymentLists){
-                totalPaid += data.TOTAL_RECEIVED!!
-            }
-            tvReceiptChanges.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPaid - totalPayment)
-        }
-        tvReceiptTransCode.text = "Receipt: ${receiptFormat(receiptCode)}"
-        tvReceiptDate.text = parseDateFormatFull(boughtList.UPDATED_DATE.toString())
-        tvReceiptSincere.text = sincere
-    }
-
-
-    private fun fetchData2(){
-        if (getMerchantReceiptImage(this))
-            layoutReceiptMerchantImage.visibility = View.VISIBLE
-        else
-            layoutReceiptMerchantImage.visibility = View.GONE
-
         layoutReceiptNote.visibility = View.VISIBLE
 
+        if (getMerchantReceiptCustName(this))
+            layoutReceiptCustomer.visibility = View.VISIBLE
+        else
+            layoutReceiptCustomer.visibility = View.GONE
+
+        if (getMerchantReceiptCustAddress(this))
+            layoutReceiptCustomerAddress.visibility = View.VISIBLE
+        else
+            layoutReceiptCustomerAddress.visibility = View.GONE
+
+        if (getMerchantReceiptCustNoTel(this))
+            layoutReceiptCustomerNoTel.visibility = View.VISIBLE
+        else
+            layoutReceiptCustomerNoTel.visibility = View.GONE
+
         if (boughtList.CUST_CODE != "") {
-            if (getMerchantReceiptCustName(this))
-                layoutReceiptCustomer.visibility = View.VISIBLE
-            else
-                layoutReceiptCustomer.visibility = View.GONE
-
-            if (getMerchantReceiptCustAddress(this))
-                layoutReceiptCustomerAddress.visibility = View.VISIBLE
-            else
-                layoutReceiptCustomerAddress.visibility = View.GONE
-
-            if (getMerchantReceiptCustNoTel(this))
-                layoutReceiptCustomerNoTel.visibility = View.VISIBLE
-            else
-                layoutReceiptCustomerNoTel.visibility = View.GONE
 
             tvReceiptCustomer.text = customer.NAME.toString()
             tvReceiptCustomerAddress.text = customer.ADDRESS.toString()
@@ -710,10 +771,20 @@ class ReceiptActivity : AppCompatActivity(), MainView {
             }
             tvReceiptChanges.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPaid - totalPayment)
         }
+
+        if (!getReceiptDate(this))
+            tvReceiptDate.visibility = View.GONE
+        if (!getReceiptNo(this))
+            tvReceiptTransCode.visibility = View.GONE
+        if (!getReceiptNote(this)){
+            tvReceiptNoteTitle.visibility = View.GONE
+            tvReceiptNote.visibility = View.GONE
+        }
+
         tvReceiptTransCode.text = "Receipt: ${receiptFormat(receiptCode)}"
         tvReceiptDate.text = parseDateFormatFull(boughtList.UPDATED_DATE.toString())
-
         tvReceiptNote.text = boughtList.NOTE
+
         tvReceiptSincere.text = sincere
     }
 
@@ -775,7 +846,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                             locationOfViewInWindow[0],
                             locationOfViewInWindow[1],
                             locationOfViewInWindow[0] + width,
-                            locationOfViewInWindow[1] + view.measuredHeight
+                            locationOfViewInWindow[1] + view.measuredHeight - 150
                         ), bitmap, { copyResult ->
                         if (copyResult == PixelCopy.SUCCESS) {
                             val photoURI: Uri = FileProvider.getUriForFile(
@@ -799,7 +870,6 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 endLoading()
                 e.printStackTrace()
             }
-            endLoading()
         }
     }
 
@@ -841,7 +911,6 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(this, "No App Available", Toast.LENGTH_SHORT).show()
         }
-        endLoading()
     }
 
     private fun shareImageToWhatsApp(uri: Uri,number: String?) {
@@ -863,10 +932,12 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
     private fun loading(){
         btnReceiptShare.visibility = View.GONE
+        btnReceiptPrint.visibility = View.GONE
     }
 
     private fun endLoading(){
         btnReceiptShare.visibility = View.VISIBLE
+        btnReceiptPrint.visibility = View.VISIBLE
         pbReceipt.visibility = View.GONE
     }
 
@@ -892,24 +963,17 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 val item = dataSnapshot.getValue(com.chcreation.pointofsale.model.Transaction::class.java)
                 receiptCode = dataSnapshot.key!!.toInt()
                 this.boughtList = item!!
-                if (receiptTemplate == ECustomReceipt.RECEIPT1.toString())
-                    fetchData()
-                else if (receiptTemplate == ECustomReceipt.RECEIPT2.toString()){
-                    if (boughtList.CUST_CODE != "") {
-                        layoutReceiptCustomer.visibility = View.VISIBLE
-                        presenter.retrieveCustomerByCode(boughtList.CUST_CODE.toString()) { success, customer ->
-                            if (success){
-                                tvReceiptCustomer.text = customer!!.NAME.toString()
-                                this@ReceiptActivity.customer = customer
-                                fetchData2()
-                            }else{
-                                fetchData()
-                            }
-                        }
-                    }else
-                        fetchData()
 
+                if (boughtList.CUST_CODE != "") {
+                    layoutReceiptCustomer.visibility = View.VISIBLE
+                    presenter.retrieveCustomerByCode(boughtList.CUST_CODE.toString()) { success, customer ->
+                        if (success){
+                            tvReceiptCustomer.text = customer!!.NAME.toString()
+                            this@ReceiptActivity.customer = customer
+                        }
+                    }
                 }
+                fetchData()
             }
         }else if (response == EMessageResult.FETCH_USER_SUCCESS.toString()){
             if (dataSnapshot.exists()){
