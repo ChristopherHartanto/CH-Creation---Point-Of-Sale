@@ -1,5 +1,6 @@
 package com.chcreation.pointofsale.transaction
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,14 +11,13 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chcreation.pointofsale.*
-import com.chcreation.pointofsale.analytic.AnalyticFragment
-import com.chcreation.pointofsale.model.Customer
-import com.chcreation.pointofsale.model.Transaction
-import com.chcreation.pointofsale.model.User
-import com.chcreation.pointofsale.model.UserList
+import com.chcreation.pointofsale.model.*
 import com.chcreation.pointofsale.presenter.TransactionPresenter
-import com.chcreation.pointofsale.presenter.UserPresenter
 import com.chcreation.pointofsale.view.MainView
+import com.dantsu.escposprinter.EscPosPrinter
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothConnection
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
+import com.dantsu.escposprinter.exceptions.EscPosConnectionException
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -25,19 +25,21 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.android.synthetic.main.activity_analytic_filter.*
-import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.android.synthetic.main.activity_receipt.*
 import kotlinx.android.synthetic.main.fragment_transaction.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.ctx
-import org.jetbrains.anko.support.v4.onRefresh
-import org.jetbrains.anko.support.v4.startActivity
-import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.support.v4.*
+import java.util.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class TransactionFragment : Fragment(), MainView {
 
+    private var cal = Calendar.getInstance()
+    private lateinit var printTransactionDate : DatePickerDialog.OnDateSetListener
     private lateinit var presenter: TransactionPresenter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
@@ -85,6 +87,7 @@ class TransactionFragment : Fragment(), MainView {
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
         presenter = TransactionPresenter(this,mAuth,mDatabase,ctx)
+        initDateListener()
 
         tlTransaction.addTab(tlTransaction.newTab().setText("All"),true)
         tlTransaction.addTab(tlTransaction.newTab().setText("Pending"))
@@ -195,6 +198,15 @@ class TransactionFragment : Fragment(), MainView {
             tvTransactionOpenPopupFilter.text = "Filter"
 
             fetchTransByCat()
+        }
+
+        btnTransactionPrint.onClick {
+            btnTransactionPrint.startAnimation(normalClickAnimation())
+            DatePickerDialog(ctx,
+                printTransactionDate,
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH)).show()
         }
 
         srTransaction.onRefresh {
@@ -314,6 +326,177 @@ class TransactionFragment : Fragment(), MainView {
         }
         tmpCustomerNameItems.addAll(customerItems)
         customerItems.clear()
+    }
+    private fun initDateListener(){
+        printTransactionDate =
+            DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+                cal.set(Calendar.YEAR, year)
+                cal.set(Calendar.MONTH, monthOfYear)
+                cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                selectPrinter(dateFormat().format(cal.time))
+            }
+    }
+
+    private fun selectPrinter(date: String){
+        val bPrinter = BluetoothPrintersConnections()
+        val printerList = arrayListOf<String>()
+        if (bPrinter.list == null){
+            toast("Please Open Bluetooth!")
+        }else{
+            bPrinter.list.forEach { printerList.add(it.device.name) }
+            val title = if (bPrinter.list.isEmpty()) "No Device Available" else "Select Printer"
+            selector(title, printerList){dialogInterface, i ->
+                if (bPrinter.list != null && tmpTransItems.size > 0){
+                    cvTransactionPrint.visibility = View.VISIBLE
+                    tvTransactionPrinterName.text = bPrinter.list[i].device.name
+                    GlobalScope.launch (Dispatchers.Main){
+                        try {
+                            if (bPrinter.list[i] == null){
+                                toast("Please Check Your Printer!")
+                            }else{
+                                val cPrinter = if (bPrinter.list[i].isConnected) bPrinter.list[i]
+                                else bPrinter.list[i].connect()
+                                val message = printTransaction(cPrinter,date)
+                                cvTransactionPrint.visibility = View.GONE
+                                bPrinter.list[i].disconnect()
+                                toast(message)
+                            }
+                        }catch (e: EscPosConnectionException){
+                            toast(e.message.toString())
+                            cvTransactionPrint.visibility = View.GONE
+                        }
+                    }
+                }
+                else if (tmpTransItems.size == 0){
+                    toast("Please Refresh Your Data!")
+                }
+                else
+                    toast("Please Refresh Your Bluetooth Connection!")
+            }
+        }
+    }
+
+    private suspend fun printTransaction(bluetoothConnection: BluetoothConnection,date: String) : String{
+        return suspendCoroutine {ct->
+            var transactionPrintList = mutableListOf<Transaction>()
+            var productLists = mutableListOf<Product>()
+            var profit = 0F
+            var revenue = 0F
+            var discount = 0F
+            var tax = 0F
+            var pending = 0F
+            GlobalScope.launch {
+
+                val dataSnapshot = presenter.retrieveProducts()
+                if (dataSnapshot != null){
+                    for (product in dataSnapshot.children){
+                        val item = product.getValue(Product::class.java)
+
+                        if (item != null) {
+                            productLists.add(item)
+                        }
+                    }
+                    for (data in tmpTransItems){
+                        if (getDateOfYear(data.CREATED_DATE.toString()) == getDateOfYear(date)
+                            && getYearT(data.CREATED_DATE.toString()) == getYearT(date)
+                            && data.STATUS_CODE != EStatusCode.CANCEL.toString()){
+                            transactionPrintList.add(data)
+                            val gson = Gson()
+                            val arrayCartType = object : TypeToken<MutableList<Cart>>() {}.type
+                            val cartItems : MutableList<Cart> = gson.fromJson(data.DETAIL,arrayCartType)
+
+                            for (cart in cartItems){
+                                val product = productLists.filter { it.PROD_CODE == cart.PROD_CODE }
+                                if (!product.isNullOrEmpty()){
+                                    val price = (if (cart.WHOLE_SALE_PRICE != -1F) cart.WHOLE_SALE_PRICE!! else cart.PRICE!!)
+                                    profit += (price * cart.Qty!!) - (product[0].COST!! * cart.Qty!!)
+                                    revenue += (price * cart.Qty!!)
+
+                                }
+                            }
+                            discount += data.DISCOUNT!!
+                            tax += data.TAX!!
+                            pending += data.TOTAL_OUTSTANDING!!
+
+                        }
+                    }
+
+                    try{
+                        val printer = EscPosPrinter(bluetoothConnection, getPrintDpi(ctx), getPrintWidth(ctx),
+                            getPrintCharLine(ctx))
+
+                        var textReceipt = ""
+
+                        textReceipt += "[L]TRANSACTION REPORT\n" +
+                                "[L]${parseDateFormat(date)}\n"
+
+                        textReceipt += "[C]"
+                        for (data in 1..getPrintCharLine(ctx)){
+                            textReceipt += "-"
+                        }
+
+                        textReceipt += "\n[L]Total Transaction: ${transactionPrintList.size}\n"
+                        textReceipt += "[L]Profit  : ${currencyFormat(getLanguage(ctx), getCountry(ctx))
+                            .format(profit)}\n"
+                        textReceipt += "[L]Revenue : ${currencyFormat(getLanguage(ctx), getCountry(ctx))
+                            .format(revenue)}\n"
+                        if (pending != 0F)
+                            textReceipt += "[L]Pending : ${currencyFormat(getLanguage(ctx), getCountry(ctx))
+                                .format(pending)}\n"
+                        //if (discount != 0F)
+                            textReceipt += "[L]Discount: ${currencyFormat(getLanguage(ctx), getCountry(ctx))
+                                .format(discount)}\n"
+                        //if (tax != 0F)
+                            textReceipt += "[L]Tax     : ${currencyFormat(getLanguage(ctx), getCountry(ctx))
+                                .format(tax)}\n"
+
+                        textReceipt += "[C]"
+                        for (data in 1..getPrintCharLine(ctx)){
+                            textReceipt += "-"
+                        }
+                        textReceipt += "\n[L]\n"
+
+                        for (data in transactionPrintList){
+                            val gson = Gson()
+                            val arrayCartType = object : TypeToken<MutableList<Cart>>() {}.type
+                            val cartItems : MutableList<Cart> = gson.fromJson(data.DETAIL,arrayCartType)
+
+                            for (cart in cartItems){
+
+                                textReceipt +="[L]${cart.NAME} x ${if (isInt(cart.Qty!!)) cart.Qty!!.toInt() else cart.Qty}" +
+                                        "[R]${currencyFormat(getLanguage(ctx), getCountry(ctx))
+                                            .format((if (cart.WHOLE_SALE_PRICE == -1F) cart.PRICE else cart.WHOLE_SALE_PRICE!!)!! * cart.Qty!!)}\n"
+                            }
+
+                        }
+                        printer.printFormattedText(textReceipt)
+                        ct.resume("Print End")
+                    }catch (e: java.lang.Exception){
+                        ct.resume(e.message.toString())
+                        e.printStackTrace()
+                    }
+                }else
+                    ct.resume("No Data")
+            }
+        }
+    }
+
+    private suspend fun getDateOfYear(convertDate: String): Int {
+        return suspendCoroutine {
+            val date = dateFormat().parse(convertDate)
+            val calendar = Calendar.getInstance()
+            calendar.time = date
+            it.resume(calendar.get(Calendar.DAY_OF_YEAR))
+        }
+    }
+
+    private suspend fun getYearT(convertDate: String): Int {
+        return suspendCoroutine {
+            val date = dateFormat().parse(convertDate)
+            val calendar = Calendar.getInstance()
+            calendar.time = date
+            it.resume(calendar.get(Calendar.YEAR))
+        }
     }
 
     override fun loadData(dataSnapshot: DataSnapshot, response: String) {

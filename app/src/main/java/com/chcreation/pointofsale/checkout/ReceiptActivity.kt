@@ -189,9 +189,11 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                             if (bPrinter.list[i] == null){
                                 toast("Please Check Your Printer!")
                             }else{
-                                val cPrinter = bPrinter.list[i].connect()
+                                val cPrinter = if (bPrinter.list[i].isConnected) bPrinter.list[i]
+                                else bPrinter.list[i].connect()
                                 val message = sysPrintReceipt(cPrinter,type,purchasedItems)
                                 cvReceiptPrint.visibility = View.GONE
+                                bPrinter.list[i].disconnect()
                                 toast(message)
                             }
                         }catch (e: EscPosConnectionException){
@@ -241,16 +243,22 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                     "[C]${getMerchantAddress(this)}\n" +
                     "[C]${getMerchantNoTel(this)}\n"
 
-            textReceipt += "[L]\n[L]Cashier: ${user.NAME}\n"
+            textReceipt += "[L]\n[L]Cashier : ${user.NAME}\n"
 
             if (getMerchantReceiptCustName(this))
                 textReceipt += "[L]Customer: ${customer.NAME}\n"
 
             if (getMerchantReceiptCustAddress(this))
-                textReceipt += "[L]Address: ${customer.ADDRESS}\n"
+                textReceipt += "[L]Address : ${customer.ADDRESS}\n"
 
             if (getMerchantReceiptCustNoTel(this))
-                textReceipt += "[L]No Tel: ${customer.PHONE}\n"
+                textReceipt += "[L]No Tel  : ${customer.PHONE}\n"
+
+            if (getReceiptTableNo(this))
+                textReceipt += "[L]Table No: ${boughtList.TABLE_NO}\n"
+
+            if (getReceiptPeopleNo(this))
+                textReceipt += "[L]Guests  : ${if (isInt(boughtList.PEOPLE_NO!!)) boughtList.PEOPLE_NO!!.toInt() else boughtList.PEOPLE_NO}\n"
 
             textReceipt += "[C]"
             for (data in 1..getPrintCharLine(this)){
@@ -377,16 +385,22 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                     "[C]${getMerchantAddress(this)}\n" +
                     "[C]${getMerchantNoTel(this)}\n"
 
-            textReceipt += "[L]\n[L]Cashier: ${user.NAME}\n"
+            textReceipt += "[L]\n[L]Cashier : ${user.NAME}\n"
 
             if (getMerchantReceiptCustName(this))
                 textReceipt += "[L]Customer: ${customer.NAME}\n"
 
             if (getMerchantReceiptCustAddress(this))
-                textReceipt += "[L]Address: ${customer.ADDRESS}\n"
+                textReceipt += "[L]Address : ${customer.ADDRESS}\n"
 
             if (getMerchantReceiptCustNoTel(this))
-                textReceipt += "[L]No Tel: ${customer.PHONE}\n"
+                textReceipt += "[L]No Tel  : ${customer.PHONE}\n"
+
+            if (getReceiptTableNo(this))
+                textReceipt += "[L]Table No: ${boughtList.TABLE_NO}\n"
+
+            if (getReceiptPeopleNo(this))
+                textReceipt += "[L]Guests  : ${if (isInt(boughtList.PEOPLE_NO!!)) boughtList.PEOPLE_NO!!.toInt() else boughtList.PEOPLE_NO}\n"
 
             textReceipt += "[C]"
             for (data in 1..getPrintCharLine(this)){
@@ -474,10 +488,19 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 
             var textReceipt = ""
 
-            textReceipt += "[C]KITCHEN\n[L]\n" +
-                    "[L]Date:${parseDateFormatFull(boughtList.UPDATED_DATE.toString())}\n" +
-                    "[L]Receipt:${receiptFormat(receiptCode)}\n" +
-                    "[L]Cashier:${user.NAME}\n"
+            textReceipt += "[C]ORDER\n[L]\n" +
+                    "[L]Date    : ${parseDateFormatFull(boughtList.UPDATED_DATE.toString())}\n"
+
+            if (getReceiptNo(this))
+                textReceipt += "[L]Receipt : ${receiptFormat(receiptCode)}\n"
+
+            if (getReceiptTableNo(this))
+                textReceipt += "[L]Table No: ${boughtList.TABLE_NO}\n"
+
+            if (getReceiptPeopleNo(this))
+                textReceipt += "[L]Guests  : ${if (isInt(boughtList.PEOPLE_NO!!)) boughtList.PEOPLE_NO!!.toInt() else boughtList.PEOPLE_NO}\n"
+
+            textReceipt += "[L]Cashier : ${user.NAME}\n"
 
             textReceipt += "[C]"
             for (data in 1..getPrintCharLine(this)){
@@ -489,7 +512,11 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                 textReceipt +="[L]${data.NAME}" +
                         "[R]x ${if (isInt(data.Qty!!)) data.Qty!!.toInt() else data.Qty}\n"
             }
-            textReceipt += "[L]\n[C]--------------------------------"
+            textReceipt += "[L]\n[C]"
+            for (data in 1..getPrintCharLine(this)){
+                textReceipt += "-"
+            }
+
             printer.printFormattedText(textReceipt)
             callback("Print End")
         }catch (e: java.lang.Exception){
@@ -658,6 +685,16 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         else
             layoutReceiptCustomerNoTel.visibility = View.GONE
 
+        if (getReceiptTableNo(this))
+            layoutReceiptTableNo.visibility = View.VISIBLE
+        else
+            layoutReceiptTableNo.visibility = View.GONE
+
+        if (getReceiptPeopleNo(this))
+            layoutReceiptPeopleNo.visibility = View.VISIBLE
+        else
+            layoutReceiptPeopleNo.visibility = View.GONE
+
         if (boughtList.CUST_CODE != "") {
 
             tvReceiptCustomer.text = customer.NAME.toString()
@@ -673,6 +710,9 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 //                }
 //            }
         }
+
+        tvReceiptPeopleNo.text = boughtList.PEOPLE_NO.toString()
+        tvReceiptTableNo.text = boughtList.TABLE_NO.toString()
 
         GlobalScope.launch {
             presenter.retrieveCashier(boughtList.CREATED_BY.toString())

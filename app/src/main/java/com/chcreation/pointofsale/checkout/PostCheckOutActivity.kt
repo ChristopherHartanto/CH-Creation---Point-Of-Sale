@@ -5,7 +5,10 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.orderNo
+import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.peopleNo
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.postTotalPayment
+import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.tableNo
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.totalOutStanding
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.totalReceived
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.transCode
@@ -125,6 +128,9 @@ class PostCheckOutActivity : AppCompatActivity() {
         tax = 0F
         HomeFragment.totalQty = 0F
         transDate = ""
+        peopleNo = 0F
+        tableNo = ""
+        orderNo = ""
         selectCustomerName = ""
         selectCustomerCode = ""
     }

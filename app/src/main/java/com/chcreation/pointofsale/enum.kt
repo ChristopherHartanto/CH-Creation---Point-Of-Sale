@@ -123,7 +123,11 @@ enum class ETransaction{
     NOTE,
     TRANS_CODE,
     USER_CODE,
-    STATUS_CODE
+    STATUS_CODE,
+    TABLE_NO,
+    PEOPLE_NO,
+    ORDER_NO,
+    OPT_FIELD
 }
 
 enum class E_Enquiry{
@@ -294,7 +298,12 @@ enum class ESharedPreference{
     RECEIPT_NO,
     PRINTER_DPI,
     PRINTER_WIDTH,
-    PRINTER_CHAR_LINE
+    PRINTER_CHAR_LINE,
+    RECEIPT_TABLE_NO,
+    RECEIPT_PEOPLE_NO,
+    RECEIPT_ORDER_NO,
+    RECEIPT_LAST_ORDER_NO_CREATED_DATE,
+    RECEIPT_LAST_ORDER_NO
 }
 
 enum class ECustomReceipt{

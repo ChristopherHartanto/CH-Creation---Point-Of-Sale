@@ -49,6 +49,9 @@ fun removeAllSharedPreference(context: Context){
     editor.putBoolean(ESharedPreference.RECEIPT_NOTE.toString(),false)
     editor.putBoolean(ESharedPreference.RECEIPT_NO.toString(),true)
     editor.putBoolean(ESharedPreference.RECEIPT_DATE.toString(),true)
+    editor.putBoolean(ESharedPreference.RECEIPT_TABLE_NO.toString(),false)
+    editor.putBoolean(ESharedPreference.RECEIPT_PEOPLE_NO.toString(),false)
+    editor.putBoolean(ESharedPreference.RECEIPT_ORDER_NO.toString(),false)
     editor.apply()
 }
 
@@ -236,6 +239,18 @@ fun getReceiptNote(context: Context) : Boolean{
     return sharedPreference.getBoolean(ESharedPreference.RECEIPT_NOTE.toString(),false)
 }
 
+fun getReceiptTableNo(context: Context) : Boolean{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getBoolean(ESharedPreference.RECEIPT_TABLE_NO.toString(),false)
+}
+
+fun getReceiptPeopleNo(context: Context) : Boolean{
+    sharedPreference =  context.getSharedPreferences("LOCAL_DATA", Context.MODE_PRIVATE)
+
+    return sharedPreference.getBoolean(ESharedPreference.RECEIPT_PEOPLE_NO.toString(),false)
+}
+
 fun normalClickAnimation() : AlphaAnimation = AlphaAnimation(10F,0.5F)
 
 fun slideUp(view: View) {
@@ -302,6 +317,13 @@ fun getDateOfMonth(convertDate: String): Int {
     val calendar = Calendar.getInstance()
     calendar.time = date
     return calendar.get(Calendar.DAY_OF_MONTH)
+}
+
+fun getDateOfYear(convertDate: String): Int {
+    val date = dateFormat().parse(convertDate)
+    val calendar = Calendar.getInstance()
+    calendar.time = date
+    return calendar.get(Calendar.DAY_OF_YEAR)
 }
 
 fun parseDateFormat(date: String) : String {

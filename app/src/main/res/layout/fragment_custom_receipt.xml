@@ -146,6 +146,40 @@
                         <CheckBox
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:id="@+id/cbCustomReceiptShowTableNo"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorBlack"
+                            android:text="Table No"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <CheckBox
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/cbCustomReceiptShowPeopleNo"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/colorBlack"
+                            android:text="Guests"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <CheckBox
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:id="@+id/cbCustomReceiptShowDate"/>
 
                         <TextView

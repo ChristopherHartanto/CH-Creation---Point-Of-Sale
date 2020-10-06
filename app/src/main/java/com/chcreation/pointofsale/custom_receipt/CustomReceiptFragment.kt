@@ -67,6 +67,8 @@ class CustomReceiptFragment : Fragment(),MainView {
         cbCustomReceiptShowNote.isChecked = getReceiptNote(ctx)
         cbCustomReceiptShowReceiptNo.isChecked = getReceiptNo(ctx)
         cbCustomReceiptShowDate.isChecked = getReceiptDate(ctx)
+        cbCustomReceiptShowTableNo.isChecked = getReceiptTableNo(ctx)
+        cbCustomReceiptShowPeopleNo.isChecked = getReceiptPeopleNo(ctx)
 
         btnCustomReceiptSave.onClick {
             btnCustomReceiptSave.startAnimation(normalClickAnimation())
@@ -94,6 +96,8 @@ class CustomReceiptFragment : Fragment(),MainView {
                 editor.putBoolean(ESharedPreference.RECEIPT_NOTE.toString(),cbCustomReceiptShowNote.isChecked)
                 editor.putBoolean(ESharedPreference.RECEIPT_NO.toString(),cbCustomReceiptShowReceiptNo.isChecked)
                 editor.putBoolean(ESharedPreference.RECEIPT_DATE.toString(),cbCustomReceiptShowDate.isChecked)
+                editor.putBoolean(ESharedPreference.RECEIPT_PEOPLE_NO.toString(),cbCustomReceiptShowPeopleNo.isChecked)
+                editor.putBoolean(ESharedPreference.RECEIPT_TABLE_NO.toString(),cbCustomReceiptShowTableNo.isChecked)
                 editor.apply()
                 toast("Save Success")
             }else

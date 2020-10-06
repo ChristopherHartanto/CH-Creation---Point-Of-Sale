@@ -16,5 +16,9 @@ data class Transaction(
     var CREATED_DATE: String? = "",
     var UPDATED_DATE: String? = "",
     var CREATED_BY: String? = "",
-    var UPDATED_BY: String? = ""
+    var UPDATED_BY: String? = "",
+    var PEOPLE_NO: Float? = 0F,
+    var TABLE_NO: String? = "",
+    var ORDER_NO: String? = "",
+    var OPT_FIELD: String? = ""
 )

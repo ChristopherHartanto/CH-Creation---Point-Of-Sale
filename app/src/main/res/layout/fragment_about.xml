@@ -56,9 +56,55 @@
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginVertical="20sp"
+            android:layout_marginTop="20sp"
             android:id="@+id/ivAbout"
             android:src="@drawable/default_image"/>
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginVertical="20sp"
+            android:text="Our Customers"/>
+
+        <FrameLayout
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/ivAboutCustomer1"/>
+
+            <ProgressBar
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:id="@+id/pbAboutCustomer1"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/ivAboutCustomer2"/>
+
+            <ProgressBar
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:id="@+id/pbAboutCustomer2"/>
+        </FrameLayout>
+
 
         <TextView
             android:layout_width="match_parent"

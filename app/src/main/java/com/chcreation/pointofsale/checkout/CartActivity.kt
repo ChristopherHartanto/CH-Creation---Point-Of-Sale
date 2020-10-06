@@ -1,5 +1,6 @@
 package com.chcreation.pointofsale.checkout
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,8 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.peopleNo
+import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.tableNo
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
 import com.chcreation.pointofsale.checkout.NoteActivity.Companion.note
@@ -39,6 +42,7 @@ class CartActivity : AppCompatActivity() {
     private lateinit var mDatabase : DatabaseReference
     private var selectedCart = 0
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cart)
@@ -177,19 +181,65 @@ class CartActivity : AppCompatActivity() {
 
         btnCartMinQty.onClick {
             btnCartMinQty.startAnimation(normalClickAnimation())
-            val qty = etCartQty.text.toString().toFloat() - 1F
+            val qty = if(etCartQty.text.toString() == "") cartItems[selectedCart].Qty!! else etCartQty.text.toString().toFloat() - 1F
             etCartQty.setText((if (isInt(qty)) qty.toInt() else qty).toString())
         }
 
         btnCartAddQty.onClick {
             btnCartAddQty.startAnimation(normalClickAnimation())
-            val qty = etCartQty.text.toString().toFloat() + 1F
+            val qty = if(etCartQty.text.toString() == "") cartItems[selectedCart].Qty!! else etCartQty.text.toString().toFloat() + 1F
             etCartQty.setText((if (isInt(qty)) qty.toInt() else qty).toString())
         }
 
         bgCartProdDetail.onClick {
             cvCartProdDetail.visibility = View.GONE
             bgCartProdDetail.visibility = View.GONE
+        }
+
+        btnCartCustTableCancel.onClick {
+            cvCartCustTable.visibility = View.GONE
+            bgCartProdDetail.visibility = View.GONE
+            peopleNo = 0F
+            tableNo = ""
+            tvCartTable.visibility = View.GONE
+        }
+
+        btnCustTableMinQty.onClick {
+            btnCustTableMinQty.startAnimation(normalClickAnimation())
+            val qty = if(etCartCustTablePeopleNumber.text.toString() == "") peopleNo else etCartCustTablePeopleNumber.text.toString().toFloat() - 1F
+            etCartCustTablePeopleNumber.setText((if (isInt(qty)) qty.toInt() else qty).toString())
+        }
+
+        btnCustTableAddQty.onClick {
+            btnCustTableAddQty.startAnimation(normalClickAnimation())
+            val qty = if(etCartCustTablePeopleNumber.text.toString() == "") peopleNo else etCartCustTablePeopleNumber.text.toString().toFloat() + 1F
+            etCartCustTablePeopleNumber.setText((if (isInt(qty)) qty.toInt() else qty).toString())
+        }
+
+        btnCartCustTableDone.onClick {
+            btnCartCustTableDone.startAnimation(normalClickAnimation())
+
+            if (etCartCustTablePeopleNumber.text.toString() == ""
+                && etCartCustTableNumber.text.toString() == "")
+                toast("Please Fill Following Field!")
+            else if (etCartCustTablePeopleNumber.text.toString() != "")
+                if (etCartCustTablePeopleNumber.text.toString().toFloat() < 0F){
+                    toast("Wrong Input!")
+                }
+            else{
+                tvCartTable.visibility = View.VISIBLE
+
+                    tableNo = etCartCustTableNumber.text.toString()
+
+                if (etCartCustTablePeopleNumber.text.toString() != "") {
+                    peopleNo = etCartCustTablePeopleNumber.text.toString().toFloat()
+                }
+                cvCartCustTable.visibility = View.GONE
+                bgCartProdDetail.visibility = View.GONE
+
+                tvCartTable.text = "${if (tableNo != "") "Table: $tableNo" else ""} " +
+                        "${if (peopleNo != 0F) "Guests: ${if (isInt(peopleNo)) peopleNo.toInt() else peopleNo}" else ""}"
+            }
         }
 
         rvCart.adapter = adapter
@@ -206,7 +256,7 @@ class CartActivity : AppCompatActivity() {
 
         ivCartMoreOptions.onClick {
             ivCartMoreOptions.startAnimation(normalClickAnimation())
-            val options = mutableListOf("Add Note","Add Discount","Add Tax", "Delete Cart")
+            val options = mutableListOf("Add Note","Add Discount","Add Tax","Add Table Number", "Delete Cart")
 
 
             selector("More Options",options) { dialogInterface, i ->
@@ -221,6 +271,13 @@ class CartActivity : AppCompatActivity() {
                         startActivity(intentFor<DiscountActivity>("action" to 2))
                     }
                     3 ->{
+                        cvCartCustTable.visibility = View.VISIBLE
+                        bgCartProdDetail.visibility = View.VISIBLE
+                        val qty = peopleNo
+                        etCartCustTablePeopleNumber.setText((if (isInt(qty)) qty.toInt() else qty).toString())
+                        etCartCustTableNumber.setText(tableNo)
+                    }
+                    4 ->{
                         alert ("Do You Want to Remove Cart?"){
                             title = "Delete Cart"
                             yesButton {

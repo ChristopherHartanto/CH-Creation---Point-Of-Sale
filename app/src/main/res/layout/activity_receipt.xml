@@ -237,6 +237,64 @@
                     android:id="@+id/tvReceiptCustomerNoTel"/>
 
             </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/layoutReceiptTableNo">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="13sp"
+                    android:text="Table No"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" : "
+                    android:textColor="@color/colorBlack"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="8"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="14sp"
+                    android:id="@+id/tvReceiptTableNo"/>
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/layoutReceiptPeopleNo">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="13sp"
+                    android:text="Guests"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=" : "
+                    android:textColor="@color/colorBlack"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="8"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="14sp"
+                    android:id="@+id/tvReceiptPeopleNo"/>
+
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"

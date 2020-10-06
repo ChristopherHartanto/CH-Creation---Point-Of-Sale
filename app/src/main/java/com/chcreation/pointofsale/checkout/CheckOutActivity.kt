@@ -45,6 +45,9 @@ class CheckOutActivity : AppCompatActivity(), MainView {
         var transCode = 0
         var totalOutStanding = 0F
         var postTotalPayment = 0F
+        var peopleNo = 0F
+        var tableNo = ""
+        var orderNo = ""
     }
     private var paymentMethod = ""
     private lateinit var mAuth: FirebaseAuth
@@ -59,6 +62,8 @@ class CheckOutActivity : AppCompatActivity(), MainView {
         setContentView(R.layout.activity_check_out)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        supportActionBar?.title = "Check Out"
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
@@ -95,6 +100,24 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             startActivity<NoteActivity>()
         }
 
+        tvCheckOutRemoveCustomer.onClick {
+            tvCheckOutRemoveCustomer.startAnimation(normalClickAnimation())
+            tvCheckOutRemoveCustomer.visibility = View.GONE
+
+            tvCheckOutCustomer.text = "Select Customer"
+            selectCustomerName = ""
+            selectCustomerCode = ""
+            custName = ""
+        }
+
+        tvCheckOutCustomer.onClick {
+            tvCheckOutCustomer.startAnimation(normalClickAnimation())
+            if (!existPayment){
+                isCustomer = 1F
+                startActivity<SelectCustomerActivity>()
+            }
+        }
+
         if (existPayment){
             btnCheckOutAddNote.visibility = View.VISIBLE
             existCheckOutSetUp()
@@ -114,6 +137,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                 newCheckOut()
             else
                 existCheckOut()
+
         }
 
         if (!existPayment){
@@ -127,24 +151,24 @@ class CheckOutActivity : AppCompatActivity(), MainView {
         super.onDestroy()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        if (!existPayment){
-            val inflater: MenuInflater = menuInflater
-            inflater.inflate(R.menu.menu_check_out, menu)
-        }
-        return true
-    }
-
+//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+//        if (!existPayment){
+//            val inflater: MenuInflater = menuInflater
+//            inflater.inflate(R.menu.menu_check_out, menu)
+//        }
+//        return true
+//    }
+//
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle item selection
         return when (item.itemId) {
-            R.id.action_select_customer -> {
-                if (!existPayment){
-                    isCustomer = 1F
-                    startActivity<SelectCustomerActivity>()
-                }
-                true
-            }
+//            R.id.action_select_customer -> {
+//                if (!existPayment){
+//                    isCustomer = 1F
+//                    startActivity<SelectCustomerActivity>()
+//                }
+//                true
+//            }
             android.R.id.home->{
                 finish()
                 true
@@ -156,10 +180,13 @@ class CheckOutActivity : AppCompatActivity(), MainView {
     private fun newCheckOutSetUp(){
         if (selectCustomerName != ""){
             custName = selectCustomerName
-            supportActionBar?.title = selectCustomerName
+            tvCheckOutCustomer.text = selectCustomerName
+            tvCheckOutRemoveCustomer.visibility = View.VISIBLE
         }
-        else
-            supportActionBar?.title = "No Customer"
+        else{
+            tvCheckOutCustomer.text = "Select Customer"
+            tvCheckOutRemoveCustomer.visibility = View.GONE
+        }
 
         totalPayment = totalPrice - discount + tax
         etCheckOutAmountReceived.setText(totalPayment.toString())
@@ -190,7 +217,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                 title = "Confirmation"
 
                 yesButton {
-
+                    btnCheckOut.isEnabled = false
                     if (totalOutStanding > 0 && selectCustomerName == ""){
                         toast("Must be Completed Payment if Without Customer")
                     }else{
@@ -203,7 +230,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                             val receipt = presenter.saveTransaction(Transaction(totalPrice,totalOutStanding,
                                 discount,tax,paymentMethod,orderDetail,selectCustomerCode, note,"",
                                 statusCode.toString(), dateFormat().format(Date()), dateFormat().format(Date()),
-                                mAuth.currentUser!!.uid,mAuth.currentUser!!.uid)
+                                mAuth.currentUser!!.uid,mAuth.currentUser!!.uid, peopleNo, tableNo,"","")
                                 , Payment("", totalReceived,paymentMethod, note,
                                     mAuth.currentUser!!.uid,EStatusCode.DONE.toString()), cartItems)
 
@@ -226,7 +253,9 @@ class CheckOutActivity : AppCompatActivity(), MainView {
 
     private fun existCheckOutSetUp(){
         custName = customerItems[transPosition]
-        supportActionBar?.title = customerItems[transPosition]
+
+        tvCheckOutCustomer.text = customerItems[transPosition]
+        tvCheckOutRemoveCustomer.visibility = View.GONE
 
         presenter.retrievePendingPayment(transCodeItems[transPosition])
     }
@@ -252,6 +281,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                 title = "Confirmation"
 
                 yesButton {
+                    btnCheckOut.isEnabled = false
                     pbCheckOut.visibility = View.VISIBLE
                     tvCheckOutProcessTitle.visibility = View.VISIBLE
                     layoutCheckOutContent.alpha = 0.3F
@@ -295,6 +325,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
             toast(message)
         }
 
+        btnCheckOut.isEnabled = true
         pbCheckOut.visibility = View.GONE
         tvCheckOutProcessTitle.visibility = View.GONE
         layoutCheckOutContent.alpha = 1F

@@ -238,7 +238,9 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                         ETransaction.CREATED_DATE.toString() to transaction.CREATED_DATE,
                         ETransaction.UPDATED_DATE.toString() to transaction.UPDATED_DATE,
                         ETransaction.CREATED_BY.toString() to transaction.CREATED_BY,
-                        ETransaction.UPDATED_BY.toString() to transaction.UPDATED_BY
+                        ETransaction.UPDATED_BY.toString() to transaction.UPDATED_BY,
+                        ETransaction.TABLE_NO.toString() to transaction.TABLE_NO,
+                        ETransaction.PEOPLE_NO.toString() to transaction.PEOPLE_NO
                     )
                     database.child(ETable.TRANSACTION.toString())
                         .child(getMerchantCredential(context))
@@ -417,7 +419,9 @@ class CheckOutPresenter(private val view: MainView, private val auth: FirebaseAu
                 ETransaction.CREATED_DATE.toString() to transaction.CREATED_DATE,
                 ETransaction.UPDATED_DATE.toString() to dateFormat().format(Date()),
                 ETransaction.CREATED_BY.toString() to transaction.CREATED_BY,
-                ETransaction.UPDATED_BY.toString() to transaction.UPDATED_BY
+                ETransaction.UPDATED_BY.toString() to transaction.UPDATED_BY,
+                ETransaction.TABLE_NO.toString() to transaction.TABLE_NO,
+                ETransaction.PEOPLE_NO.toString() to transaction.PEOPLE_NO
             )
             database.child(ETable.TRANSACTION.toString())
                 .child(getMerchantCredential(context))

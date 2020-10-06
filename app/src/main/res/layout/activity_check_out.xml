@@ -1,171 +1,200 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".checkout.CheckOutActivity">
 
-<!--    <TextView-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:textSize="36sp"-->
-<!--        android:gravity="center"-->
-<!--        android:textColor="@color/colorBlack"-->
-<!--        android:text="Check Out"-->
-<!--        android:id="@+id/tvCheckOutTitle"/>-->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-<!--    <View-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="2dp"-->
-<!--        android:background="@color/colorBlack"/>-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="10dp"
+                android:id="@+id/layoutCheckOutContent"
+                android:gravity="center">
 
-    <FrameLayout
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="8"
+                        android:textSize="18sp"
+                        android:textColor="@color/colorBlack"
+                        android:textStyle="bold"
+                        android:layout_marginStart="5dp"
+                        android:text="Select Customer"
+                        android:gravity="center_vertical"
+                        android:id="@+id/tvCheckOutCustomer"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:textSize="16sp"
+                        android:gravity="end"
+                        android:textColor="@color/colorBlack"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="15dp"
+                        android:id="@+id/tvCheckOutRemoveCustomer"
+                        android:visibility="gone"
+                        android:text="x"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorGrey"
+                    android:layout_marginVertical="10dp"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:id="@+id/tvCheckOutTotalTitle"
+                    android:gravity="center_horizontal"
+                    android:text="Total Amount Due"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="36sp"
+                    android:id="@+id/tvCheckOutTotal"
+                    android:gravity="center_horizontal"
+                    android:text="Rp 100000"
+                    android:textColor="@color/colorBlack"/>
+
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Amount Received"
+                        android:inputType="numberDecimal"
+                        android:text="100000"
+                        android:id="@+id/etCheckOutAmountReceived"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:elevation="10dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:id="@+id/tvPaymentMethodTitle"
+                            android:text="Payment Method"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginVertical="10dp">
+                            <Button
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@drawable/button_border"
+                                android:text="Cash"
+                                android:layout_margin="5dp"
+                                android:id="@+id/btnCheckOutCash"/>
+
+                            <Button
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@drawable/button_border"
+                                android:text="Card"
+                                android:layout_margin="5dp"
+                                android:id="@+id/btnCheckOutCard"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
         android:orientation="vertical"
-        android:id="@+id/layoutCheckOutProgress">
+        android:gravity="bottom"
+        android:layout_marginVertical="10dp">
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_border_fill"
+            android:text="Next"
+            android:textColor="@color/colorWhite"
+            android:layout_margin="5dp"
+            android:id="@+id/btnCheckOut"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_border"
+            android:text="Add Note"
+            android:visibility="gone"
+            android:layout_marginHorizontal="5dp"
+            android:id="@+id/btnCheckOutAddNote"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center">
+
 
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="80dp"
+            android:layout_height="wrap_content"
             android:textColor="@color/colorBlack"
             android:textSize="16sp"
+            android:layout_marginVertical="10dp"
             android:visibility="gone"
             android:text="Processing CheckOut . . ."
             android:id="@+id/tvCheckOutProcessTitle"
             android:gravity="center"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="10dp"
-            android:id="@+id/layoutCheckOutContent"
-            android:gravity="center">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:gravity="center_vertical"
-                android:id="@+id/tvCheckOutCustomer"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:id="@+id/tvCheckOutTotalTitle"
-                android:gravity="center_horizontal"
-                android:text="Total Amount Due"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="36sp"
-                android:id="@+id/tvCheckOutTotal"
-                android:gravity="center_horizontal"
-                android:text="Rp 100000"
-                android:textColor="@color/colorBlack"/>
-
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp">
-
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Amount Received"
-                    android:inputType="numberDecimal"
-                    android:text="100000"
-                    android:id="@+id/etCheckOutAmountReceived"/>
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:elevation="10dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="16sp"
-                        android:id="@+id/tvPaymentMethodTitle"
-                        android:text="Payment Method"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginVertical="10dp">
-                        <Button
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:background="@drawable/button_border"
-                            android:text="Cash"
-                            android:layout_margin="5dp"
-                            android:id="@+id/btnCheckOutCash"/>
-
-                        <Button
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:background="@drawable/button_border"
-                            android:text="Card"
-                            android:layout_margin="5dp"
-                            android:id="@+id/btnCheckOutCard"/>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginVertical="10dp">
-                <Button
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/button_border_fill"
-                    android:text="Next"
-                    android:textColor="@color/colorWhite"
-                    android:layout_margin="5dp"
-                    android:id="@+id/btnCheckOut"/>
-
-                <Button
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/button_border"
-                    android:text="Add Note"
-                    android:visibility="gone"
-                    android:layout_marginHorizontal="5dp"
-                    android:id="@+id/btnCheckOutAddNote"/>
-            </LinearLayout>
-
-        </LinearLayout>
-
         <ProgressBar
             android:layout_width="30dp"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:id="@+id/pbCheckOut"
             android:visibility="gone"
             android:layout_gravity="center"/>
-    </FrameLayout>
+    </LinearLayout>
 
+</FrameLayout>
 
-</LinearLayout>

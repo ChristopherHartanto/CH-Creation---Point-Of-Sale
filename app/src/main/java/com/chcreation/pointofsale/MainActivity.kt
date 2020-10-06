@@ -99,10 +99,10 @@ class MainActivity : AppCompatActivity(), MainView, GenerateReport {
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_check_out
+                ,R.id.nav_transaction
                 ,R.id.nav_manage_product
                 ,R.id.nav_catalog
                 ,R.id.nav_customer
-                ,R.id.nav_transaction
                 ,R.id.nav_receipt_settings
                 ,R.id.nav_analytics
                 ,R.id.nav_activity_logs

@@ -14,10 +14,14 @@
     </fragment>
 
     <fragment
-        android:id="@+id/nav_catalog"
-        android:name="com.chcreation.pointofsale.product.ProductFragment"
-        android:label="Catalog"
-        tools:layout="@layout/fragment_product" />
+        android:id="@+id/nav_transaction"
+        android:name="com.chcreation.pointofsale.transaction.TransactionFragment"
+        android:label="Transaction"
+        tools:layout="@layout/fragment_transaction" >
+        <action
+            android:id="@+id/action_nav_slideshow_to_nav_home"
+            app:destination="@id/nav_check_out" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_manage_product"
@@ -42,10 +46,11 @@
     </fragment>
 
     <fragment
-        android:id="@+id/nav_transaction"
-        android:name="com.chcreation.pointofsale.transaction.TransactionFragment"
-        android:label="Transaction"
-        tools:layout="@layout/fragment_transaction" >
+        android:id="@+id/nav_catalog"
+        android:name="com.chcreation.pointofsale.product.ProductFragment"
+        android:label="Catalog"
+        tools:layout="@layout/fragment_product" >
+
         <action
             android:id="@+id/action_nav_slideshow_to_nav_home"
             app:destination="@id/nav_check_out" />

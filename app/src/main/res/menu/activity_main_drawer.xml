@@ -9,20 +9,20 @@
             android:title="Check Out" />
 
         <item
-            android:id="@+id/nav_manage_product"
-            android:title="Manage Products" />
+            android:id="@+id/nav_transaction"
+            android:title="@string/transaction" />
 
         <item
-            android:id="@+id/nav_catalog"
-            android:title="Catalog" />
+            android:id="@+id/nav_manage_product"
+            android:title="Manage Products" />
 
         <item
             android:id="@+id/nav_customer"
             android:title="Customer" />
 
         <item
-            android:id="@+id/nav_transaction"
-            android:title="@string/transaction" />
+            android:id="@+id/nav_catalog"
+            android:title="Catalog" />
 
         <item
             android:id="@+id/nav_receipt_settings"
