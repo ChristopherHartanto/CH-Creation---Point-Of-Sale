@@ -257,6 +257,7 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
 
     fun getAvailableMerchant(callback:(success: Boolean, availableMerchant: AvailableMerchant?)->Unit){
         try{
+
             postListener = object : ValueEventListener {
                 override fun onCancelled(p0: DatabaseError) {
                     database.removeEventListener(this)
@@ -350,6 +351,33 @@ class Homepresenter(private val view: MainView, private val auth: FirebaseAuth, 
         }catch (e:java.lang.Exception){
             showError(context,e.message.toString())
             e.printStackTrace()
+        }
+    }
+
+    suspend fun retrieveOurCustomer() : DataSnapshot?{
+        return suspendCoroutine { ctx->
+            try{
+                postListener = object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                        database.removeEventListener(this)
+                        ctx.resume(null)
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot) {
+                        if (p0.exists())
+                            ctx.resume(p0)
+                        else
+                            ctx.resume(null)
+                    }
+
+                }
+                database.child(ETable.OUR_CUSTOMER.toString())
+                    .addListenerForSingleValueEvent(postListener)
+            }catch (e:java.lang.Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+                ctx.resume(null)
+            }
         }
     }
 

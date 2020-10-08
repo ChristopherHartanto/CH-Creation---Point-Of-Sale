@@ -54,6 +54,8 @@ class CartActivity : AppCompatActivity() {
         mDatabase = FirebaseDatabase.getInstance().reference
 
         adapter = CheckOutRecyclerViewAdapter(this, cartItems, imageItems){ type,it->
+            Thread.sleep(100)
+
             if (type == 1){
                 if (cartItems[it].Qty!! <= 1F){
                     alert ("Remove ${cartItems[it].NAME} From Cart?"){
@@ -143,6 +145,7 @@ class CartActivity : AppCompatActivity() {
                 cvCartProdDetail.visibility = View.VISIBLE
                 bgCartProdDetail.visibility = View.VISIBLE
             }
+            visibleView()
         }
 
         btnCartDeleteProd.onClick {
@@ -157,6 +160,7 @@ class CartActivity : AppCompatActivity() {
             btnCartDeleteProd.startAnimation(normalClickAnimation())
             cvCartProdDetail.visibility = View.GONE
             bgCartProdDetail.visibility = View.GONE
+            visibleView()
 
             val qty = etCartQty.text.toString().toFloat()
             if (qty <= 0)
@@ -194,6 +198,8 @@ class CartActivity : AppCompatActivity() {
         bgCartProdDetail.onClick {
             cvCartProdDetail.visibility = View.GONE
             bgCartProdDetail.visibility = View.GONE
+            cvCartCustTable.visibility = View.GONE
+            visibleView()
         }
 
         btnCartCustTableCancel.onClick {
@@ -201,7 +207,7 @@ class CartActivity : AppCompatActivity() {
             bgCartProdDetail.visibility = View.GONE
             peopleNo = 0F
             tableNo = ""
-            tvCartTable.visibility = View.GONE
+            visibleView()
         }
 
         btnCustTableMinQty.onClick {
@@ -227,19 +233,16 @@ class CartActivity : AppCompatActivity() {
                     toast("Wrong Input!")
                 }
             else{
-                tvCartTable.visibility = View.VISIBLE
-
-                    tableNo = etCartCustTableNumber.text.toString()
+                visibleView()
+                tableNo = etCartCustTableNumber.text.toString()
 
                 if (etCartCustTablePeopleNumber.text.toString() != "") {
                     peopleNo = etCartCustTablePeopleNumber.text.toString().toFloat()
                 }
                 cvCartCustTable.visibility = View.GONE
                 bgCartProdDetail.visibility = View.GONE
-
-                tvCartTable.text = "${if (tableNo != "") "Table: $tableNo" else ""} " +
-                        "${if (peopleNo != 0F) "Guests: ${if (isInt(peopleNo)) peopleNo.toInt() else peopleNo}" else ""}"
             }
+            visibleView()
         }
 
         rvCart.adapter = adapter
@@ -262,39 +265,47 @@ class CartActivity : AppCompatActivity() {
             selector("More Options",options) { dialogInterface, i ->
                 when(i) {
                     0 ->{
-                        startActivity<NoteActivity>()
+                        goToNote()
                     }
                     1 ->{
-                        startActivity(intentFor<DiscountActivity>("action" to 1))
+                        goToDiscount()
                     }
                     2 ->{
-                        startActivity(intentFor<DiscountActivity>("action" to 2))
+                        goToTax()
                     }
                     3 ->{
-                        cvCartCustTable.visibility = View.VISIBLE
-                        bgCartProdDetail.visibility = View.VISIBLE
-                        val qty = peopleNo
-                        etCartCustTablePeopleNumber.setText((if (isInt(qty)) qty.toInt() else qty).toString())
-                        etCartCustTableNumber.setText(tableNo)
+                        goToTableNumber()
                     }
                     4 ->{
-                        alert ("Do You Want to Remove Cart?"){
-                            title = "Delete Cart"
-                            yesButton {
-                                cartItems.clear()
-                                imageItems.clear()
-                                totalQty = 0F
-                                totalPrice = 0F
-                                PostCheckOutActivity().clearCartData()
-                                finish()
-                            }
-                            noButton {
-
-                            }
-                        }.show()
+                        deleteCart()
                     }
                 }
             }
+        }
+
+        btnCartTax.onClick {
+            btnCartTax.startAnimation(normalClickAnimation())
+            goToTax()
+        }
+
+        btnCartDiscount.onClick {
+            btnCartDiscount.startAnimation(normalClickAnimation())
+            goToDiscount()
+        }
+
+        btnCartTableNumber.onClick {
+            btnCartTableNumber.startAnimation(normalClickAnimation())
+            goToTableNumber()
+        }
+
+        btnCartNote.onClick {
+            btnCartNote.startAnimation(normalClickAnimation())
+            goToNote()
+        }
+
+        tvCartDelete.onClick {
+            tvCartDelete.startAnimation(normalClickAnimation())
+            deleteCart()
         }
     }
 
@@ -302,8 +313,10 @@ class CartActivity : AppCompatActivity() {
         super.onStart()
 
         sumPriceDetail()
-
+        visibleView()
     }
+
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
             finish()
@@ -326,6 +339,46 @@ class CartActivity : AppCompatActivity() {
 //        note = ""
 //        newTotal = 0
         super.onBackPressed()
+    }
+
+    private fun visibleView(){
+        if (note == ""){
+            btnCartNote.text = "Note"
+            btnCartNote.textColorResource = R.color.colorBlack
+            btnCartNote.backgroundResource = R.drawable.button_border
+        }else{
+            btnCartNote.text = note
+            btnCartNote.textColorResource = R.color.colorWhite
+            btnCartNote.backgroundResource = R.drawable.button_border_fill
+        }
+        if (tax == 0F){
+            btnCartTax.text = "Tax"
+            btnCartTax.textColorResource = R.color.colorBlack
+            btnCartTax.backgroundResource = R.drawable.button_border
+        }else{
+            btnCartTax.text = currencyFormat(getLanguage(this), getCountry(this)).format(tax)
+            btnCartTax.textColorResource = R.color.colorWhite
+            btnCartTax.backgroundResource = R.drawable.button_border_fill
+        }
+        if (discount == 0F){
+            btnCartDiscount.text = "Discount"
+            btnCartDiscount.textColorResource = R.color.colorBlack
+            btnCartDiscount.backgroundResource = R.drawable.button_border
+        }else{
+            btnCartDiscount.text = currencyFormat(getLanguage(this), getCountry(this)).format(discount)
+            btnCartDiscount.textColorResource = R.color.colorWhite
+            btnCartDiscount.backgroundResource = R.drawable.button_border_fill
+        }
+        if (tableNo == "" && peopleNo == 0F){
+            btnCartTableNumber.text = "Table No"
+            btnCartTableNumber.textColorResource = R.color.colorBlack
+            btnCartTableNumber.backgroundResource = R.drawable.button_border
+        }else{
+            btnCartTableNumber.text = "${if (tableNo == "") "-" else tableNo}" +
+                    "/${if (peopleNo == 0F) "-" else if (isInt(peopleNo)) peopleNo.toInt() else peopleNo}"
+            btnCartTableNumber.textColorResource = R.color.colorWhite
+            btnCartTableNumber.backgroundResource = R.drawable.button_border_fill
+        }
     }
 
     private fun deleteItem(position: Int){
@@ -355,31 +408,28 @@ class CartActivity : AppCompatActivity() {
 
     private fun sumPriceDetail(){
 
-        if (discount != 0F) tvCartDiscount.visibility = View.VISIBLE else tvCartDiscount.visibility = View.GONE
-        if (tax != 0F) tvCartTax.visibility = View.VISIBLE else tvCartTax.visibility = View.GONE
+//        if (discount != 0F) tvCartDiscount.visibility = View.VISIBLE else tvCartDiscount.visibility = View.GONE
+//        if (tax != 0F) tvCartTax.visibility = View.VISIBLE else tvCartTax.visibility = View.GONE
 
         val totalPayment = totalPrice - discount + tax
 
         if (discount != 0F || tax != 0F){
 
-            tvCartDiscount.text = "Discount : ${currencyFormat(getLanguage(this), getCountry(this)).format(discount)}"
-            tvCartTax.text = "Tax: ${currencyFormat(getLanguage(this), getCountry(this)).format(tax)}"
+//            tvCartDiscount.text = currencyFormat(getLanguage(this), getCountry(this)).format(discount)
+//            tvCartTax.text = currencyFormat(getLanguage(this), getCountry(this)).format(tax)
 
-            tvCartSubTotal.text ="Sub Total : ${currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)}"
-            tvCartSubTotal.visibility = View.VISIBLE
-        }else
-            tvCartSubTotal.visibility = View.GONE
-
-        tvCartTotal.text = "Total : ${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}"
-        if (note != "")
-        {
-            tvCartNote.visibility = View.VISIBLE
-            tvCartNote.text = "Note: ${note}"
+            tvCartSubTotal.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)
+            layoutCartSubTotal.visibility = View.VISIBLE
+            //tvCartSubTotal.visibility = View.VISIBLE
         }
         else
-            tvCartNote.visibility = View.GONE
+            layoutCartSubTotal.visibility = View.GONE
+//            tvCartSubTotal.visibility = View.GONE
 
-        btnCart.text = "${if (isInt(totalQty)) totalQty.toInt() else totalQty} Items = ${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}"
+        tvCartTotal.text = currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)
+        //tvCartNote.text = note
+
+        btnCart.text = "Check Out ${if (isInt(totalQty)) totalQty.toInt() else totalQty} Items"
     }
 
     private fun countQty() : Float{
@@ -401,5 +451,43 @@ class CartActivity : AppCompatActivity() {
             }
         }
         return -1F
+    }
+
+    private fun goToNote(){
+        startActivity<NoteActivity>()
+    }
+
+    private fun goToTax(){
+        startActivity(intentFor<DiscountActivity>("action" to 2))
+    }
+
+    private fun goToDiscount(){
+        startActivity(intentFor<DiscountActivity>("action" to 1))
+    }
+
+    private fun goToTableNumber(){
+        Thread.sleep(100)
+        cvCartCustTable.visibility = View.VISIBLE
+        bgCartProdDetail.visibility = View.VISIBLE
+        val qty = peopleNo
+        etCartCustTablePeopleNumber.setText((if (isInt(qty)) qty.toInt() else qty).toString())
+        etCartCustTableNumber.setText(tableNo)
+    }
+
+    private fun deleteCart(){
+        alert ("Do You Want to Remove Cart?"){
+            title = "Delete Cart"
+            yesButton {
+                cartItems.clear()
+                imageItems.clear()
+                totalQty = 0F
+                totalPrice = 0F
+                PostCheckOutActivity().clearCartData()
+                finish()
+            }
+            noButton {
+
+            }
+        }.show()
     }
 }

@@ -228,7 +228,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                         GlobalScope.launch {
 
                             val receipt = presenter.saveTransaction(Transaction(totalPrice,totalOutStanding,
-                                discount,tax,paymentMethod,orderDetail,selectCustomerCode, note,"",
+                                discount,tax,paymentMethod,orderDetail,selectCustomerCode, note.trim(),"",
                                 statusCode.toString(), dateFormat().format(Date()), dateFormat().format(Date()),
                                 mAuth.currentUser!!.uid,mAuth.currentUser!!.uid, peopleNo, tableNo,"","")
                                 , Payment("", totalReceived,paymentMethod, note,
@@ -287,7 +287,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                     layoutCheckOutContent.alpha = 0.3F
 
                     presenter.savePendingPayment(transCodeItems[transPosition],
-                        Payment("", totalReceived,paymentMethod, note, mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
+                        Payment("", totalReceived,paymentMethod, note.trim(), mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
                         totalOutStanding,transItems[transPosition])
 
                     val log = "Receive ${currencyFormat(getLanguage(this@CheckOutActivity),

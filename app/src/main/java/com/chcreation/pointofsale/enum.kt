@@ -16,7 +16,8 @@ enum class ETable{
     ABOUT,
     SINCERE,
     ACTIVITY_LOGS,
-    VERSION
+    VERSION,
+    OUR_CUSTOMER
 }
 
 enum class ESincere{
@@ -178,6 +179,13 @@ enum class EUser{
     MEMBER_STATUS,
     ACTIVE,
     DEVICE_ID
+}
+
+enum class EOUR_CUSTOMER{
+    NAME,
+    DESC,
+    IMAGE,
+    LINK
 }
 
 enum class EUserMemberStatus{

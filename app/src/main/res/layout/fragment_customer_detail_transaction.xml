@@ -53,7 +53,7 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/colorBlack"
                     android:textSize="18sp"
-                    android:text="Total Gross Earning : "/>
+                    android:text="Revenue Earning : "/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

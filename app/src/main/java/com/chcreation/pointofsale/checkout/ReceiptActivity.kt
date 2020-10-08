@@ -711,7 +711,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
 //            }
         }
 
-        tvReceiptPeopleNo.text = boughtList.PEOPLE_NO.toString()
+        tvReceiptPeopleNo.text = (if (isInt(boughtList.PEOPLE_NO!!)) boughtList.PEOPLE_NO!!.toInt() else boughtList.PEOPLE_NO).toString()
         tvReceiptTableNo.text = boughtList.TABLE_NO.toString()
 
         GlobalScope.launch {

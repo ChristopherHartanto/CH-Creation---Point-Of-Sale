@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-
 <FrameLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,6 +14,56 @@
         android:orientation="vertical"
         android:id="@+id/layoutCart">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_margin="5dp">
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:text="Tax"
+                android:maxLines="1"
+                android:id="@+id/btnCartTax"
+                android:background="@drawable/button_border"/>
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:text="Discount"
+                android:maxLines="1"
+                android:id="@+id/btnCartDiscount"
+                android:layout_marginHorizontal="5dp"
+                android:background="@drawable/button_border"/>
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:text="Table No"
+                android:maxLines="1"
+                android:textSize="12sp"
+                android:layout_marginEnd="5dp"
+                android:id="@+id/btnCartTableNumber"
+                android:background="@drawable/button_border"/>
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:text="Note"
+                android:maxLines="1"
+                android:id="@+id/btnCartNote"
+                android:background="@drawable/button_border"/>
+
+        </LinearLayout>
+
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -25,116 +74,125 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Information : "
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="5dp"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:visibility="gone"
-            android:textColor="@color/colorBlack"/>
+            android:text="Clear Cart"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:id="@+id/tvCartDelete"
+            android:layout_marginVertical="5dp"
+            android:textColor="@color/colorRed"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/colorBlack"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvCartTable"
-            android:gravity="end"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginTop="5dp"
-            android:textSize="16sp"
-            android:visibility="gone"
-            android:textColor="@color/colorGrey"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvCartNote"
-            android:gravity="end"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginTop="5dp"
-            android:textSize="16sp"
-            android:textColor="@color/colorGrey"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvCartSubTotal"
-            android:text="Sub Total : 0"
-            android:gravity="end"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginTop="5dp"
-            android:textSize="16sp"
-            android:visibility="gone"
-            android:textStyle="bold"
-            android:textColor="@color/colorBlack"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvCartDiscount"
-            android:gravity="end"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginTop="5dp"
-            android:textSize="16sp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvCartTax"
-            android:gravity="end"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginTop="5dp"
-            android:textSize="16sp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tvCartTotal"
-            android:gravity="end"
-            android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="5dp"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/colorBlack"/>
+            android:background="@color/colorGrey"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="bottom">
+            android:padding="10dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/layoutCartSubTotal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="3"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorBlack"
+                    android:text="Sub Total"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/colorBlack"
+                    android:text=" : "/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="7"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvCartSubTotal"
+                    android:gravity="end"
+                    android:textSize="14sp"
+                    android:textColor="@color/colorBlack"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <Button
+                <TextView
                     android:layout_width="0dp"
+                    android:layout_weight="3"
                     android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:layout_margin="5dp"
-                    android:gravity="center"
-                    android:text="..."
+                    android:textSize="16sp"
                     android:textStyle="bold"
-                    android:id="@+id/ivCartMoreOptions"
-                    android:background="@drawable/button_border"/>
+                    android:textColor="@color/colorBlack"
+                    android:text="Total"/>
 
-                <Button
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/button_border_fill"
-                    android:layout_margin="5dp"
-                    android:padding="10dp"
-                    android:layout_weight="8"
-                    android:textColor="@color/colorWhite"
-                    android:id="@+id/btnCart"/>
+                    android:textSize="14sp"
+                    android:textColor="@color/colorBlack"
+                    android:text=" : "/>
 
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="7"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tvCartTotal"
+                    android:gravity="end"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorBlack"/>
             </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="bottom"
+                android:layout_marginTop="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:layout_margin="5dp"
+                        android:gravity="center"
+                        android:text="..."
+                        android:textStyle="bold"
+                        android:id="@+id/ivCartMoreOptions"
+                        android:visibility="gone"
+                        android:background="@drawable/button_border"/>
+
+                    <Button
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/button_border_fill"
+                        android:layout_weight="8"
+                        android:text="Check Out"
+                        android:textColor="@color/colorWhite"
+                        android:id="@+id/btnCart"/>
+
+                </LinearLayout>
+            </LinearLayout>
+
         </LinearLayout>
+
     </LinearLayout>
 
     <View
