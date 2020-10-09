@@ -3,10 +3,7 @@ package com.chcreation.pointofsale.presenter
 import android.content.Context
 import com.chcreation.pointofsale.*
 import com.chcreation.pointofsale.custom_receipt.Sincere
-import com.chcreation.pointofsale.model.ActivityLogs
-import com.chcreation.pointofsale.model.Customer
-import com.chcreation.pointofsale.model.Product
-import com.chcreation.pointofsale.model.User
+import com.chcreation.pointofsale.model.*
 import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -148,6 +145,78 @@ class TransactionPresenter(private val view: MainView, private val auth: Firebas
         }catch (e: Exception){
             showError(context,e.message.toString())
             e.printStackTrace()
+        }
+    }
+
+    suspend fun retrieveTax(taxCode: String) : String{
+        return suspendCoroutine {ctx->
+            try{
+                postListener = object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                        database.removeEventListener(this)
+                        ctx.resume("")
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot) {
+                        if (p0.exists()){
+                            for (data in p0.children){
+                                val item = data.getValue(Tax::class.java)
+                                if (item != null) {
+                                    ctx.resume(item.NAME.toString())
+                                }else
+                                    ctx.resume("")
+                            }
+                        }else
+                            ctx.resume("")
+                    }
+
+                }
+                database.child(ETable.TAX.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchantCode(context))
+                    .orderByChild(ETax.CODE.toString())
+                    .equalTo(taxCode)
+                    .addListenerForSingleValueEvent(postListener)
+            }catch (e: Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+            }
+        }
+    }
+
+    suspend fun retrieveDiscount(discountName: String) : String{
+        return suspendCoroutine {ctx->
+            try{
+                postListener = object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                        database.removeEventListener(this)
+                        ctx.resume("")
+                    }
+
+                    override fun onDataChange(p0: DataSnapshot) {
+                        if (p0.exists()){
+                            for (data in p0.children){
+                                val item = data.getValue(Discount::class.java)
+                                if (item != null) {
+                                    ctx.resume(item.NAME.toString())
+                                }else
+                                    ctx.resume("")
+                            }
+                        }else
+                            ctx.resume("")
+                    }
+
+                }
+                database.child(ETable.DISCOUNT.toString())
+                    .child(getMerchantCredential(context))
+                    .child(getMerchantCode(context))
+                    .orderByChild(ETax.CODE.toString())
+                    .equalTo(discountName)
+                    .addListenerForSingleValueEvent(postListener)
+            }catch (e: Exception){
+                showError(context,e.message.toString())
+                e.printStackTrace()
+            }
         }
     }
 

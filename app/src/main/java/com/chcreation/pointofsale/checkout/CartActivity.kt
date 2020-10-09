@@ -23,24 +23,48 @@ import com.chcreation.pointofsale.home.HomeFragment.Companion.imageItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.tempProductItems
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalQty
+import com.chcreation.pointofsale.model.ActivityLogs
+import com.chcreation.pointofsale.model.Discount
+import com.chcreation.pointofsale.model.Tax
 import com.chcreation.pointofsale.model.WholeSale
+import com.chcreation.pointofsale.presenter.CheckOutPresenter
+import com.chcreation.pointofsale.view.MainView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_cart.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.onRefresh
 import java.lang.Exception
 import java.util.*
 
-class CartActivity : AppCompatActivity() {
+class CartActivity : AppCompatActivity(),MainView {
 
+    private lateinit var presenter: CheckOutPresenter
     private lateinit var adapter: CheckOutRecyclerViewAdapter
+    private lateinit var taxAdapter: TaxListRecyclerViewAdapter
+    private lateinit var discountAdapter: DiscountListRecyclerViewAdapter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDatabase : DatabaseReference
     private var selectedCart = 0
+    private var taxItems = mutableListOf<Tax>()
+    private var discountItems = mutableListOf<Discount>()
+    private var selectedTax = -1
+    private var selectedUpdateTax = -1
+    private var selectedDiscount = -1
+    private var selectedUpdateDiscount = -1
+
+    companion object{
+        var taxCode = ""
+        var discountCode = ""
+    }
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +76,107 @@ class CartActivity : AppCompatActivity() {
 
         mAuth = FirebaseAuth.getInstance()
         mDatabase = FirebaseDatabase.getInstance().reference
+        presenter = CheckOutPresenter(this,mAuth,mDatabase,this)
+
+        taxAdapter = TaxListRecyclerViewAdapter(this,taxItems){type, position ->
+            Thread.sleep(100) // for UI purpose
+            when(type){
+                0->{
+                    val percentage = taxItems[position].PERCENT
+                    tax = totalPrice * percentage!! / 100
+                    taxCode = taxItems[position].CODE.toString()
+                    selectedTax = position
+                    tvCartSelectedTax.text = taxItems[selectedTax].NAME +"/"+currencyFormat(getLanguage(this), getCountry(this)).format(tax)
+
+                    sumPriceDetail()
+                    visibleView()
+                }
+                1 ->{
+                    selectedUpdateTax = position
+                    cvCartTax.visibility = View.GONE
+                    cvCartAddTax.visibility = View.VISIBLE
+                    initAddTax()
+                }
+                2 ->{
+                    alert ("Are You Sure Want to Delete ${taxItems[position].NAME}?"){
+                        yesButton {
+                            GlobalScope.launch (Dispatchers.Main){
+                                val message = presenter.deleteTax(taxItems[position].CODE.toString(),
+                                    dateFormat().format(Date()),mAuth.currentUser!!.uid)
+
+                                presenter.saveActivityLogs(ActivityLogs("Delete Tax ${taxItems[position].NAME}"
+                                    ,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+
+                                toast(message)
+                                fetchTax()
+                            }
+                            if (position == selectedTax){
+                                selectedTax = -1
+                                tax = 0F
+                                taxCode = ""
+                                sumPriceDetail()
+                                visibleView()
+                            }
+                        }
+                        noButton {
+
+                        }
+                    }.show()
+                }
+            }
+        }
+
+        initTax()
+
+        discountAdapter = DiscountListRecyclerViewAdapter(this,discountItems){type, position ->
+            Thread.sleep(100) // for UI purpose
+            when(type){
+                0->{
+                    val percentage = discountItems[position].PERCENT
+                    discount = totalPrice * percentage!! / 100
+                    discountCode = discountItems[position].CODE.toString()
+                    selectedDiscount = position
+                    tvCartSelectedDisc.text = discountItems[selectedDiscount].NAME +"/"+currencyFormat(getLanguage(this), getCountry(this)).format(
+                        discount)
+
+                    sumPriceDetail()
+                    visibleView()
+                }
+                1 ->{
+                    selectedUpdateDiscount = position
+                    cvCartDisc.visibility = View.GONE
+                    cvCartAddDisc.visibility = View.VISIBLE
+                    initAddDiscount()
+                }
+                2 ->{
+                    alert ("Are You Sure Want to Delete ${discountItems[position].NAME}?"){
+                        yesButton {
+                            GlobalScope.launch (Dispatchers.Main){
+                                val message = presenter.deleteDiscount(discountItems[position].CODE.toString(),
+                                    dateFormat().format(Date()),mAuth.currentUser!!.uid)
+
+                                presenter.saveActivityLogs(ActivityLogs("Delete Discount ${discountItems[position].NAME}"
+                                    ,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+                                toast(message)
+                                fetchDisc()
+                            }
+                            if (position == selectedDiscount){
+                                selectedDiscount = -1
+                                discount = 0F
+                                discountCode = ""
+                                sumPriceDetail()
+                                visibleView()
+                            }
+                        }
+                        noButton {
+
+                        }
+                    }.show()
+                }
+            }
+        }
+
+        initDisc()
 
         adapter = CheckOutRecyclerViewAdapter(this, cartItems, imageItems){ type,it->
             Thread.sleep(100)
@@ -312,6 +437,9 @@ class CartActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
+        if (discountCode == "") selectedDiscount = -1
+        if (taxCode == "") selectedTax = -1
+
         sumPriceDetail()
         visibleView()
     }
@@ -458,11 +586,169 @@ class CartActivity : AppCompatActivity() {
     }
 
     private fun goToTax(){
-        startActivity(intentFor<DiscountActivity>("action" to 2))
+        cvCartTax.visibility = View.VISIBLE
+        bgCartTaxDisc.visibility = View.VISIBLE
+
+        srCartTax.isRefreshing = true
+        fetchTax()
+
+        var title = ""
+        if (selectedTax != -1)
+            title = taxItems[selectedTax].NAME.toString() + "/"
+        if (tax != 0F)
+            title += currencyFormat(getLanguage(this), getCountry(this)).format(tax)
+
+        tvCartSelectedTax.text = title
+    }
+
+    private fun initTax(){
+
+        rvCartTax.adapter = taxAdapter
+        rvCartTax.layoutManager = LinearLayoutManager(this)
+
+        srCartTax.onRefresh {
+            fetchTax()
+        }
+
+        btnCartTaxClose.onClick {
+            cvCartTax.visibility = View.GONE
+            bgCartTaxDisc.visibility = View.GONE
+            selectedTax = -1
+            tax = 0F
+            taxCode = ""
+            sumPriceDetail()
+            visibleView()
+        }
+
+        btnCartTaxDone.onClick {
+            cvCartTax.visibility = View.GONE
+            bgCartTaxDisc.visibility = View.GONE
+        }
+
+        btnCartTaxManual.onClick {
+            btnCartTaxManual.startAnimation(normalClickAnimation())
+
+            startActivity(intentFor<DiscountActivity>("action" to 2))
+            cvCartTax.visibility = View.GONE
+            bgCartTaxDisc.visibility = View.GONE
+        }
+
+        fbCartAddTax.onClick {
+            fbCartAddTax.startAnimation(normalClickAnimation())
+            cvCartTax.visibility = View.GONE
+            cvCartAddTax.visibility = View.VISIBLE
+            initAddTax()
+        }
+    }
+
+    private fun initDisc(){
+
+        rvCartDisc.adapter = discountAdapter
+        rvCartDisc.layoutManager = LinearLayoutManager(this)
+
+        srCartDisc.onRefresh {
+            fetchDisc()
+        }
+
+        btnCartDiscClose.onClick {
+            cvCartDisc.visibility = View.GONE
+            bgCartTaxDisc.visibility = View.GONE
+            selectedDiscount = -1
+            discount = 0F
+            discountCode = ""
+            sumPriceDetail()
+            visibleView()
+        }
+
+        btnCartDiscDone.onClick {
+            cvCartDisc.visibility = View.GONE
+            bgCartTaxDisc.visibility = View.GONE
+        }
+
+        btnCartDiscManual.onClick {
+            btnCartDiscManual.startAnimation(normalClickAnimation())
+
+            startActivity(intentFor<DiscountActivity>("action" to 1))
+            cvCartDisc.visibility = View.GONE
+            bgCartTaxDisc.visibility = View.GONE
+        }
+
+        fbCartAddDisc.onClick {
+            fbCartAddDisc.startAnimation(normalClickAnimation())
+            cvCartDisc.visibility = View.GONE
+            cvCartAddDisc.visibility = View.VISIBLE
+            initAddDiscount()
+        }
+    }
+
+    private fun fetchTax(){
+        GlobalScope.launch (Dispatchers.Main){
+            val dataSnapshot = presenter.retrieveTax()
+            if (dataSnapshot != null) {
+                if (dataSnapshot.exists()){
+                    taxItems.clear()
+
+                    for (data in dataSnapshot.children){
+                        val item = data.getValue(Tax::class.java)
+                        if (item != null && item.STATUS_CODE == EStatusCode.ACTIVE.toString()){
+                            taxItems.add(item)
+                        }
+                    }
+                }
+                taxAdapter.notifyDataSetChanged()
+                if (taxItems.size == 0){
+                    rvCartTax.visibility = View.GONE
+                    layoutCartTaxNoData.visibility = View.VISIBLE
+                }else{
+                    rvCartTax.visibility = View.VISIBLE
+                    layoutCartTaxNoData.visibility = View.GONE
+                }
+            }
+            srCartTax.isRefreshing = false
+        }
+    }
+
+    private fun fetchDisc(){
+        GlobalScope.launch (Dispatchers.Main){
+            val dataSnapshot = presenter.retrieveDiscount()
+            if (dataSnapshot != null) {
+                if (dataSnapshot.exists()){
+                    discountItems.clear()
+
+                    for (data in dataSnapshot.children){
+                        val item = data.getValue(Discount::class.java)
+                        if (item != null && item.STATUS_CODE == EStatusCode.ACTIVE.toString()){
+                            discountItems.add(item)
+                        }
+                    }
+                }
+                discountAdapter.notifyDataSetChanged()
+                if (discountItems.size == 0){
+                    rvCartDisc.visibility = View.GONE
+                    layoutCartDiscNoData.visibility = View.VISIBLE
+                }else{
+                    rvCartDisc.visibility = View.VISIBLE
+                    layoutCartDiscNoData.visibility = View.GONE
+                }
+            }
+            srCartDisc.isRefreshing = false
+        }
     }
 
     private fun goToDiscount(){
-        startActivity(intentFor<DiscountActivity>("action" to 1))
+        cvCartDisc.visibility = View.VISIBLE
+        bgCartTaxDisc.visibility = View.VISIBLE
+
+        srCartDisc.isRefreshing = true
+        fetchDisc()
+
+        var title = ""
+        if (selectedDiscount != -1)
+            title = discountItems[selectedDiscount].NAME.toString() + "/"
+        if (discount != 0F)
+            title += currencyFormat(getLanguage(this), getCountry(this)).format(discount)
+
+        tvCartSelectedDisc.text = title
     }
 
     private fun goToTableNumber(){
@@ -489,5 +775,137 @@ class CartActivity : AppCompatActivity() {
 
             }
         }.show()
+    }
+
+    private fun initAddTax(){
+
+        if (selectedUpdateTax == -1)
+            tvCartAddTaxTitle.text = "Add Tax"
+        else{
+            tvCartAddTaxTitle.text = "Update Tax"
+            etAddTaxName.setText(taxItems[selectedUpdateTax].NAME.toString())
+            etAddTaxAmount.setText(taxItems[selectedUpdateTax].PERCENT.toString())
+        }
+
+        btnCartAddTaxClose.onClick {
+            cvCartAddTax.visibility = View.GONE
+            bgCartTaxDisc.visibility = View.GONE
+            selectedUpdateTax = -1
+        }
+
+        btnCartAddTaxDone.onClick {
+            val name = etAddTaxName.text.toString()
+            val amount = etAddTaxAmount.text.toString()
+
+            if (name == "" || amount == ""){
+                toast("Please Fill Following Field!")
+            }else{
+                pbCart.visibility = View.VISIBLE
+                cvCartAddTax.visibility = View.GONE
+                bgCartTaxDisc.visibility = View.GONE
+
+                val code = generateCode("TAX")
+                GlobalScope.launch (Dispatchers.Main){
+
+                    val message =
+                        when (selectedUpdateTax) {
+                            -1 -> presenter.saveTax(Tax(name,amount.toFloat(),code, EStatusCode.ACTIVE.toString(),
+                                dateFormat().format(Date()),dateFormat().format(Date()),
+                                mAuth.currentUser!!.uid,mAuth.currentUser!!.uid))
+                            else-> presenter.updateTax(taxItems[selectedUpdateTax].CODE.toString(),
+                                Tax(name,
+                                    amount.toFloat(),
+                                    taxItems[selectedUpdateTax].CODE,
+                                    taxItems[selectedUpdateTax].STATUS_CODE,
+                                    taxItems[selectedUpdateTax].CREATED_DATE,
+                                    dateFormat().format(Date()),
+                                    taxItems[selectedUpdateTax].CREATED_BY,mAuth.currentUser!!.uid))
+                        }
+
+                    presenter.saveActivityLogs(ActivityLogs("${if (selectedUpdateTax == -1) "Save" else "Update"} Tax $name"
+                            ,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+                    toast(message)
+
+                    selectedUpdateTax = -1
+                    etAddTaxName.setText("")
+                    etAddTaxAmount.setText("")
+                }
+            }
+        }
+    }
+
+    private fun initAddDiscount(){
+
+        if (selectedUpdateDiscount == -1)
+            tvCartAddDiscTitle.text = "Add Discount"
+        else{
+            tvCartAddDiscTitle.text = "Update Discount"
+            etAddDiscName.setText(discountItems[selectedUpdateDiscount].NAME.toString())
+            etAddDiscAmount.setText(discountItems[selectedUpdateDiscount].PERCENT.toString())
+        }
+
+        btnCartAddDiscClose.onClick {
+            etAddDiscName.setText("")
+            etAddDiscAmount.setText("")
+            cvCartAddDisc.visibility = View.GONE
+            bgCartTaxDisc.visibility = View.GONE
+            selectedUpdateDiscount = -1
+        }
+
+        btnCartAddDiscDone.onClick {
+            val name = etAddDiscName.text.toString()
+            val amount = etAddDiscAmount.text.toString()
+
+            if (name == "" || amount == ""){
+                toast("Please Fill Following Field!")
+            }else{
+                cvCartAddDisc.visibility = View.GONE
+                bgCartTaxDisc.visibility = View.GONE
+
+                val code = generateCode("DISC")
+                GlobalScope.launch (Dispatchers.Main){
+
+                    val message =
+                        when (selectedUpdateDiscount) {
+                            -1 -> {
+                                presenter.saveDiscount(
+                                    Discount(name,amount.toFloat(),code, EStatusCode.ACTIVE.toString(),
+                                        dateFormat().format(Date()),dateFormat().format(Date()),
+                                        mAuth.currentUser!!.uid,mAuth.currentUser!!.uid)
+                                )
+                            }
+                            else-> presenter.updateDiscount(discountItems[selectedUpdateDiscount].CODE.toString(),
+                                Discount(name,
+                                    amount.toFloat(),
+                                    discountItems[selectedUpdateDiscount].CODE,
+                                    discountItems[selectedUpdateDiscount].STATUS_CODE,
+                                    discountItems[selectedUpdateDiscount].CREATED_DATE,
+                                    dateFormat().format(Date()),
+                                    discountItems[selectedUpdateDiscount].CREATED_BY,mAuth.currentUser!!.uid))
+                        }
+
+                    presenter.saveActivityLogs(ActivityLogs("${if (selectedUpdateDiscount == -1) "Save" else "Update"} Discount $name"
+                        ,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+
+                    toast(message)
+
+                    selectedUpdateDiscount = -1
+                    etAddDiscName.setText("")
+                    etAddDiscAmount.setText("")
+                }
+            }
+        }
+    }
+
+    private fun generateCode(name:String) : String{
+        return "${name}${mDatabase.push().key.toString()}"
+    }
+
+    override fun loadData(dataSnapshot: DataSnapshot, response: String) {
+
+    }
+
+    override fun response(message: String) {
+        toast(message)
     }
 }

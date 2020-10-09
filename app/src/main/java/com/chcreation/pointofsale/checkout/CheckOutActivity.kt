@@ -7,6 +7,8 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.CartActivity.Companion.discountCode
+import com.chcreation.pointofsale.checkout.CartActivity.Companion.taxCode
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.discount
 import com.chcreation.pointofsale.checkout.DiscountActivity.Companion.tax
 import com.chcreation.pointofsale.checkout.NoteActivity.Companion.note
@@ -30,6 +32,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_check_out.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.*
@@ -228,7 +231,7 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                         GlobalScope.launch {
 
                             val receipt = presenter.saveTransaction(Transaction(totalPrice,totalOutStanding,
-                                discount,tax,paymentMethod,orderDetail,selectCustomerCode, note.trim(),"",
+                                discount,discountCode,tax,taxCode,paymentMethod,orderDetail,selectCustomerCode, note.trim(),"",
                                 statusCode.toString(), dateFormat().format(Date()), dateFormat().format(Date()),
                                 mAuth.currentUser!!.uid,mAuth.currentUser!!.uid, peopleNo, tableNo,"","")
                                 , Payment("", totalReceived,paymentMethod, note,
@@ -286,13 +289,17 @@ class CheckOutActivity : AppCompatActivity(), MainView {
                     tvCheckOutProcessTitle.visibility = View.VISIBLE
                     layoutCheckOutContent.alpha = 0.3F
 
-                    presenter.savePendingPayment(transCodeItems[transPosition],
-                        Payment("", totalReceived,paymentMethod, note.trim(), mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
-                        totalOutStanding,transItems[transPosition])
+                    GlobalScope.launch (Dispatchers.Main){
+                        val log = "Receive ${currencyFormat(getLanguage(this@CheckOutActivity),
+                            getCountry(this@CheckOutActivity)).format(totalReceived)} from Receipt ${receiptFormat(transCodeItems[transPosition])}"
 
-                    val log = "Receive ${currencyFormat(getLanguage(this@CheckOutActivity),
-                        getCountry(this@CheckOutActivity)).format(totalReceived)} from Receipt ${receiptFormat(transCodeItems[transPosition])}"
-                    presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+                        presenter.saveActivityLogs(ActivityLogs(log,mAuth.currentUser!!.uid,dateFormat().format(Date())))
+
+                        presenter.savePendingPayment(transCodeItems[transPosition],
+                            Payment("", totalReceived,paymentMethod, note.trim(), mAuth.currentUser?.uid,EStatusCode.DONE.toString()),
+                            totalOutStanding,transItems[transPosition])
+                    }
+
                 }
 
                 noButton {

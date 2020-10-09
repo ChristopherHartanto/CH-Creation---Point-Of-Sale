@@ -17,7 +17,9 @@ enum class ETable{
     SINCERE,
     ACTIVITY_LOGS,
     VERSION,
-    OUR_CUSTOMER
+    OUR_CUSTOMER,
+    TAX,
+    DISCOUNT
 }
 
 enum class ESincere{
@@ -117,7 +119,9 @@ enum class ETransaction{
     TOTAL_PRICE,
     TOTAL_OUTSTANDING,
     DISCOUNT,
+    DISCOUNT_CODE,
     TAX,
+    TAX_CODE,
     PAYMENT_METHOD,
     DETAIL,
     CUST_CODE,
@@ -186,6 +190,28 @@ enum class EOUR_CUSTOMER{
     DESC,
     IMAGE,
     LINK
+}
+
+enum class ETax{
+    NAME,
+    PERCENT,
+    CODE,
+    STATUS_CODE,
+    CREATED_DATE,
+    UPDATED_DATE,
+    CREATED_BY,
+    UPDATED_BY
+}
+
+enum class EDiscount{
+    NAME,
+    PERCENT,
+    CODE,
+    STATUS_CODE,
+    CREATED_DATE,
+    UPDATED_DATE,
+    CREATED_BY,
+    UPDATED_BY
 }
 
 enum class EUserMemberStatus{

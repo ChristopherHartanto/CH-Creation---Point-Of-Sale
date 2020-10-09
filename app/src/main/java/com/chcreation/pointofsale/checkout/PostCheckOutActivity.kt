@@ -5,6 +5,8 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.CartActivity.Companion.discountCode
+import com.chcreation.pointofsale.checkout.CartActivity.Companion.taxCode
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.orderNo
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.peopleNo
 import com.chcreation.pointofsale.checkout.CheckOutActivity.Companion.postTotalPayment
@@ -133,5 +135,9 @@ class PostCheckOutActivity : AppCompatActivity() {
         orderNo = ""
         selectCustomerName = ""
         selectCustomerCode = ""
+
+        //Cart
+        taxCode = ""
+        discountCode = ""
     }
 }

@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.widget.doOnTextChanged
 import com.chcreation.pointofsale.*
+import com.chcreation.pointofsale.checkout.CartActivity.Companion.discountCode
+import com.chcreation.pointofsale.checkout.CartActivity.Companion.taxCode
 import com.chcreation.pointofsale.home.HomeFragment.Companion.totalPrice
 import kotlinx.android.synthetic.main.activity_discount.*
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -13,6 +15,8 @@ class DiscountActivity : AppCompatActivity() {
     companion object{
         var discount = 0F
         var tax = 0F
+        var taxPercentage = 0F
+        var discountPercentage = 0F
     }
 
     private var percentageDiscount = 0F
@@ -113,6 +117,11 @@ class DiscountActivity : AppCompatActivity() {
         }
 
         btnDiscount.onClick {
+            if (action == 1)
+                discountCode = ""
+            else if (action == 2)
+                taxCode = ""
+
             btnDiscount.startAnimation(normalClickAnimation())
             finish()
         }

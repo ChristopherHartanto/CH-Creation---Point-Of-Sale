@@ -184,7 +184,6 @@
             android:textColor="@color/colorBlack"
             android:textSize="16sp"
             android:layout_marginVertical="10dp"
-            android:visibility="gone"
             android:text="Processing CheckOut . . ."
             android:id="@+id/tvCheckOutProcessTitle"
             android:gravity="center"/>

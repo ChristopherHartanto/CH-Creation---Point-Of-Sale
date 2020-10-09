@@ -34,6 +34,7 @@ import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.tran
 import com.chcreation.pointofsale.transaction.TransactionFragment.Companion.transPosition
 import com.chcreation.pointofsale.view.MainView
 import com.dantsu.escposprinter.EscPosPrinter
+import com.dantsu.escposprinter.EscPosPrinterSize
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothConnection
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.dantsu.escposprinter.exceptions.EscPosConnectionException
@@ -71,6 +72,8 @@ class ReceiptActivity : AppCompatActivity(), MainView {
     private var paymentLists : MutableList<Payment> = mutableListOf()
     private var boughtList =  com.chcreation.pointofsale.model.Transaction()
     private lateinit var user: User
+    private var taxName = ""
+    private var discountName = ""
     private var receiptCode = 0
     private var screenShotPath : Uri? = null
     private var sincere = ""
@@ -178,7 +181,7 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         if (bPrinter.list == null){
             toast("Please Open Bluetooth!")
         }else{
-            bPrinter.list.forEach { printerList.add(it.device.name) }
+            bPrinter.list.forEach { printerList.add("${it.device.name} - ${it.device}") }
             val title = if (bPrinter.list.isEmpty()) "No Device Available" else "Select Printer"
             selector(title, printerList){dialogInterface, i ->
                 if (bPrinter.list != null && purchasedItems.size > 0){
@@ -283,9 +286,10 @@ class ReceiptActivity : AppCompatActivity(), MainView {
             if (tax != 0F || discount != 0F)
                 textReceipt += "[L]<b>SubTotal:</b>[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)}</b>\n"
             if (discount != 0F)
-                textReceipt += "[L]<b>Discount:</b>[R]${currencyFormat(getLanguage(this), getCountry(this)).format(discount)}\n"
-            if (tax != 0F)
-                textReceipt += "[L]<b>Tax:</b>[R]${currencyFormat(getLanguage(this), getCountry(this)).format(tax)}\n"
+                textReceipt += "[L]<b>${if (discountName == "") "Discount" else discountName}:</b>[R]${currencyFormat(getLanguage(this), getCountry(this)).format(discount)}\n"
+            if (tax != 0F){
+                textReceipt += "[L]<b>${if (taxName == "") "Tax" else taxName}:</b>[R]${currencyFormat(getLanguage(this), getCountry(this)).format(tax)}\n"
+            }
 
             textReceipt += "[L]<b>Total:</b>[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}</b>\n"
 
@@ -425,9 +429,9 @@ class ReceiptActivity : AppCompatActivity(), MainView {
             if (tax != 0F || discount != 0F)
                 textReceipt += "[L]<b>SubTotal:</b>[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPrice)}</b>\n"
             if (discount != 0F)
-                textReceipt += "[L]<b>Discount:</b>[R]${currencyFormat(getLanguage(this), getCountry(this)).format(discount)}\n"
+                textReceipt += "[L]<b>${if (discountName == "") "Discount" else discountName}:</b>[R]${currencyFormat(getLanguage(this), getCountry(this)).format(discount)}\n"
             if (tax != 0F)
-                textReceipt += "[L]<b>Tax:</b>[R]${currencyFormat(getLanguage(this), getCountry(this)).format(tax)}\n"
+                textReceipt += "[L]<b>${if (taxName == "") "Tax" else taxName}:</b>[R]${currencyFormat(getLanguage(this), getCountry(this)).format(tax)}\n"
 
             textReceipt += "[L]<b>Total:</b>[R]<b>${currencyFormat(getLanguage(this), getCountry(this)).format(totalPayment)}</b>\n"
 
@@ -695,27 +699,16 @@ class ReceiptActivity : AppCompatActivity(), MainView {
         else
             layoutReceiptPeopleNo.visibility = View.GONE
 
-        if (boughtList.CUST_CODE != "") {
-
-            tvReceiptCustomer.text = customer.NAME.toString()
-            tvReceiptCustomerAddress.text = customer.ADDRESS.toString()
-            tvReceiptCustomerNoTel.text = customer.PHONE.toString()
-//            GlobalScope.launch {
-//                presenter.retrieveCustomerByCode(boughtList.CUST_CODE.toString()) { success, customer ->
-//                    if (success){
-//                        tvReceiptCustomer.text = customer!!.NAME.toString()
-//                        this@ReceiptActivity.customer = customer
-//                    }else
-//                        layoutReceiptCustomer.visibility = View.GONE
-//                }
-//            }
-        }
-
         tvReceiptPeopleNo.text = (if (isInt(boughtList.PEOPLE_NO!!)) boughtList.PEOPLE_NO!!.toInt() else boughtList.PEOPLE_NO).toString()
         tvReceiptTableNo.text = boughtList.TABLE_NO.toString()
 
         GlobalScope.launch {
             presenter.retrieveCashier(boughtList.CREATED_BY.toString())
+            taxName = presenter.retrieveTax(boughtList.TAX_CODE.toString())
+            discountName = presenter.retrieveDiscount(boughtList.DISCOUNT_CODE.toString())
+
+            tvReceiptDiscountTitle.text = if (discountName == "") "Discount:" else "${discountName}:"
+            tvReceiptTaxTitle.text = if (taxName == "") "Tax:" else "${taxName}:"
         }
         val gson = Gson()
         val arrayCartType = object : TypeToken<MutableList<Cart>>() {}.type
@@ -1009,6 +1002,8 @@ class ReceiptActivity : AppCompatActivity(), MainView {
                     presenter.retrieveCustomerByCode(boughtList.CUST_CODE.toString()) { success, customer ->
                         if (success){
                             tvReceiptCustomer.text = customer!!.NAME.toString()
+                            tvReceiptCustomerAddress.text = customer.ADDRESS.toString()
+                            tvReceiptCustomerNoTel.text = customer.PHONE.toString()
                             this@ReceiptActivity.customer = customer
                         }
                     }

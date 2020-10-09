@@ -38,4 +38,5 @@
     <string name="receipt_setting">Printer and Receipt</string>
     <string name="cancel">cancel</string>
     <string name="ok">ok</string>
+    <string name="clear">Clear</string>
 </resources>

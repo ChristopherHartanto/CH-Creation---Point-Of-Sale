@@ -343,7 +343,7 @@ class TransactionFragment : Fragment(), MainView {
         if (bPrinter.list == null){
             toast("Please Open Bluetooth!")
         }else{
-            bPrinter.list.forEach { printerList.add(it.device.name) }
+            bPrinter.list.forEach { printerList.add("${it.device.name} - ${it.device}") }
             val title = if (bPrinter.list.isEmpty()) "No Device Available" else "Select Printer"
             selector(title, printerList){dialogInterface, i ->
                 if (bPrinter.list != null && tmpTransItems.size > 0){
